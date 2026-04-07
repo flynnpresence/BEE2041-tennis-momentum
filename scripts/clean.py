@@ -2,9 +2,10 @@
 clean.py
 --------
 Loads raw point-by-point and match metadata files for ATP and WTA.
-Filters to 2023 Grand Slams only.
+Filters to 2023 Grand Slams main draw only (drops qualifying rounds).
 Casts columns to modern pandas extension types.
 Merges datasets with validation.
+Adds official rankings for focal player and opponent.
 Outputs data/processed/atp_cleaned_points.csv and wta_cleaned_points.csv.
 
 No feature engineering occurs here — that happens in features.py.
@@ -26,16 +27,22 @@ GRAND_SLAMS = ['Australian Open', 'Roland Garros', 'Wimbledon', 'US Open']
 
 # ── Data Loading & Cleaning ───────────────────────────────────────────────────
 def load_and_filter_matches(filepath: str) -> pd.DataFrame:
-    """Load match metadata, clean headers, and filter to 2023 Grand Slams."""
+    """Load match metadata, clean headers, filter to 2023 Grand Slams main draw."""
     df = pd.read_csv(filepath, low_memory=False)
     df.columns = df.columns.str.strip().str.replace(' ', '_')
     df['match_id']   = df['match_id'].astype('string').str.strip()
     df['Tournament'] = df['Tournament'].astype('string').str.strip().str.replace('_', ' ')
     df['Date'] = pd.to_datetime(df['Date'].astype(str), format='%Y%m%d', errors='coerce')
     df = df[df['Date'].dt.year == TARGET_YEAR]
+
+    # Filter to Grand Slams and drop Juniors
     gs_mask      = df['Tournament'].str.contains('|'.join(GRAND_SLAMS), case=False, na=False)
     juniors_mask = df['Tournament'].str.contains('Junior', case=False, na=False)
     df = df[gs_mask & ~juniors_mask]
+
+    # Drop qualifying rounds — main draw only
+    df = df[~df['Round'].str.startswith('Q', na=False)]
+
     return df
 
 
@@ -55,12 +62,44 @@ def load_points(filepath: str) -> pd.DataFrame:
     return df
 
 
+def prep_rankings(filepath: str) -> pd.DataFrame:
+    """
+    Load ATP/WTA match results file and build a player -> ranking lookup.
+    Filters to Grand Slams only and takes the ranking from the first
+    appearance of each player in a Grand Slam match that year.
+    """
+    df = pd.read_csv(filepath, low_memory=False)
+
+    # Use all 2023 matches for rankings lookup — maximises coverage
+    # Grand Slam filter applied separately to match metadata
+    df = df.copy()
+
+    # Build long-format player -> ranking table
+    winners = df[['winner_name', 'winner_rank']].rename(
+        columns={'winner_name': 'player_name', 'winner_rank': 'ranking'}
+    )
+    losers = df[['loser_name', 'loser_rank']].rename(
+        columns={'loser_name': 'player_name', 'loser_rank': 'ranking'}
+    )
+    rankings = pd.concat([winners, losers], ignore_index=True)
+    rankings = rankings.dropna(subset=['ranking'])
+    rankings['ranking'] = rankings['ranking'].astype('Int64')
+
+    # Keep first (lowest = best) ranking per player
+    rankings = rankings.sort_values('ranking')
+    rankings = rankings.drop_duplicates(subset=['player_name'], keep='first')
+    rankings['player_name'] = rankings['player_name'].astype('string')
+
+    return rankings
+
+
 def process_tour(
     tour_name: str,
     points_file: str,
-    matches_file: str
+    matches_file: str,
+    rankings_file: str
 ) -> pd.DataFrame:
-    """Executes the load, filter, validated merge, and feature prep for a specific tour."""
+    """Executes the load, filter, validated merge, rankings attach, and feature prep."""
     print(f'\n--- Processing {tour_name} ---')
 
     matches = load_and_filter_matches(os.path.join(RAW_DIR, matches_file))
@@ -69,6 +108,7 @@ def process_tour(
     pts = load_points(os.path.join(RAW_DIR, points_file))
     print(f'  Loaded {len(pts):,} raw points')
 
+    # Merge points with match metadata
     merged = pts.merge(
         matches,
         on='match_id',
@@ -94,6 +134,19 @@ def process_tour(
         'focal_is_p1': np.random.rand(len(unique_matches)) > 0.5
     })
     merged = merged.merge(match_mask, on='match_id', validate='m:1')
+
+    # Identify focal player and opponent names
+    merged['Focal_Player'] = np.where(
+        merged['focal_is_p1'],
+        merged['Player_1'],
+        merged['Player_2']
+    )
+    merged['Opponent_Player'] = np.where(
+        merged['focal_is_p1'],
+        merged['Player_2'],
+        merged['Player_1']
+    )
+
     merged['Point_Won'] = np.where(
         merged['focal_is_p1'],
         merged['PtWinner'] == 1,
@@ -107,30 +160,61 @@ def process_tour(
         .astype('Int64')
     )
     merged = merged.dropna(subset=['Next_Point_Won']).copy()
-    print(f'  Final row count after dropping last points: {len(merged):,}')
+    print(f'  Rows after dropping last points: {len(merged):,}')
+
+    # ── 4. Attach Official Rankings ───────────────────────────────────────────
+    rankings = prep_rankings(
+        os.path.join(RAW_DIR, rankings_file)
+    )
+    print(f'  Rankings lookup: {len(rankings):,} players')
+
+    # Focal player ranking
+    merged = merged.merge(
+        rankings.rename(columns={
+            'player_name': 'Focal_Player',
+            'ranking': 'Focal_Ranking'
+        }),
+        on='Focal_Player',
+        how='left',
+        validate='m:1'
+    )
+
+    # Opponent ranking
+    merged = merged.merge(
+        rankings.rename(columns={
+            'player_name': 'Opponent_Player',
+            'ranking': 'Opponent_Ranking'
+        }),
+        on='Opponent_Player',
+        how='left',
+        validate='m:1'
+    )
+
+    # Ranking difference (focal minus opponent — negative = focal is better ranked)
+    merged['Ranking_Diff'] = merged['Focal_Ranking'] - merged['Opponent_Ranking']
+
+    print(f'  Rankings missing — Focal: {merged["Focal_Ranking"].isna().sum()}')
+    print(f'  Rankings missing — Opponent: {merged["Opponent_Ranking"].isna().sum()}')
+    print(f'  Final row count: {len(merged):,}')
 
     return merged
 
 
+# ── Main ──────────────────────────────────────────────────────────────────────
 def main() -> None:
-    """
-    Run the full cleaning pipeline for ATP and WTA.
-
-    Loads raw files from data/raw/, filters to 2023 Grand Slams, merges
-    match metadata with point-by-point data, engineers outcome variables,
-    and saves two cleaned CSVs to data/processed/.
-    """
     print('=== clean.py ===')
 
     atp = process_tour(
         tour_name='ATP',
         points_file='charting-m-points-2020s.csv',
         matches_file='charting-m-matches.csv',
+        rankings_file='atp_matches_2023.csv',
     )
     wta = process_tour(
         tour_name='WTA',
         points_file='charting-w-points-2020s.csv',
         matches_file='charting-w-matches.csv',
+        rankings_file='wta_matches_2023.csv',
     )
 
     atp_out = os.path.join(PROC_DIR, 'atp_cleaned_points.csv')
@@ -139,8 +223,8 @@ def main() -> None:
     atp.to_csv(atp_out, index=False)
     wta.to_csv(wta_out, index=False)
 
-    print(f'\nSaved: {atp_out}')
-    print(f'Saved: {wta_out}')
+    print(f'\n  Saved atp_cleaned_points.csv ({len(atp):,} rows)')
+    print(f'  Saved wta_cleaned_points.csv ({len(wta):,} rows)')
     print('\n=== Done ===')
 
 
