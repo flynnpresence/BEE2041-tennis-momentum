@@ -22,6 +22,10 @@ MCP = 'https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProjec
 ATP = 'https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master'
 WTA = 'https://raw.githubusercontent.com/JeffSackmann/tennis_wta/master'
 
+HEADERS = {
+    'User-Agent': 'BEE2041_Student_Project (Data Science in Economics)'
+}
+
 URLS = {
     'charting-m-matches.csv':      f'{MCP}/charting-m-matches.csv',
     'charting-m-points-2020s.csv': f'{MCP}/charting-m-points-2020s.csv',
@@ -51,7 +55,7 @@ def download(filename: str, url: str) -> None:
 
     for attempt in range(3):
         try:
-            response = requests.get(url, verify=False)
+            response = requests.get(url, headers=HEADERS, verify=False)
             response.raise_for_status()
             with open(dest, 'wb') as f:
                 f.write(response.content)
