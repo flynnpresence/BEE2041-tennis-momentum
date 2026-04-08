@@ -5,7 +5,7 @@ Loads raw point-by-point and match metadata files for ATP and WTA.
 Filters to 2023 Grand Slams main draw only (drops qualifying rounds).
 Casts columns to modern pandas extension types.
 Merges datasets with validation.
-Adds official rankings for focal player and opponent.
+Adds official rankings using primary GS merge + season median fallback.
 Outputs data/processed/atp_cleaned_points.csv and wta_cleaned_points.csv.
 
 No feature engineering occurs here — that happens in features.py.
@@ -62,19 +62,66 @@ def load_points(filepath: str) -> pd.DataFrame:
     return df
 
 
-def prep_rankings(filepath: str) -> pd.DataFrame:
+def prep_rankings_gs(filepath: str, gs_names: list) -> pd.DataFrame:
     """
-    Load ATP/WTA match results file and build a player -> ranking lookup.
-    Filters to Grand Slams only and takes the ranking from the first
-    appearance of each player in a Grand Slam match that year.
+    Build player + tournament -> ranking lookup from Grand Slam matches only.
+    Joins on both Tournament_Key and player name to guarantee m:1 uniqueness.
+    Satisfies project log requirement of ranking at match date.
     """
     df = pd.read_csv(filepath, low_memory=False)
 
-    # Use all 2023 matches for rankings lookup — maximises coverage
-    # Grand Slam filter applied separately to match metadata
-    df = df.copy()
+    # Drop walkovers and retirements
+    df = df[~df['score'].astype(str).str.contains('W/O|RET', case=False, na=False)]
 
-    # Build long-format player -> ranking table
+    gs_mask = df['tourney_name'].str.contains(
+        '|'.join(gs_names), case=False, na=False
+    )
+    df = df[gs_mask].copy()
+
+    winners = df[['tourney_name', 'winner_name', 'winner_rank']].rename(
+        columns={
+            'tourney_name': 'Tournament_Key',
+            'winner_name':  'player_name',
+            'winner_rank':  'ranking'
+        }
+    )
+    losers = df[['tourney_name', 'loser_name', 'loser_rank']].rename(
+        columns={
+            'tourney_name': 'Tournament_Key',
+            'loser_name':   'player_name',
+            'loser_rank':   'ranking'
+        }
+    )
+    rankings = pd.concat([winners, losers], ignore_index=True)
+    rankings = rankings.dropna(subset=['ranking'])
+    rankings['ranking']        = rankings['ranking'].astype('Int64')
+    rankings['player_name']    = rankings['player_name'].astype('string').str.strip()
+    rankings['Tournament_Key'] = (
+        rankings['Tournament_Key']
+        .astype('string')
+        .str.strip()
+        .str.replace('Us Open', 'US Open', regex=False)
+    )
+
+    # One row per player per tournament
+    rankings = rankings.sort_values('ranking')
+    rankings = rankings.drop_duplicates(
+        subset=['Tournament_Key', 'player_name'], keep='first'
+    )
+    return rankings
+
+
+def prep_rankings_fallback(filepath: str) -> pd.DataFrame:
+    """
+    Build season-wide median ranking lookup as fallback for qualifiers
+    and wildcards missing from the Grand Slam subset.
+    One row per player — safe for m:1 merge on player name alone.
+    """
+    df = pd.read_csv(filepath, low_memory=False)
+
+    # Drop walkovers and retirements
+    df = df[~df['score'].astype(str).str.contains('W/O|RET', case=False, na=False)]
+
     winners = df[['winner_name', 'winner_rank']].rename(
         columns={'winner_name': 'player_name', 'winner_rank': 'ranking'}
     )
@@ -83,13 +130,12 @@ def prep_rankings(filepath: str) -> pd.DataFrame:
     )
     rankings = pd.concat([winners, losers], ignore_index=True)
     rankings = rankings.dropna(subset=['ranking'])
-    rankings['ranking'] = rankings['ranking'].astype('Int64')
+    rankings['ranking'] = rankings['ranking'].astype(float)
 
-    # Keep first (lowest = best) ranking per player
-    rankings = rankings.sort_values('ranking')
-    rankings = rankings.drop_duplicates(subset=['player_name'], keep='first')
-    rankings['player_name'] = rankings['player_name'].astype('string')
-
+    # Median rank across full season — one row per player
+    rankings = rankings.groupby('player_name')['ranking'].median().reset_index()
+    rankings['ranking']     = rankings['ranking'].round().astype('Int64')
+    rankings['player_name'] = rankings['player_name'].astype('string').str.strip()
     return rankings
 
 
@@ -130,7 +176,7 @@ def process_tour(
     np.random.seed(42)
     unique_matches = merged['match_id'].unique()
     match_mask = pd.DataFrame({
-        'match_id': unique_matches,
+        'match_id':    unique_matches,
         'focal_is_p1': np.random.rand(len(unique_matches)) > 0.5
     })
     merged = merged.merge(match_mask, on='match_id', validate='m:1')
@@ -163,35 +209,88 @@ def process_tour(
     print(f'  Rows after dropping last points: {len(merged):,}')
 
     # ── 4. Attach Official Rankings ───────────────────────────────────────────
-    rankings = prep_rankings(
-        os.path.join(RAW_DIR, rankings_file)
-    )
-    print(f'  Rankings lookup: {len(rankings):,} players')
+    rankings_filepath = os.path.join(RAW_DIR, rankings_file)
+    gs_rankings  = prep_rankings_gs(rankings_filepath, GRAND_SLAMS)
+    all_rankings = prep_rankings_fallback(rankings_filepath)
+    print(f'  GS rankings lookup: {len(gs_rankings):,} rows')
+    print(f'  Fallback rankings lookup: {len(all_rankings):,} players')
 
-    # Focal player ranking
+    # Standardise Tournament_Key to match GS rankings lookup
+    merged['Tournament_Key'] = (
+        merged['Tournament']
+        .astype('string')
+        .str.strip()
+        .str.replace('Us Open', 'US Open', regex=False)
+    )
+
+    # ── Focal player ranking ──────────────────────────────────────────────────
     merged = merged.merge(
-        rankings.rename(columns={
+        gs_rankings.rename(columns={
             'player_name': 'Focal_Player',
-            'ranking': 'Focal_Ranking'
+            'ranking':     'Focal_Ranking_GS'
+        }),
+        on=['Tournament_Key', 'Focal_Player'],
+        how='left',
+        validate='m:1',
+        indicator=True
+    )
+    print(f'  Focal GS merge:\n{merged["_merge"].value_counts()}')
+    merged = merged.drop(columns=['_merge'])
+
+    merged = merged.merge(
+        all_rankings.rename(columns={
+            'player_name': 'Focal_Player',
+            'ranking':     'Focal_Ranking_Fallback'
         }),
         on='Focal_Player',
         how='left',
-        validate='m:1'
+        validate='m:1',
+        indicator=True
     )
+    print(f'  Focal fallback merge:\n{merged["_merge"].value_counts()}')
+    merged = merged.drop(columns=['_merge'])
 
-    # Opponent ranking
+    merged['Focal_Ranking'] = merged['Focal_Ranking_GS'].fillna(
+        merged['Focal_Ranking_Fallback']
+    ).astype('Int64')
+    merged = merged.drop(columns=['Focal_Ranking_GS', 'Focal_Ranking_Fallback'])
+
+    # ── Opponent ranking ──────────────────────────────────────────────────────
     merged = merged.merge(
-        rankings.rename(columns={
+        gs_rankings.rename(columns={
             'player_name': 'Opponent_Player',
-            'ranking': 'Opponent_Ranking'
+            'ranking':     'Opponent_Ranking_GS'
+        }),
+        on=['Tournament_Key', 'Opponent_Player'],
+        how='left',
+        validate='m:1',
+        indicator=True
+    )
+    print(f'  Opponent GS merge:\n{merged["_merge"].value_counts()}')
+    merged = merged.drop(columns=['_merge'])
+
+    merged = merged.merge(
+        all_rankings.rename(columns={
+            'player_name': 'Opponent_Player',
+            'ranking':     'Opponent_Ranking_Fallback'
         }),
         on='Opponent_Player',
         how='left',
-        validate='m:1'
+        validate='m:1',
+        indicator=True
     )
+    print(f'  Opponent fallback merge:\n{merged["_merge"].value_counts()}')
+    merged = merged.drop(columns=['_merge'])
 
-    # Ranking difference (focal minus opponent — negative = focal is better ranked)
-    merged['Ranking_Diff'] = merged['Focal_Ranking'] - merged['Opponent_Ranking']
+    merged['Opponent_Ranking'] = merged['Opponent_Ranking_GS'].fillna(
+        merged['Opponent_Ranking_Fallback']
+    ).astype('Int64')
+    merged = merged.drop(columns=['Opponent_Ranking_GS', 'Opponent_Ranking_Fallback'])
+
+    # Ranking difference (positive = focal is worse ranked)
+    merged['Ranking_Diff'] = (
+        merged['Focal_Ranking'] - merged['Opponent_Ranking']
+    ).astype('Int64')
 
     print(f'  Rankings missing — Focal: {merged["Focal_Ranking"].isna().sum()}')
     print(f'  Rankings missing — Opponent: {merged["Opponent_Ranking"].isna().sum()}')
