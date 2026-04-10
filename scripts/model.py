@@ -1,0 +1,348 @@
+"""
+model.py
+--------
+Loads processed_features.csv checkpoint.
+Runs logistic regression and Causal Forest separately for ATP and WTA.
+Generates all 6 outputs to outputs/.
+
+Standalone — does not depend on clean.py or features.py.
+"""
+
+import os
+import warnings
+import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import statsmodels.api as sm
+from econml.dml import CausalForestDML
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.preprocessing import LabelEncoder
+
+warnings.filterwarnings('ignore')
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+BASE_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROC_DIR  = os.path.join(BASE_DIR, 'data', 'processed')
+OUT_DIR   = os.path.join(BASE_DIR, 'outputs')
+os.makedirs(OUT_DIR, exist_ok=True)
+
+# ── Constants ─────────────────────────────────────────────────────────────────
+CONTROLS  = ['Focal_Ranking', 'Rolling_Win_Pct', 'Streak_k4', 'CUSUM']
+TREATMENT = 'High_Leverage'
+OUTCOME   = 'Next_Point_Won'
+ALPHA     = 0.05
+SEED      = 42
+
+
+# ── Output 1: Per-player Chi-squared summary table ────────────────────────────
+def plot_chi2_table(tests_path: str) -> None:
+    tests = pd.read_csv(tests_path)
+
+    summary = tests.groupby('Tour').agg(
+        Players_Tested=('Player', 'count'),
+        Chi2_Significant=('Chi2_Sig', 'sum'),
+        Runs_Significant=('Runs_Sig', 'sum'),
+    ).reset_index()
+    summary['Chi2_Pct'] = (summary['Chi2_Significant'] / summary['Players_Tested'] * 100).round(1)
+    summary['Runs_Pct'] = (summary['Runs_Significant'] / summary['Players_Tested'] * 100).round(1)
+
+    fig, ax = plt.subplots(figsize=(8, 2.5))
+    ax.axis('off')
+    table_data = [
+        ['Tour', 'Players\nTested', 'Chi² Sig.\n(n)', 'Chi² Sig.\n(%)', 'Runs Sig.\n(n)', 'Runs Sig.\n(%)'],
+    ]
+    for _, row in summary.iterrows():
+        table_data.append([
+            row['Tour'],
+            int(row['Players_Tested']),
+            int(row['Chi2_Significant']),
+            f"{row['Chi2_Pct']}%",
+            int(row['Runs_Significant']),
+            f"{row['Runs_Pct']}%",
+        ])
+
+    t = ax.table(cellText=table_data[1:], colLabels=table_data[0],
+                 loc='center', cellLoc='center')
+    t.auto_set_font_size(False)
+    t.set_fontsize(11)
+    t.scale(1.2, 1.8)
+
+    ax.set_title('Output 1: Per-Player Momentum Test Results (p < 0.05)',
+                 fontsize=12, fontweight='bold', pad=10)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DIR, 'output1_chi2_table.png'), dpi=150, bbox_inches='tight')
+    plt.close()
+    print('  Saved output1_chi2_table.png')
+
+
+# ── Output 2: CUSUM line chart ────────────────────────────────────────────────
+def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
+    # Pick the match with the most points for a clear chart
+    match_counts = df.groupby('match_id').size()
+    target_match = match_counts.idxmax()
+    match_data = df[df['match_id'] == target_match].copy().reset_index(drop=True)
+
+    # Extract player names from match_id
+    parts = target_match.split('-')
+    p1 = parts[-2].replace('_', ' ') if len(parts) >= 2 else 'Player 1'
+    p2 = parts[-1].replace('_', ' ') if len(parts) >= 1 else 'Player 2'
+
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(match_data.index, match_data['CUSUM'], color='steelblue', linewidth=1.5)
+    ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
+    ax.fill_between(match_data.index, match_data['CUSUM'], 0,
+                    where=match_data['CUSUM'] > 0, alpha=0.3, color='green', label='Above expectation')
+    ax.fill_between(match_data.index, match_data['CUSUM'], 0,
+                    where=match_data['CUSUM'] < 0, alpha=0.3, color='red', label='Below expectation')
+
+    ax.set_title(f'Output 2: CUSUM Momentum Tracker — {tour_name}\n{p1} vs {p2}',
+                 fontsize=12, fontweight='bold')
+    ax.set_xlabel('Point Number')
+    ax.set_ylabel('Cumulative Deviation from Mean')
+    ax.legend(fontsize=9)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    plt.tight_layout()
+    fname = f'output2_cusum_{tour_name.lower()}.png'
+    plt.savefig(os.path.join(OUT_DIR, fname), dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f'  Saved {fname}')
+
+
+# ── Output 3: TBOE scatter plot ───────────────────────────────────────────────
+def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    for ax, df, label, color in zip(axes, [atp, wta], ['ATP', 'WTA'], ['steelblue', 'coral']):
+        player_tboe = df.groupby('Focal_Player')['TBOE'].mean().reset_index()
+        player_tboe = player_tboe.sort_values('TBOE')
+        player_tboe['rank'] = range(len(player_tboe))
+
+        ax.scatter(player_tboe['rank'], player_tboe['TBOE'],
+                   color=color, alpha=0.7, s=40, edgecolors='none')
+        ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
+        ax.set_title(f'{label} — Tiebreak Over-Expectation per Player',
+                     fontsize=11, fontweight='bold')
+        ax.set_xlabel('Player Rank (by TBOE)')
+        ax.set_ylabel('TBOE (actual minus expected win rate)')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+    fig.suptitle('Output 3: Tiebreak Over-Expectation (TBOE) by Player',
+                 fontsize=13, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DIR, 'output3_tboe_scatter.png'), dpi=150, bbox_inches='tight')
+    plt.close()
+    print('  Saved output3_tboe_scatter.png')
+
+
+# ── Logistic Regression ───────────────────────────────────────────────────────
+def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
+    print(f'\n  Logistic regression — {tour_name}')
+    keep = CONTROLS + [TREATMENT, OUTCOME]
+    data = df[keep].dropna().copy()
+
+    X = sm.add_constant(data[CONTROLS + [TREATMENT]].astype(float))
+    y = data[OUTCOME].astype(float)
+
+    model = sm.Logit(y, X)
+    result = model.fit(disp=0, method='bfgs', cov_type='HC1')
+
+    coef_df = pd.DataFrame({
+        'Feature':   result.params.index,
+        'Coef':      result.params.values,
+        'SE':        result.bse.values,
+        'P_value':   result.pvalues.values,
+    })
+    coef_df['Tour'] = tour_name
+    print(f'    N = {len(data):,} | Log-likelihood = {result.llf:.1f}')
+    return coef_df
+
+
+# ── Causal Forest ─────────────────────────────────────────────────────────────
+def run_causal_forest(df: pd.DataFrame, tour_name: str) -> tuple:
+    print(f'\n  Causal Forest — {tour_name}')
+    keep = CONTROLS + [TREATMENT, OUTCOME]
+    data = df[keep].dropna().copy()
+
+    T = data[TREATMENT].astype(float).values
+    Y = data[OUTCOME].astype(float).values
+    X = data[CONTROLS].astype(float).values
+
+    cf = CausalForestDML(
+        model_y=GradientBoostingRegressor(n_estimators=100, random_state=SEED),
+        model_t=GradientBoostingRegressor(n_estimators=100, random_state=SEED),
+        n_estimators=200,
+        cv=2,
+        random_state=SEED,
+        verbose=0
+    )
+    cf.fit(Y, T, X=X)
+
+    cates = cf.effect(X)
+    ate   = cates.mean()
+    ate_se = cates.std() / np.sqrt(len(cates))
+
+    print(f'    N = {len(data):,} | ATE = {ate:.4f} (SE = {ate_se:.4f})')
+
+    # Feature importances from forest
+    importances = cf.feature_importances_
+    feat_imp = pd.DataFrame({
+        'Feature':    CONTROLS,
+        'Importance': importances,
+        'Tour':       tour_name
+    }).sort_values('Importance', ascending=False)
+
+    return cates, ate, ate_se, feat_imp, data[CONTROLS].astype(float)
+
+
+# ── Output 4: CATE plot ───────────────────────────────────────────────────────
+def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    for ax, cates, X, label, color in zip(
+        axes,
+        [atp_cates, wta_cates],
+        [atp_X, wta_X],
+        ['ATP', 'WTA'],
+        ['steelblue', 'coral']
+    ):
+        ranking = X['Focal_Ranking'].values
+        ax.scatter(ranking, cates, alpha=0.3, s=15, color=color, edgecolors='none')
+
+        # Smoothed trend
+        sort_idx = np.argsort(ranking)
+        window = max(1, len(ranking) // 50)
+        smoothed = pd.Series(cates[sort_idx]).rolling(window, center=True, min_periods=1).mean()
+        ax.plot(ranking[sort_idx], smoothed, color='black', linewidth=2, label='Trend')
+
+        ax.axhline(0, color='red', linewidth=0.8, linestyle='--', alpha=0.7)
+        ax.set_title(f'{label} — Causal Effect by Player Ranking', fontsize=11, fontweight='bold')
+        ax.set_xlabel('Focal Player Ranking')
+        ax.set_ylabel('CATE (causal effect on next point)')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.legend(fontsize=9)
+
+    fig.suptitle('Output 4: Heterogeneous Causal Effects (CATE) of High-Leverage Points',
+                 fontsize=13, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'), dpi=150, bbox_inches='tight')
+    plt.close()
+    print('  Saved output4_cate_plot.png')
+
+
+# ── Output 5: Model evaluation table ─────────────────────────────────────────
+def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se) -> None:
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.axis('off')
+
+    rows = []
+    for coef_df, label in [(atp_coef, 'ATP'), (wta_coef, 'WTA')]:
+        for _, row in coef_df[coef_df['Feature'] != 'const'].iterrows():
+            sig = '***' if row['P_value'] < 0.001 else ('**' if row['P_value'] < 0.01 else ('*' if row['P_value'] < 0.05 else ''))
+            rows.append([label, row['Feature'], f"{row['Coef']:.4f}", f"{row['SE']:.4f}",
+                         f"{row['P_value']:.3f}", sig])
+
+    # Add CATE rows
+    rows.append(['ATP', 'CATE (Causal Forest ATE)', f'{atp_ate:.4f}', f'{atp_ate_se:.4f}', '—', ''])
+    rows.append(['WTA', 'CATE (Causal Forest ATE)', f'{wta_ate:.4f}', f'{wta_ate_se:.4f}', '—', ''])
+
+    col_labels = ['Tour', 'Feature', 'Coef / ATE', 'SE', 'P-value', 'Sig.']
+    t = ax.table(cellText=rows, colLabels=col_labels, loc='center', cellLoc='center')
+    t.auto_set_font_size(False)
+    t.set_fontsize(9)
+    t.scale(1.1, 1.6)
+
+    ax.set_title('Output 5: Model Evaluation — Logistic Regression + Causal Forest',
+                 fontsize=12, fontweight='bold', pad=10)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DIR, 'output5_model_table.png'), dpi=150, bbox_inches='tight')
+    plt.close()
+    print('  Saved output5_model_table.png')
+
+
+# ── Output 6: SHAP feature importance ────────────────────────────────────────
+def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+    for ax, imp, label, color in zip(
+        axes,
+        [atp_imp, wta_imp],
+        ['ATP', 'WTA'],
+        ['steelblue', 'coral']
+    ):
+        imp_sorted = imp.sort_values('Importance')
+        ax.barh(imp_sorted['Feature'], imp_sorted['Importance'], color=color, alpha=0.8)
+        ax.set_title(f'{label} — Feature Importance (Causal Forest)',
+                     fontsize=11, fontweight='bold')
+        ax.set_xlabel('Importance')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+    fig.suptitle('Output 6: Feature Importance from Causal Forest',
+                 fontsize=13, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'), dpi=150, bbox_inches='tight')
+    plt.close()
+    print('  Saved output6_feature_importance.png')
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+def main() -> None:
+    print('=== model.py ===')
+
+    # Load checkpoint
+    df = pd.read_csv(os.path.join(PROC_DIR, 'processed_features.csv'), low_memory=False)
+    print(f'Loaded processed_features.csv: {len(df):,} rows')
+
+    atp = df[df['Tour'] == 'ATP'].copy()
+    wta = df[df['Tour'] == 'WTA'].copy()
+    print(f'ATP: {len(atp):,} rows | WTA: {len(wta):,} rows')
+
+    # Output 1
+    print('\n--- Output 1: Chi-squared table ---')
+    plot_chi2_table(os.path.join(PROC_DIR, 'per_player_tests.csv'))
+
+    # Output 2
+    print('\n--- Output 2: CUSUM line charts ---')
+    plot_cusum(atp, 'ATP')
+    plot_cusum(wta, 'WTA')
+
+    # Output 3
+    print('\n--- Output 3: TBOE scatter ---')
+    plot_tboe(atp, wta)
+
+    # Logistic regression
+    print('\n--- Logistic Regression ---')
+    atp_coef = run_logistic(atp, 'ATP')
+    wta_coef = run_logistic(wta, 'WTA')
+
+    # Causal Forest
+    print('\n--- Causal Forest ---')
+    atp_cates, atp_ate, atp_ate_se, atp_imp, atp_X = run_causal_forest(atp, 'ATP')
+    wta_cates, wta_ate, wta_ate_se, wta_imp, wta_X = run_causal_forest(wta, 'WTA')
+
+    # Output 4
+    print('\n--- Output 4: CATE plot ---')
+    plot_cate(atp_cates, atp_X, wta_cates, wta_X)
+
+    # Output 5
+    print('\n--- Output 5: Model table ---')
+    plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se)
+
+    # Output 6
+    print('\n--- Output 6: Feature importance ---')
+    plot_feature_importance(atp_imp, wta_imp)
+
+    print('\n=== Done — all 6 outputs saved to outputs/ ===')
+
+
+if __name__ == '__main__':
+    main()
