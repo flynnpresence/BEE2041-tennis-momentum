@@ -237,39 +237,92 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
     print('  Saved output4_cate_plot.png')
 
 
-# ── Output 5: Model evaluation table ─────────────────────────────────────────
+# ── Output 5: Coefficient plot ────────────────────────────────────────────────
 def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se) -> None:
-    fig, ax = plt.subplots(figsize=(12, 5))
-    ax.axis('off')
+    label_map = {
+        'Focal_Ranking':    'Player Rank',
+        'Rolling_Win_Pct':  'Rolling Win %',
+        'Streak_k4':        'Winning Streak (Last 4 Points)',
+        'CUSUM':            'Momentum Score',
+        'High_Leverage':    'Pressure Point',
+    }
+    atp_coef = atp_coef.copy()
+    wta_coef = wta_coef.copy()
+    atp_coef['Feature'] = atp_coef['Feature'].replace(label_map)
+    wta_coef['Feature'] = wta_coef['Feature'].replace(label_map)
 
-    rows = []
-    for coef_df, label in [(atp_coef, 'ATP'), (wta_coef, 'WTA')]:
-        for _, row in coef_df[coef_df['Feature'] != 'const'].iterrows():
-            sig = '***' if row['P_value'] < 0.001 else ('**' if row['P_value'] < 0.01 else ('*' if row['P_value'] < 0.05 else ''))
-            rows.append([label, row['Feature'], f"{row['Coef']:.4f}", f"{row['SE']:.4f}",
-                         f"{row['P_value']:.3f}", sig])
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    colors = {'ATP': 'steelblue', 'WTA': 'coral'}
+    offsets = {'ATP': -0.15, 'WTA': 0.15}
+    y_labels = []
+    y_positions = []
+
+    all_features = atp_coef[atp_coef['Feature'] != 'const']['Feature'].tolist()
+
+    for i, feature in enumerate(all_features):
+        y_labels.append(feature)
+        y_positions.append(i)
+        for tour, coef_df in [('ATP', atp_coef), ('WTA', wta_coef)]:
+            row = coef_df[coef_df['Feature'] == feature]
+            if len(row) == 0:
+                continue
+            coef = row['Coef'].values[0]
+            se   = row['SE'].values[0]
+            y    = i + offsets[tour]
+            ax.errorbar(coef, y, xerr=1.96*se,
+                       fmt='o', color=colors[tour],
+                       capsize=4, capthick=1.5,
+                       markersize=7, linewidth=1.5,
+                       label=tour if i == 0 else '')
 
     # Add CATE rows
-    rows.append(['ATP', 'CATE (Causal Forest ATE)', f'{atp_ate:.4f}', f'{atp_ate_se:.4f}', '—', ''])
-    rows.append(['WTA', 'CATE (Causal Forest ATE)', f'{wta_ate:.4f}', f'{wta_ate_se:.4f}', '—', ''])
+    cate_y = len(all_features)
+    y_labels.append('Pressure Point (Causal Effect)')
+    y_positions.append(cate_y)
+    ax.errorbar(atp_ate, cate_y + offsets['ATP'],
+                xerr=1.96*atp_ate_se, fmt='D',
+                color='steelblue', capsize=4, capthick=1.5,
+                markersize=8, linewidth=1.5)
+    ax.errorbar(wta_ate, cate_y + offsets['WTA'],
+                xerr=1.96*wta_ate_se, fmt='D',
+                color='coral', capsize=4, capthick=1.5,
+                markersize=8, linewidth=1.5)
 
-    col_labels = ['Tour', 'Feature', 'Coef / ATE', 'SE', 'P-value', 'Sig.']
-    t = ax.table(cellText=rows, colLabels=col_labels, loc='center', cellLoc='center')
-    t.auto_set_font_size(False)
-    t.set_fontsize(9)
-    t.scale(1.1, 1.6)
+    ax.axvline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.6)
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels(y_labels, fontsize=10)
+    ax.set_xlabel('Coefficient / Causal Effect', fontsize=11)
+    ax.set_title('Output 5: Model Results — Logistic Regression + Causal Forest',
+                 fontsize=12, fontweight='bold', pad=15)
 
-    ax.set_title('Output 5: Model Evaluation — Logistic Regression + Causal Forest',
-                 fontsize=12, fontweight='bold', pad=20)
+    handles = [plt.Line2D([0], [0], marker='o', color='w',
+                          markerfacecolor=c, markersize=9, label=t)
+               for t, c in colors.items()]
+    ax.legend(handles=handles, fontsize=10)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output5_model_table.png'), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output5_model_table.png'),
+                dpi=150, bbox_inches='tight')
     plt.close()
     print('  Saved output5_model_table.png')
 
 
-# ── Output 6: SHAP feature importance ────────────────────────────────────────
+# ── Output 6: Feature importance ─────────────────────────────────────────────
 def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> None:
+    label_map = {
+        'Focal_Ranking':    'Player Rank',
+        'Rolling_Win_Pct':  'Rolling Win %',
+        'Streak_k4':        'Winning Streak (Last 4 Points)',
+        'CUSUM':            'Momentum Score',
+    }
+    atp_imp = atp_imp.copy()
+    wta_imp = wta_imp.copy()
+    atp_imp['Feature'] = atp_imp['Feature'].replace(label_map)
+    wta_imp['Feature'] = wta_imp['Feature'].replace(label_map)
+
     fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 
     for ax, imp, label, color in zip(
@@ -278,7 +331,7 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
         ['ATP', 'WTA'],
         ['steelblue', 'coral']
     ):
-        imp_sorted = imp.sort_values('Importance')
+        imp_sorted = imp.sort_values('Importance').copy()
         ax.barh(imp_sorted['Feature'], imp_sorted['Importance'], color=color, alpha=0.8)
         ax.set_title(f'{label} — Feature Importance (Causal Forest)',
                      fontsize=11, fontweight='bold')
