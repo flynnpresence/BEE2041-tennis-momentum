@@ -49,7 +49,7 @@ def plot_chi2_table(tests_path: str) -> None:
     summary['Chi2_Pct'] = (summary['Chi2_Significant'] / summary['Players_Tested'] * 100).round(1)
     summary['Runs_Pct'] = (summary['Runs_Significant'] / summary['Players_Tested'] * 100).round(1)
 
-    fig, ax = plt.subplots(figsize=(8, 2.5))
+    fig, ax = plt.subplots(figsize=(10, 3))
     ax.axis('off')
     table_data = [
         ['Tour', 'Players\nTested', 'Chi² Sig.\n(n)', 'Chi² Sig.\n(%)', 'Runs Sig.\n(n)', 'Runs Sig.\n(%)'],
@@ -68,7 +68,7 @@ def plot_chi2_table(tests_path: str) -> None:
                  loc='center', cellLoc='center')
     t.auto_set_font_size(False)
     t.set_fontsize(11)
-    t.scale(1.2, 1.8)
+    t.scale(1.4, 2.2)
 
     ax.set_title('Output 1: Per-Player Momentum Test Results (p < 0.05)',
                  fontsize=12, fontweight='bold', pad=10)
@@ -239,7 +239,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 
 # ── Output 5: Model evaluation table ─────────────────────────────────────────
 def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se) -> None:
-    fig, ax = plt.subplots(figsize=(10, 4))
+    fig, ax = plt.subplots(figsize=(12, 5))
     ax.axis('off')
 
     rows = []
@@ -260,7 +260,7 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
     t.scale(1.1, 1.6)
 
     ax.set_title('Output 5: Model Evaluation — Logistic Regression + Causal Forest',
-                 fontsize=12, fontweight='bold', pad=10)
+                 fontsize=12, fontweight='bold', pad=20)
 
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DIR, 'output5_model_table.png'), dpi=150, bbox_inches='tight')
