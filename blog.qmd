@@ -2,7 +2,12 @@
 title: "The Illusion of Momentum: What Tennis Data Reveals About the Myth of the Hot Hand"
 author: "Flynn Presence"
 date: "2026-05-01"
-format: pdf
+format:
+  pdf: default
+  html:
+    theme: darkly
+    toc: true
+    number-sections: false
 ---
 
 It is the fourth set of the 2023 Wimbledon final. Carlos Alcaraz, twenty years old, has just saved a break point with a forehand winner down the line that the crowd will talk about for years. The commentators erupt. Novak Djokovic, standing at the baseline with twenty-three Grand Slam titles behind him, rolls his neck and bounces on his toes. The stadium is unanimous: something has shifted. The momentum, every pundit agrees, belongs to Alcaraz now.
