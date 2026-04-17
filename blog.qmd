@@ -8,6 +8,7 @@ format:
     theme: flatly
     toc: true
     number-sections: false
+    embed-resources: true
 ---
 
 It is the fourth set of the 2023 Wimbledon final. Carlos Alcaraz, twenty years old, has just saved a break point with a forehand winner down the line that the crowd will talk about for years. The commentators erupt. Novak Djokovic, standing at the baseline with twenty-three Grand Slam titles behind him, rolls his neck and bounces on his toes. The stadium is unanimous: something has shifted. The momentum, every pundit agrees, belongs to Alcaraz now.
@@ -86,7 +87,7 @@ Across 52,314 points, two tours, and four Grand Slams, the data tells a consiste
 
 The comparison between tours adds an intriguing wrinkle. The ATP causal estimate sits at -0.0009, so close to zero it is essentially a flatline. The WTA estimate is -0.0104, still statistically indistinguishable from zero, but pointing slightly negative. If anything, the WTA data hints at a small hangover effect: winning a high-pressure point may if anything marginally reduce the probability of winning the next one, perhaps because of the physical and mental effort required to convert it. This is speculative, and the effect is too small to be conclusive, but it is the opposite of what the momentum narrative predicts. Both tours point firmly away from momentum being a real causal force.
 
-This does not mean psychology plays no role in sport. What it does mean is that the narrative (*he has the momentum now*) is almost certainly a story imposed by human observers on a process that is, at the point level, much closer to random than it feels from the stands.
+This does not mean psychology plays no role in sport. What it does mean is that the narrative that *he has the momentum now* is almost certainly a story imposed by human observers on a process that is, at the point level, much closer to random than it feels from the stands.
 
 There are honest limitations to acknowledge. This dataset covers one season. Attenuation bias, the tendency for measurement imprecision to push causal estimates toward zero, means our findings likely represent an upper bound on the true null rather than a precise measurement of nothing. A richer dataset across multiple seasons would sharpen the inference considerably. Furthermore, the crowdsourced dataset skews toward elite matches on broadcast courts, and we lack physiological data such as player fatigue that might capture momentum effects invisible to point-level scoring.
 
