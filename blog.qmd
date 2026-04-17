@@ -7,8 +7,10 @@ format:
   html:
     theme: flatly
     toc: true
+    toc-location: left
     number-sections: false
     embed-resources: true
+    css: styles.css
 ---
 
 It is the fourth set of the 2023 Wimbledon final. Carlos Alcaraz, twenty years old, has just saved a break point with a forehand winner down the line that the crowd will talk about for years. The commentators erupt. Novak Djokovic, standing at the baseline with twenty-three Grand Slam titles behind him, rolls his neck and bounces on his toes. The stadium is unanimous: something has shifted. The momentum, every pundit agrees, belongs to Alcaraz now.
