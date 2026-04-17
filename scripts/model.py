@@ -99,7 +99,7 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     ax.fill_between(match_data.index, match_data['CUSUM'], 0,
                     where=match_data['CUSUM'] < 0, alpha=0.3, color='red', label='Below expectation')
 
-    ax.set_title(f'Output 2: CUSUM Momentum Tracker — {tour_name}\n{p1} vs {p2}',
+    ax.set_title(f'Output 2: Cumulative Momentum Score — {tour_name}\n{p1} vs {p2}',
                  fontsize=12, fontweight='bold')
     ax.set_xlabel('Point Number')
     ax.set_ylabel('Cumulative Deviation from Mean')
@@ -153,11 +153,13 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     model = sm.Logit(y, X)
     result = model.fit(disp=0, method='bfgs', cov_type='HC1')
 
+    # Compute marginal effects at the mean
+    margins = result.get_margeff()
     coef_df = pd.DataFrame({
-        'Feature':   result.params.index,
-        'Coef':      result.params.values,
-        'SE':        result.bse.values,
-        'P_value':   result.pvalues.values,
+        'Feature':  [v for v in margins.summary_frame().index],
+        'Coef':     margins.margeff,
+        'SE':       margins.margeff_se,
+        'P_value':  margins.pvalues,
     })
     coef_df['Tour'] = tour_name
     print(f'    N = {len(data):,} | Log-likelihood = {result.llf:.1f}')
@@ -175,8 +177,8 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str) -> tuple:
     X = data[CONTROLS].astype(float).values
 
     cf = CausalForestDML(
-        model_y=GradientBoostingRegressor(n_estimators=100, random_state=SEED),
-        model_t=GradientBoostingRegressor(n_estimators=100, random_state=SEED),
+        model_y=GradientBoostingRegressor(n_estimators=200, random_state=SEED),
+        model_t=GradientBoostingRegressor(n_estimators=200, random_state=SEED),
         n_estimators=200,
         cv=2,
         n_jobs=1,
@@ -293,7 +295,7 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
     ax.axvline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.6)
     ax.set_yticks(y_positions)
     ax.set_yticklabels(y_labels, fontsize=10)
-    ax.set_xlabel('Coefficient / Causal Effect', fontsize=11)
+    ax.set_xlabel('Marginal Effect on Win Probability', fontsize=11)
     ax.set_title('Output 5: Model Results — Logistic Regression + Causal Forest',
                  fontsize=12, fontweight='bold', pad=15)
 

@@ -35,9 +35,9 @@ Before asking whether momentum causes anything, we first need to ask whether it 
 
 The results in Figure 1 are the first blow to the momentum theory. In the ATP, just 9.1% of players showed statistically significant evidence that their point sequences were non-random. In the WTA, 7.7%. At a 5% significance threshold, random chance alone would produce roughly 5% significant results. Our figures barely exceed that. Across both tours, momentum, if it exists, is present in fewer than one in ten players.
 
-To visualise what this looks like in a real match, Figure 2 tracks the cumulative drift in performance for a single WTA match between Ekaterina Alexandrova and Madison Brengle. The line rises when the player we are tracking is winning points above her average rate, and falls when she drops below it. Think of it as a running score of whether a player is outperforming or underperforming their own average. A genuine momentum effect would look like a sustained climb, with the player catching fire and staying hot. If momentum were real and powerful, we would expect to see long stretches where the line keeps climbing in one direction.
+To visualise what this looks like in a real match, Figure 2 tracks the cumulative momentum score, a running total of how far a player's performance drifts above or below their own average, across a single WTA match between Ekaterina Alexandrova and Madison Brengle. The line rises when the player we are tracking is winning points above her average rate, and falls when she drops below it. Think of it as a running score of whether a player is outperforming or underperforming their own average. A genuine momentum effect would look like a sustained climb, with the player catching fire and staying hot. If momentum were real and powerful, we would expect to see long stretches where the line keeps climbing in one direction.
 
-![CUSUM momentum tracker, Alexandrova vs Brengle, WTA](outputs/output2_cusum_wta.png)
+![Cumulative momentum score, Alexandrova vs Brengle, WTA](outputs/output2_cusum_wta.png)
 
 What we actually see is oscillation. The line moves up, reverses, recovers, and reverses again. There are no sustained directional runs of the kind that a momentum narrative would predict. The pattern looks far more like the natural variance of a competitive match than evidence of a psychological force building behind one player.
 
@@ -45,7 +45,7 @@ What we actually see is oscillation. The line moves up, reverses, recovers, and 
 
 Perhaps momentum does not operate across an entire match; perhaps it concentrates in the highest-pressure moments. Break points. Tiebreaks. The moments where crowds hold their breath and commentators reach for their most dramatic vocabulary.
 
-We tested this directly. For every player, we calculated their Tiebreak Over-Expectation, measuring how much better or worse they performed in tiebreaks compared to what their overall skill level would predict. If certain players consistently raise their game when it matters most, we would expect to see clear outliers pulling away from zero in Figure 3.
+We tested this directly. For every player, we calculated their Tiebreak Over-Expectation (TBOE), a measure of how much better or worse they performed in tiebreaks compared to what their overall skill level would predict. If certain players consistently raise their game when it matters most, we would expect to see clear outliers pulling away from zero in Figure 3.
 
 ![Tiebreak over-expectation by player, ATP and WTA](outputs/output3_tboe_scatter.png)
 
@@ -61,11 +61,11 @@ This approach controls for everything else (player ranking, recent form, match c
 
 ![Causal effect of winning a high-leverage point, across player rankings](outputs/output4_cate_plot.png)
 
-Figure 4 shows the estimated causal effect for every observation in the dataset, plotted against player ranking. If momentum were real, we would expect to see a consistent positive effect, with points clustered above zero, indicating that winning a pressure point reliably lifts the probability of winning the next. Instead, the scatter sits around zero across all ranking levels. Top-ranked players show no more momentum effect than qualifiers. The effect is absent everywhere.
+Figure 4 shows what statisticians call the CATE, or Conditional Average Treatment Effect, the estimated causal effect for every observation in the dataset, plotted against player ranking. If momentum were real, we would expect to see a consistent positive effect, with points clustered above zero, indicating that winning a pressure point reliably lifts the probability of winning the next. Instead, the scatter sits around zero across all ranking levels. Top-ranked players show no more momentum effect than qualifiers. The effect is absent everywhere.
 
 ![Model results, logistic regression and causal forest estimates](outputs/output5_model_table.png)
 
-Figure 5 confirms this numerically. The Average Treatment Effect (the average causal impact of winning a high-leverage point on the probability of winning the next) is -0.0009 for ATP and -0.0098 for WTA. Both are statistically indistinguishable from zero. In plain terms: winning a pressure point does not cause you to win the next one.
+Figure 5 visualises this finding. Each point estimate sits with its confidence interval plotted around it, and for both tours, those intervals straddle zero. The Average Treatment Effect is -0.0009 for ATP and -0.0104 for WTA. Both are statistically indistinguishable from zero. In plain terms: winning a pressure point does not cause you to win the next one.
 
 ## If Not Momentum, Then What?
 
@@ -79,11 +79,11 @@ Rolling win percentage dominates by a significant margin. A player's recent form
 
 Across 52,314 points, two tours, and four Grand Slams, the data tells a consistent story. Momentum, in the sense of winning a pressure point causally driving the next result, does not appear to exist in professional tennis at this scale.
 
-The comparison between tours adds an intriguing wrinkle. The ATP causal estimate sits at -0.0009, so close to zero it is essentially a flatline. The WTA estimate is -0.0098, still statistically indistinguishable from zero, but pointing slightly negative. If anything, the WTA data hints at a small hangover effect: winning a high-pressure point may if anything marginally reduce the probability of winning the next one, perhaps because of the physical and mental effort required to convert it. This is speculative, and the effect is too small to be conclusive, but it is the opposite of what the momentum narrative predicts. Both tours point firmly away from momentum being a real causal force.
+The comparison between tours adds an intriguing wrinkle. The ATP causal estimate sits at -0.0009, so close to zero it is essentially a flatline. The WTA estimate is -0.0104, still statistically indistinguishable from zero, but pointing slightly negative. If anything, the WTA data hints at a small hangover effect: winning a high-pressure point may if anything marginally reduce the probability of winning the next one, perhaps because of the physical and mental effort required to convert it. This is speculative, and the effect is too small to be conclusive, but it is the opposite of what the momentum narrative predicts. Both tours point firmly away from momentum being a real causal force.
 
 This does not mean psychology plays no role in sport. What it does mean is that the narrative (*he has the momentum now*) is almost certainly a story imposed by human observers on a process that is, at the point level, much closer to random than it feels from the stands.
 
-There are honest limitations to acknowledge. This dataset covers one season. Attenuation bias, the tendency for measurement imprecision to push causal estimates toward zero, means our findings likely represent an upper bound on the true null rather than a precise measurement of nothing. A richer dataset across multiple seasons would sharpen the inference considerably.
+There are honest limitations to acknowledge. This dataset covers one season. Attenuation bias, the tendency for measurement imprecision to push causal estimates toward zero, means our findings likely represent an upper bound on the true null rather than a precise measurement of nothing. A richer dataset across multiple seasons would sharpen the inference considerably. Furthermore, the crowdsourced dataset skews toward elite matches on broadcast courts, and we lack physiological data such as player fatigue that might capture momentum effects invisible to point-level scoring.
 
 But the burden of proof lies with those who claim momentum exists. At Grand Slam scale, with causal methods, across both tours, the evidence is not there.
 
