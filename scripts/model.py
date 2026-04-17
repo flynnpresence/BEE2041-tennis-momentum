@@ -179,6 +179,7 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str) -> tuple:
         model_t=GradientBoostingRegressor(n_estimators=100, random_state=SEED),
         n_estimators=200,
         cv=2,
+        n_jobs=1,
         random_state=SEED,
         verbose=0
     )
@@ -223,7 +224,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 
         ax.axhline(0, color='red', linewidth=0.8, linestyle='--', alpha=0.7)
         ax.set_title(f'{label} — Causal Effect by Player Ranking', fontsize=11, fontweight='bold')
-        ax.set_xlabel('Focal Player Ranking')
+        ax.set_xlabel('Player Ranking')
         ax.set_ylabel('CATE (causal effect on next point)')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
