@@ -1,78 +1,120 @@
+/* ── Typography ─────────────────────────────────────────── */
 body {
   font-family: 'Georgia', serif;
-  font-size: 1.1rem;
+  font-size: 16px;
   line-height: 1.8;
   color: #222;
-  max-width: 860px;
-  margin: 0 auto;
 }
 
 h1, h2, h3 {
-  font-family: 'Helvetica Neue', sans-serif;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
   font-weight: 700;
   color: #111;
 }
 
-h1 {
-  font-size: 2.2rem;
-  line-height: 1.2;
-  margin-bottom: 0.3rem;
-}
-
 h2 {
-  font-size: 1.5rem;
-  margin-top: 2.5rem;
+  font-size: 1.4rem;
+  margin-top: 3rem;
+  padding-bottom: 0.4rem;
   border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 0.3rem;
 }
 
 p {
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.5rem;
+  max-width: 68ch;
 }
 
+/* ── Hero Title Block ───────────────────────────────────── */
+.quarto-title-block {
+  background-color: #4682B4;
+  color: white !important;
+  padding: 3rem 2rem 2rem 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 6px solid #FF7F50;
+}
+
+.quarto-title-block h1 {
+  color: white !important;
+  font-size: 2.2rem;
+  line-height: 1.2;
+}
+
+.quarto-title-block .author,
+.quarto-title-block .date {
+  color: rgba(255,255,255,0.85) !important;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* ── Pull Quotes ────────────────────────────────────────── */
+blockquote {
+  text-align: center;
+  font-size: 1.5rem;
+  font-family: 'Georgia', serif;
+  color: #333;
+  border: none;
+  margin: 2.5rem auto;
+  max-width: 600px;
+  position: relative;
+  padding: 1rem 2rem;
+}
+
+blockquote::before {
+  content: '\201C';
+  font-size: 5rem;
+  color: #FF7F50;
+  position: absolute;
+  top: -1.5rem;
+  left: 0;
+  line-height: 1;
+}
+
+/* ── Figure Captions ────────────────────────────────────── */
+.quarto-float-caption,
+figcaption,
+.figure-caption {
+  font-size: 0.82rem;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+  margin-top: 0.4rem;
+  margin-bottom: 2rem;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── Images ─────────────────────────────────────────────── */
 img {
   width: 100%;
   border-radius: 4px;
-  margin: 1.5rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin: 1.5rem 0 0.5rem 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
-.quarto-figure-caption {
-  font-size: 0.85rem;
-  color: #666;
-  text-align: center;
-  margin-top: -1rem;
-  margin-bottom: 1.5rem;
-  font-style: italic;
+/* ── Statistical Highlights ─────────────────────────────── */
+strong {
+  background-color: rgba(70,130,180,0.12);
+  padding: 0 3px;
+  border-radius: 2px;
 }
 
-blockquote {
-  border-left: 4px solid #3498db;
-  padding-left: 1rem;
-  color: #555;
-  font-style: italic;
-}
-
-#toc {
-  font-size: 0.9rem;
-}
-
-.author {
-  font-size: 1rem;
-  color: #555;
-}
-
-.date {
-  font-size: 0.9rem;
-  color: #888;
-}
-
+/* ── Section Dividers ───────────────────────────────────── */
 hr {
   border: none;
-  border-top: 1px solid #e0e0e0;
-  margin: 2rem 0;
+  border-top: 2px dashed #e0e0e0;
+  margin: 4rem 0;
 }
 
+/* ── TOC ─────────────────────────────────────────────────── */
+#TOC {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.88rem;
+  border-left: 3px solid #4682B4;
+  padding-left: 1rem;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
 em {
-  color: #222;
+  font-size: 0.85rem;
+  color: #888;
 }
