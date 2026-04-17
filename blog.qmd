@@ -25,7 +25,7 @@ This project tests the same claim at a scale that has never been attempted befor
 
 The raw data comes from Jeff Sackmann's Match Charting Project, a volunteer-compiled record of every point played in professional tennis, including the exact score state at each moment. This allowed us to identify the highest-pressure situations in the game with precision: break points, where the returner stands one point away from winning the service game, and tiebreak points, where an entire set hangs in the balance. We called these high-leverage moments. Across the ATP tour, 27% of all points in our dataset fell into this category, more than one in four points was played under genuine pressure. Before any analysis could begin, the raw data required substantial preparation: matching player names across separate datasets, filtering to main draw matches only, removing retirements and walkovers, and standardising score formats across tens of thousands of individual points. We also drew on official ATP and WTA rankings to measure each player's baseline skill level, ensuring that any effect we found could not simply be explained by better players playing better tennis.
 
-Crucially, we kept the ATP and WTA tours completely separate throughout the entire analysis. Mixing them together would risk masking tour-specific patterns: what is true for men's tennis is not necessarily true for women's tennis, and treating them as one dataset would have obscured exactly the kind of comparison that turns out to matter most. It is worth noting that ATP matches are played best of five sets while WTA matches are played best of three — meaning ATP matches generate more points per match on average, which partly explains the larger ATP dataset.
+Crucially, we kept the ATP and WTA tours completely separate throughout the entire analysis. Mixing them together would risk masking tour-specific patterns: what is true for men's tennis is not necessarily true for women's tennis, and treating them as one dataset would have obscured exactly the kind of comparison that turns out to matter most. It is worth noting that ATP matches are played best of five sets while WTA matches are played best of three, meaning ATP matches generate more points per match on average, which partly explains the larger ATP dataset.
 
 ## Does Momentum Even Show Up in the Data?
 
@@ -35,7 +35,7 @@ Before asking whether momentum causes anything, we first need to ask whether it 
 
 The results in Figure 1 are the first blow to the momentum theory. In the ATP, just 9.1% of players showed statistically significant evidence that their point sequences were non-random. In the WTA, 7.7%. At a 5% significance threshold, random chance alone would produce roughly 5% significant results. Our figures barely exceed that. Across both tours, momentum, if it exists, is present in fewer than one in ten players.
 
-To visualise what this looks like in a real match, Figure 2 tracks the cumulative drift in performance for a single WTA match between Ekaterina Alexandrova and Madison Brengle. The line rises when the focal player is winning points above her average rate, and falls when she drops below it. Think of it as a running score of whether a player is outperforming or underperforming their own average. A genuine momentum effect would look like a sustained climb, with the player catching fire and staying hot. If momentum were real and powerful, we would expect to see long stretches where the line keeps climbing in one direction.
+To visualise what this looks like in a real match, Figure 2 tracks the cumulative drift in performance for a single WTA match between Ekaterina Alexandrova and Madison Brengle. The line rises when the player we are tracking is winning points above her average rate, and falls when she drops below it. Think of it as a running score of whether a player is outperforming or underperforming their own average. A genuine momentum effect would look like a sustained climb, with the player catching fire and staying hot. If momentum were real and powerful, we would expect to see long stretches where the line keeps climbing in one direction.
 
 ![CUSUM momentum tracker, Alexandrova vs Brengle, WTA](outputs/output2_cusum_wta.png)
 
@@ -63,7 +63,7 @@ This approach controls for everything else (player ranking, recent form, match c
 
 Figure 4 shows the estimated causal effect for every observation in the dataset, plotted against player ranking. If momentum were real, we would expect to see a consistent positive effect, with points clustered above zero, indicating that winning a pressure point reliably lifts the probability of winning the next. Instead, the scatter sits around zero across all ranking levels. Top-ranked players show no more momentum effect than qualifiers. The effect is absent everywhere.
 
-![Model results: logistic regression and causal forest estimates](outputs/output5_model_table.png)
+![Model results, logistic regression and causal forest estimates](outputs/output5_model_table.png)
 
 Figure 5 confirms this numerically. The Average Treatment Effect (the average causal impact of winning a high-leverage point on the probability of winning the next) is -0.0009 for ATP and -0.0098 for WTA. Both are statistically indistinguishable from zero. In plain terms: winning a pressure point does not cause you to win the next one.
 
