@@ -1,7 +1,6 @@
 ---
 title: "The Illusion of Momentum: What Tennis Data Reveals About the Myth of the Hot Hand"
 author: "Flynn Presence"
-date: "2026-05-01"
 format:
   html:
     theme: flatly
