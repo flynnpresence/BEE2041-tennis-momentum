@@ -38,7 +38,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         BPOR            : Rolling historical break point win rate minus return point win rate (luck proxy)
         TBOE            : Rolling historical tiebreak win rate minus rolling win percentage (luck proxy)
     """
-    df = df.sort_values(['match_id', 'Pt']).copy()
+    df = df.sort_values(['match_id', 'Set1', 'Gm1', 'Pt']).copy()
 
     # ── Streak_k4 ─────────────────────────────────────────────────────────────
     df['Streak_k4'] = (
@@ -76,8 +76,16 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     bp_p2_serving = (df['Svr'] == 2) & df['Pts'].astype('string').str.startswith(('40-', 'AD-'))
     df['is_bp'] = (bp_p1_serving | bp_p2_serving).astype(int)
 
+    # Point-level tiebreak flag — consistent with clean.py, more reliable than TbSet
+    _pts_split = df['Pts'].astype('string').str.split('-', expand=True)
+    _tennis_vals = {'0', '15', '30', '40', 'AD'}
+    df['_is_tb_point'] = (~(
+        _pts_split[0].isin(_tennis_vals) & _pts_split[1].isin(_tennis_vals)
+    )).astype(int)
+
     def calculate_luck_proxies(match_df: pd.DataFrame) -> pd.DataFrame:
         """Calculate BPOR and TBOE using strictly historical (shifted) expanding sums."""
+        match_id = match_df['match_id'].iloc[0]
         # BPOR: historical break point win rate minus historical return point win rate
         ret_played = match_df['is_returning'].shift(1).expanding().sum()
         ret_won    = (match_df['is_returning'] * match_df['Point_Won']).shift(1).expanding().sum()
@@ -89,20 +97,21 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
         match_df['BPOR'] = bp_rate - ret_rate
 
-        # TBOE: historical tiebreak win rate minus rolling win percentage
-        tb_played  = match_df['TbSet'].fillna(False).astype(int).shift(1).expanding().sum()
-        tb_won     = (match_df['TbSet'].fillna(False).astype(int) * match_df['Point_Won']).shift(1).expanding().sum()
+        # TBOE: uses point-level tiebreak flag, not TbSet (which is set-level and unreliable)
+        tb_played  = match_df['_is_tb_point'].shift(1).expanding().sum()
+        tb_won     = (match_df['_is_tb_point'] * match_df['Point_Won']).shift(1).expanding().sum()
         tb_rate    = (tb_won / tb_played).fillna(0.5)
 
         match_df['TBOE'] = tb_rate - match_df['Rolling_Win_Pct']
+        match_df['match_id'] = match_id
 
         return match_df
 
-    # Store match_id before groupby consumes it
-    match_ids = df['match_id'].values
-    df = df.groupby('match_id', group_keys=False).apply(calculate_luck_proxies).reset_index(drop=True)
-    df['match_id'] = match_ids
-    df = df.drop(columns=['is_returning', 'is_bp'])
+    df = pd.concat(
+        [calculate_luck_proxies(group) for _, group in df.groupby('match_id')],
+        ignore_index=True
+    )
+    df = df.drop(columns=['is_returning', 'is_bp', '_is_tb_point'])
 
     return df
 
@@ -125,6 +134,8 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
         'Svr',
         'TbSet',
         'High_Leverage',
+        'High_Leverage_BP',
+        'High_Leverage_TB',
         'Streak_k4',
         'Rolling_Win_Pct',
         'CUSUM',

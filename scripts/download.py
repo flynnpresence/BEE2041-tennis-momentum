@@ -55,6 +55,8 @@ def download(filename: str, url: str) -> None:
 
     for attempt in range(3):
         try:
+            # verify=False bypasses macOS SSL certificate verification issues with GitHub
+            # This is a known local environment workaround, not a security endorsement
             response = requests.get(url, headers=HEADERS, verify=False)
             response.raise_for_status()
             with open(dest, 'wb') as f:

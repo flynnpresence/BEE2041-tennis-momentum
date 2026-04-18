@@ -15,11 +15,9 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import statsmodels.api as sm
 from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.preprocessing import LabelEncoder
 
 warnings.filterwarnings('ignore')
 
@@ -144,14 +142,20 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
 # ── Logistic Regression ───────────────────────────────────────────────────────
 def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     print(f'\n  Logistic regression — {tour_name}')
-    keep = CONTROLS + [TREATMENT, OUTCOME]
+    keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id']
     data = df[keep].dropna().copy()
+    data['HL_Win'] = ((data['High_Leverage'] == 1) & (data['Point_Won'] == 1)).astype(float)
 
-    X = sm.add_constant(data[CONTROLS + [TREATMENT]].astype(float))
+    X = sm.add_constant(data[CONTROLS + ['HL_Win']].astype(float))
     y = data[OUTCOME].astype(float)
 
     model = sm.Logit(y, X)
-    result = model.fit(disp=0, method='bfgs', cov_type='HC1')
+    result = model.fit(
+        disp=0,
+        method='bfgs',
+        cov_type='cluster',
+        cov_kwds={'groups': data['match_id']}
+    )
 
     # Compute marginal effects at the mean
     margins = result.get_margeff()
@@ -167,14 +171,46 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
 
 
 # ── Causal Forest ─────────────────────────────────────────────────────────────
-def run_causal_forest(df: pd.DataFrame, tour_name: str) -> tuple:
-    print(f'\n  Causal Forest — {tour_name}')
-    keep = CONTROLS + [TREATMENT, OUTCOME]
+def run_causal_forest(df: pd.DataFrame, tour_name: str,
+                      treatment_label: str = 'combined',
+                      controls: list = None) -> tuple:
+    if controls is None:
+        controls = CONTROLS
+    print(f'\n  Causal Forest — {tour_name} [{treatment_label}]')
+
+    extra_cols = ['Point_Won']
+    if treatment_label == 'bp':
+        extra_cols.append('High_Leverage_BP')
+    elif treatment_label == 'tb':
+        extra_cols.append('High_Leverage_TB')
+
+    keep = controls + [TREATMENT, OUTCOME] + extra_cols
     data = df[keep].dropna().copy()
 
-    T = data[TREATMENT].astype(float).values
+    if treatment_label == 'bp':
+        data['Treatment'] = ((data['High_Leverage_BP'] == 1) & (data['Point_Won'] == 1)).astype(float)
+    elif treatment_label == 'tb':
+        data['Treatment'] = ((data['High_Leverage_TB'] == 1) & (data['Point_Won'] == 1)).astype(float)
+    else:
+        data['Treatment'] = ((data['High_Leverage'] == 1) & (data['Point_Won'] == 1)).astype(float)
+
+    # Stratified subsampling — preserve treatment balance
+    if len(data) > 15000:
+        treated = data[data['Treatment'] == 1]
+        control = data[data['Treatment'] == 0].sample(
+            min(len(data) - len(treated), 15000 - len(treated)),
+            random_state=SEED
+        )
+        data = pd.concat([treated, control])
+        print(f'    Stratified sample: {len(treated):,} treated, {len(control):,} control')
+
+    T = data['Treatment'].values
     Y = data[OUTCOME].astype(float).values
-    X = data[CONTROLS].astype(float).values
+    X = data[controls].astype(float).values
+
+    # Fix 6: Treatment overlap check
+    print(f'    Treatment rate: {T.mean()*100:.1f}%')
+    print(f'    Treated N: {int(T.sum()):,} | Control N: {int((1-T).sum()):,}')
 
     cf = CausalForestDML(
         model_y=GradientBoostingRegressor(n_estimators=200, random_state=SEED),
@@ -188,20 +224,19 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str) -> tuple:
     cf.fit(Y, T, X=X)
 
     cates = cf.effect(X)
-    ate   = cates.mean()
+    ate   = float(cf.ate(X))
     ate_se = cates.std() / np.sqrt(len(cates))
 
     print(f'    N = {len(data):,} | ATE = {ate:.4f} (SE = {ate_se:.4f})')
 
-    # Feature importances from forest
     importances = cf.feature_importances_
     feat_imp = pd.DataFrame({
-        'Feature':    CONTROLS,
+        'Feature':    controls,
         'Importance': importances,
         'Tour':       tour_name
     }).sort_values('Importance', ascending=False)
 
-    return cates, ate, ate_se, feat_imp, data[CONTROLS].astype(float)
+    return cates, ate, ate_se, feat_imp, data[controls].astype(float)
 
 
 # ── Output 4: CATE plot ───────────────────────────────────────────────────────
@@ -248,6 +283,7 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
         'Streak_k4':        'Winning Streak (Last 4 Points)',
         'CUSUM':            'Momentum Score',
         'High_Leverage':    'Pressure Point',
+        'HL_Win':           'Pressure Point (Win)',
     }
     atp_coef = atp_coef.copy()
     wta_coef = wta_coef.copy()
@@ -380,10 +416,26 @@ def main() -> None:
     atp_coef = run_logistic(atp, 'ATP')
     wta_coef = run_logistic(wta, 'WTA')
 
-    # Causal Forest
+    # Causal Forest — combined treatment, full controls
     print('\n--- Causal Forest ---')
     atp_cates, atp_ate, atp_ate_se, atp_imp, atp_X = run_causal_forest(atp, 'ATP')
     wta_cates, wta_ate, wta_ate_se, wta_imp, wta_X = run_causal_forest(wta, 'WTA')
+
+    # Fix 4: BP vs TB breakdown
+    _, atp_bp_ate, _, _, _ = run_causal_forest(atp, 'ATP', treatment_label='bp')
+    _, wta_bp_ate, _, _, _ = run_causal_forest(wta, 'WTA', treatment_label='bp')
+    _, atp_tb_ate, _, _, _ = run_causal_forest(atp, 'ATP', treatment_label='tb')
+    _, wta_tb_ate, _, _, _ = run_causal_forest(wta, 'WTA', treatment_label='tb')
+    print(f'\n  ATE by leverage type:')
+    print(f'    ATP — Break Point: {atp_bp_ate:.4f} | Tiebreak: {atp_tb_ate:.4f}')
+    print(f'    WTA — Break Point: {wta_bp_ate:.4f} | Tiebreak: {wta_tb_ate:.4f}')
+
+    # Fix 5: Robustness — reduced controls (ranking only)
+    _, atp_ate_r, _, _, _ = run_causal_forest(atp, 'ATP', controls=['Focal_Ranking'])
+    _, wta_ate_r, _, _, _ = run_causal_forest(wta, 'WTA', controls=['Focal_Ranking'])
+    print(f'\n  Robustness (ranking-only controls):')
+    print(f'    ATP — Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
+    print(f'    WTA — Full: {wta_ate:.4f} | Reduced: {wta_ate_r:.4f}')
 
     # Output 4
     print('\n--- Output 4: CATE plot ---')

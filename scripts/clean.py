@@ -181,6 +181,8 @@ def process_tour(
     is_tb_point = ~(left_is_tennis & right_is_tennis)
 
     merged['High_Leverage'] = (is_bp | is_tb_point).astype(int)
+    merged['High_Leverage_BP'] = is_bp.astype(int)
+    merged['High_Leverage_TB'] = is_tb_point.astype(int)
 
     # ── 2. Apply Random Positional Mask ───────────────────────────────────────
     np.random.seed(42)
@@ -210,6 +212,7 @@ def process_tour(
     ).astype(int)
 
     # ── 3. Create Next_Point_Won Outcome Variable ─────────────────────────────
+    merged = merged.sort_values(['match_id', 'Set1', 'Gm1', 'Pt'])
     merged['Next_Point_Won'] = (
         merged.groupby('match_id')['Point_Won']
         .shift(-1)
