@@ -86,7 +86,7 @@ This approach controls for four variables: player ranking, rolling win percentag
 
 Figure 4 shows the Conditional Average Treatment Effect — the estimated causal effect for every observation in the dataset, plotted against player ranking. The scatter sits around zero across all ranking levels. Top-ranked players show no more momentum effect than qualifiers when looking at the combined picture. But this aggregate view conceals something important.
 
-![Model results, logistic regression and causal forest estimates](outputs/output5_model_table.png)
+![Model results, logistic regression and causal forest estimates](outputs/output5_model_table.png){width=85%}
 
 Figure 5 visualises the model results using two complementary approaches. The logistic regression establishes which variables are statistically associated with winning the next point, while the causal forest estimates the effect of high-leverage wins conditional on observed controls. The combined Average Treatment Effect is -0.0162 for ATP and -0.0173 for WTA — both negative and consistent across full and reduced control specifications.
 
