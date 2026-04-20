@@ -33,7 +33,7 @@ The raw data comes from Jeff Sackmann's Match Charting Project, a publicly avail
 
 Before any analysis could begin, the raw data required substantial preparation: matching player names across separate datasets, filtering to main draw matches only — qualifying rounds were excluded because they feature significantly lower-ranked players under different competitive conditions — removing retirements and walkovers, and standardising score formats across tens of thousands of individual points. We also drew on official ATP and WTA rankings to measure each player's baseline skill level, ensuring that any effect we found could not simply be explained by better players playing better tennis.
 
-Crucially, we kept the ATP and WTA tours completely separate throughout the entire analysis. Mixing them together would risk masking tour-specific patterns: what is true for men's tennis is not necessarily true for women's tennis, and treating them as one dataset would have obscured exactly the kind of comparison that turns out to matter most.
+Crucially, we kept the ATP and WTA tours completely separate throughout. Mixing them together would risk masking tour-specific patterns: what is true for men's tennis is not necessarily true for women's tennis, and treating them as one dataset would have obscured exactly the kind of comparison that turns out to matter most.
 
 ## Does Momentum Even Show Up in the Data?
 
