@@ -377,15 +377,16 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
         imp_sorted = imp.sort_values('Importance').copy()
         ax.barh(imp_sorted['Feature'], imp_sorted['Importance'], color=color, alpha=0.8)
         ax.set_title(f'{label} — Feature Importance (Causal Forest)',
-                     fontsize=11, fontweight='bold')
-        ax.set_xlabel('Importance')
+                     fontsize=12, fontweight='bold')
+        ax.set_xlabel('Importance', fontsize=11)
+        ax.tick_params(labelsize=10)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
     fig.suptitle('Output 6: Feature Importance from Causal Forest',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'), dpi=200, bbox_inches='tight')
     plt.close()
     print('  Saved output6_feature_importance.png')
 
