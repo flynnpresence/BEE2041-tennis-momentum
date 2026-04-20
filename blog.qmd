@@ -67,8 +67,7 @@ We use a causal forest to estimate the effect of winning a pressure point on the
 
 We define a high-leverage win as a point where the player faced a break point or tiebreak situation and won it. This follows directly from the academic literature — Gilovich et al. (1985) and Miller and Sanjurjo (2018) both define momentum as success breeding success, not merely exposure to pressure. Crucially, we split these two types of pressure moment apart, because it turns out they behave very differently.
 
-This approach controls for four variables: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score — and asks: holding all of that constant, does winning a high-leverage point actually shift what happens next? It is worth noting that rolling win percentage, streak length, and momentum score are themselves proxies for short-run performance persistence, so this specification asks a deliberately narrow and conservative question: does a pressure-point win matter beyond what current form already predicts?
-
+This approach controls for four variables: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score — and asks: holding all of that constant, does winning a high-leverage point actually shift what happens next?
 ![Causal effect of winning a high-leverage point, across player rankings](outputs/output4_cate_plot.png)
 
 Figure 4 shows the Conditional Average Treatment Effect — the estimated causal effect for every observation in the dataset, plotted against player ranking. The scatter sits around zero across all ranking levels. Top-ranked players show no more momentum effect than qualifiers when looking at the combined picture. But this aggregate view conceals something important.
