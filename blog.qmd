@@ -82,7 +82,7 @@ We define a high-leverage win as a point where the player faced a break point or
 This approach controls for four variables: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score — and asks: holding all of that constant, does winning a high-leverage point actually shift what happens next?
 \newpage
 
-![Causal effect of winning a high-leverage point, across player rankings](outputs/output4_cate_plot.png)
+![Causal effect of winning a high-leverage point, across player rankings](outputs/output4_cate_plot.png){width=100%}
 
 Figure 4 shows the Conditional Average Treatment Effect — the estimated causal effect for every observation in the dataset, plotted against player ranking. The scatter sits around zero across all ranking levels. Top-ranked players show no more momentum effect than qualifiers when looking at the combined picture. But this aggregate view conceals something important.
 
@@ -104,7 +104,7 @@ These two effects cancel each other out in the combined analysis, which is why e
 
 Outside of tiebreaks, if momentum does not drive point outcomes, what does? Figure 6 shows which variables actually matter, ranked by how much explanatory power they carry in our model.
 
-![Causal Forest feature importance](outputs/output6_feature_importance.png)
+![Causal Forest feature importance](outputs/output6_feature_importance.png){width=100%}
 
 The cumulative momentum score dominates in both tours — carrying roughly twice the predictive weight of player rank and three times that of rolling win percentage. This is a striking finding. The variable that best predicts whether a player wins the next point is not their recent form over ten points, nor their official ranking, but the accumulated drift of their performance across the entire match. This suggests that while momentum does not operate cleanly through individual pressure points, the broader pattern of a player's performance within a match — their cumulative trajectory — does carry genuine predictive information.
 
