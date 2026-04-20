@@ -263,9 +263,10 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         ax.plot(sorted_ranking, smoothed, color='black', linewidth=2, label='Trend')
 
         ax.axhline(0, color='red', linewidth=0.8, linestyle='--', alpha=0.7)
-        ax.set_title(f'{label} — Causal Effect by Player Ranking', fontsize=11, fontweight='bold')
-        ax.set_xlabel('Player Ranking (most Grand Slam players ranked below 200)')
-        ax.set_ylabel('CATE (causal effect on next point)')
+        ax.set_title(f'{label} — Causal Effect by Player Ranking', fontsize=12, fontweight='bold')
+        ax.set_xlabel('Player Ranking (most Grand Slam players ranked below 200)', fontsize=11)
+        ax.set_ylabel('CATE (causal effect on next point)', fontsize=11)
+        ax.tick_params(labelsize=10)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.legend(fontsize=9)
@@ -273,7 +274,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
     fig.suptitle('Output 4: Heterogeneous Causal Effects (CATE) of High-Leverage Points',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'), dpi=200, bbox_inches='tight')
     plt.close()
     print('  Saved output4_cate_plot.png')
 
