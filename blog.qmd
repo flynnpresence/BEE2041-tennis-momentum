@@ -45,7 +45,13 @@ The results in Figure 1 are the first blow to the momentum theory. In the ATP, 1
 
 Figure 2 tracks the cumulative momentum score — a running total of how far a player's performance drifts above or below their average — across a WTA match between Ekaterina Alexandrova and Madison Brengle, the longest in the WTA dataset by point count. The line rises when the player we are tracking is winning points above her average rate, and falls when she drops below it. A genuine momentum effect would look like a sustained climb, with the player catching fire and staying hot.
 
+::: {.content-visible when-format="html"}
+<iframe src="outputs/interactive_cusum.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
+:::
+
+::: {.content-visible when-format="pdf"}
 ![Cumulative momentum score, Alexandrova vs Brengle, WTA](outputs/output2_cusum_wta.png)
+:::
 
 What we actually see is oscillation. The line moves up, reverses, recovers, and reverses again. There are no sustained directional runs of the kind that a momentum narrative would predict. The pattern looks far more like the natural variance of a competitive match than evidence of a psychological force building behind one player.
 
@@ -55,7 +61,13 @@ Perhaps momentum does not operate across an entire match; perhaps it concentrate
 
 We tested this directly. For every player, we calculated their Tiebreak Over-Expectation (TBOE) — their actual tiebreak win rate minus their predicted win rate based on their official ranking and rolling form. A positive TBOE means a player outperforms expectations under pressure; a negative TBOE means they underperform. If certain players consistently raise their game when it matters most, we would expect to see clear outliers pulling away from zero in Figure 3.
 
+::: {.content-visible when-format="html"}
+<iframe src="outputs/interactive_tboe.html" width="100%" height="470" frameborder="0" scrolling="no"></iframe>
+:::
+
+::: {.content-visible when-format="pdf"}
 ![Tiebreak over-expectation by player, ATP and WTA](outputs/output3_tboe_scatter.png)
+:::
 
 The chart reveals a systematic pattern rather than random scatter. Top-ranked players — those with the lowest ranking numbers — tend to have negative TBOE, meaning they underperform expectations in tiebreaks relative to their baseline skill. Lower-ranked players show positive TBOE, outperforming expectations. This is consistent with what you would expect from a top-heavy ranking system: the best players are already performing at such a high level that even their strong tiebreak performance falls slightly below their own elevated standard. There is no evidence of a consistent clutch performer who reliably over-delivers regardless of ranking — the pattern is driven by skill level, not psychological pressure response.
 
