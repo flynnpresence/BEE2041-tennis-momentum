@@ -78,13 +78,16 @@ def make_interactive_cusum() -> None:
     fig.add_hline(y=0, line_dash='dash', line_color='black', opacity=0.4)
 
     fig.update_layout(
-        title=f'Cumulative Momentum Score — WTA<br>{p1} vs {p2}',
+        title=dict(
+            text=f'<b>Cumulative Momentum Score — WTA</b><br>{p1} vs {p2}',
+            font=dict(size=13, color='#111')
+        ),
         xaxis_title='Point Number',
         yaxis_title='Cumulative Deviation from Mean',
         template='plotly_white',
         height=400,
         showlegend=False,
-        font=dict(family='Helvetica Neue, Arial, sans-serif', size=12, color='#222'),
+        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11, color='#222'),
         paper_bgcolor='white',
         plot_bgcolor='white',
         hoverlabel=dict(bgcolor='white', font_size=12)
@@ -134,15 +137,20 @@ def make_interactive_tboe() -> None:
     fig.update_xaxes(title_text='Player Rank (by TBOE)')
     fig.update_yaxes(title_text='TBOE (actual minus expected win rate)')
     fig.update_layout(
-        title='Tiebreak Over-Expectation (TBOE) by Player — Hover to See Names',
+        title=dict(
+            text='<b>Tiebreak Over-Expectation (TBOE) by Player</b> — Hover to See Names',
+            font=dict(size=13, color='#111')
+        ),
         template='plotly_white',
         height=450,
         showlegend=False,
-        font=dict(family='Helvetica Neue, Arial, sans-serif', size=12, color='#222'),
+        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11, color='#222'),
         paper_bgcolor='white',
         plot_bgcolor='white',
         hoverlabel=dict(bgcolor='white', font_size=12)
     )
+
+    fig.update_annotations(font_size=12)
 
     fig.write_html(
         os.path.join(OUT_DIR, 'interactive_tboe.html'),
