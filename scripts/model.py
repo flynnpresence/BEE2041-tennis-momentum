@@ -241,7 +241,7 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
 
 # ── Output 4: CATE plot ───────────────────────────────────────────────────────
 def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
     for ax, cates, X, label, color in zip(
         axes,
@@ -253,15 +253,18 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         ranking = X['Focal_Ranking'].values
         ax.scatter(ranking, cates, alpha=0.3, s=15, color=color, edgecolors='none')
 
-        # Smoothed trend
+        # Polynomial trend line
+        from numpy.polynomial import polynomial as P
         sort_idx = np.argsort(ranking)
-        window = max(1, len(ranking) // 50)
-        smoothed = pd.Series(cates[sort_idx]).rolling(window, center=True, min_periods=1).mean()
-        ax.plot(ranking[sort_idx], smoothed, color='black', linewidth=2, label='Trend')
+        sorted_ranking = ranking[sort_idx]
+        sorted_cates = cates[sort_idx]
+        coeffs = P.polyfit(sorted_ranking, sorted_cates, 3)
+        smoothed = P.polyval(sorted_ranking, coeffs)
+        ax.plot(sorted_ranking, smoothed, color='black', linewidth=2, label='Trend')
 
         ax.axhline(0, color='red', linewidth=0.8, linestyle='--', alpha=0.7)
         ax.set_title(f'{label} — Causal Effect by Player Ranking', fontsize=11, fontweight='bold')
-        ax.set_xlabel('Player Ranking')
+        ax.set_xlabel('Player Ranking (most Grand Slam players ranked below 200)')
         ax.set_ylabel('CATE (causal effect on next point)')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -362,7 +365,7 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
     atp_imp['Feature'] = atp_imp['Feature'].replace(label_map)
     wta_imp['Feature'] = wta_imp['Feature'].replace(label_map)
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     for ax, imp, label, color in zip(
         axes,
