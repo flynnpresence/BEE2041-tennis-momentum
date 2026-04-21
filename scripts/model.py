@@ -11,6 +11,8 @@ Standalone — does not depend on clean.py or features.py.
 import os
 import warnings
 import numpy as np
+
+rng = np.random.default_rng(seed=42)
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')

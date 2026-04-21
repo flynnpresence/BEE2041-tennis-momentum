@@ -1,5 +1,7 @@
 # BEE2041 Tennis Momentum Project
 
+Live blog: https://flynnpresence.github.io/BEE2041-tennis-momentum/blog.html
+
 **Is Momentum a Statistical Illusion in Professional Tennis?**
 
 ## Overview

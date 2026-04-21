@@ -165,6 +165,8 @@ def process_tour(
     print(f'  Merge indicator counts:\n{merged["_merge"].value_counts()}')
     merged = merged.drop(columns=['_merge'])
     print(f'  Retained {len(merged):,} points after merge')
+    assert len(merged) > 0, f"Points/matches merge produced empty dataframe for {tour_name}"
+    assert 'High_Leverage' not in merged.columns, "High_Leverage already exists before engineering"
 
     # ── 1. Engineer High_Leverage Treatment Flag ──────────────────────────────
     # Break points: detected from Pts score string
@@ -267,6 +269,7 @@ def process_tour(
         merged['Focal_Ranking_Fallback']
     ).astype('Int64')
     merged = merged.drop(columns=['Focal_Ranking_GS', 'Focal_Ranking_Fallback'])
+    assert merged['Focal_Ranking'].notna().sum() > 0, f"No focal rankings attached for {tour_name}"
 
     # ── Opponent ranking ──────────────────────────────────────────────────────
     merged = merged.merge(
@@ -299,6 +302,7 @@ def process_tour(
         merged['Opponent_Ranking_Fallback']
     ).astype('Int64')
     merged = merged.drop(columns=['Opponent_Ranking_GS', 'Opponent_Ranking_Fallback'])
+    assert merged['Opponent_Ranking'].notna().sum() > 0, f"No opponent rankings attached for {tour_name}"
 
     # Ranking difference (positive = focal is worse ranked)
     merged['Ranking_Diff'] = (

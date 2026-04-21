@@ -70,7 +70,7 @@ def download(filename: str, url: str) -> None:
             print(f'  Attempt {attempt + 1} failed: {e}')
             time.sleep(2)
 
-    print(f'  ERROR: Failed after 3 attempts.')
+    raise RuntimeError(f"Failed to download {filename} after 3 attempts. Pipeline cannot continue.")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
