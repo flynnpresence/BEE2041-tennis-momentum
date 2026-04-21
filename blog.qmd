@@ -148,15 +148,13 @@ The second chart breaks this down by variable. Two findings stand out. First, th
 
 The combined causal effect of winning a pressure point is -0.0162 for the ATP and -0.0173 for the WTA. Both are negative. Both are precise.
 
-If we stopped here, the debate would be over. The hot hand is a fallacy. But remember, this combined number treats all high-leverage moments as identical. What happens if we split the two types of pressure apart?
+If we stopped here, the universal hot hand would look like a fallacy. But remember, this combined number treats all high-leverage moments as identical. What happens if we split the two types of pressure apart?
 
 ## The Finding That Changes Everything
 
 When I separate break points from tiebreaks, the combined picture breaks apart into something far more interesting.
 
 Two opposite effects have been cancelling each other out inside the aggregate. Toggle the view to see how.
-
-**Average Treatment Effect of Winning a High-Leverage Point**
 
 ::: {.reveal-section}
 <div class="reveal-chart" id="reveal-chart"></div>
@@ -179,7 +177,7 @@ This also explains why the combined number is negative. Break points are far mor
 
 The WTA tiebreak estimate should be read with some caution. Only 197 WTA tiebreak observations met the treatment definition, compared to 646 in the ATP. The direction is consistent, but the ATP finding carries more statistical weight.
 
-Two opposite effects have been cancelling each other out in every previous study that treated pressure moments as a single category. This is why the hot hand debate in tennis has never been resolved. Both sides were right about different things.
+Two opposite effects have been cancelling each other out in every previous study of tennis momentum that treated pressure moments as a single category. Within tennis, this may help explain why momentum studies have reached conflicting conclusions.
 
 ## If Not Momentum, Then What?
 
@@ -197,7 +195,7 @@ This connects back to the core insight of Gilovich, Vallone and Tversky. Human o
 
 ## The Uncomfortable Conclusion
 
-Momentum in tennis is not universal. It operates in opposite directions depending on context. Winning a break point reduces the probability of winning the next point. Winning a tiebreak point increases it. The break point effect is a hangover, the opposite of what every commentator assumes. The tiebreak effect is genuine positive momentum, exactly what crowds expect, but only in that specific context. These two effects are real, opposite in sign, and have been cancelling each other out in every aggregate analysis of tennis that treated all pressure moments as identical. Within tennis, this may help explain why momentum studies have reached conflicting conclusions.
+Momentum in tennis is not universal. It operates in opposite directions depending on context. Winning a break point reduces the probability of winning the next point. Winning a tiebreak point increases it. The break point effect is a hangover, the opposite of what every commentator assumes. The tiebreak effect is genuine positive momentum, exactly what crowds expect, but only in that specific context. The evidence for these two effects is striking, opposite in sign, and has been cancelling each other out in every aggregate analysis of tennis that treated all pressure moments as identical. Within tennis, this may help explain why momentum studies have reached conflicting conclusions.
 
 The finding holds up. Whether I control only for player ranking or include the full set of form variables, the results are consistent. The split between break points and tiebreaks is not an artefact of over-controlling. It is stable.
 
