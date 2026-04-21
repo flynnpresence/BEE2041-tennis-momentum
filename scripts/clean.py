@@ -28,23 +28,37 @@ GRAND_SLAMS = ['Australian Open', 'Roland Garros', 'Wimbledon', 'US Open']
 # ── Data Loading & Cleaning ───────────────────────────────────────────────────
 def load_and_filter_matches(filepath: str) -> pd.DataFrame:
     """Load match metadata, clean headers, filter to 2023 Grand Slams main draw."""
+    # low_memory=False forces pandas to read the full column before inferring
+    # dtype. Without it, mixed-type columns in large files get inferred
+    # incorrectly mid-read, producing silent type errors downstream.
     df = pd.read_csv(filepath, low_memory=False)
     df.columns = df.columns.str.strip().str.replace(' ', '_')
     df['match_id']   = df['match_id'].astype('string').str.strip()
     df['Tournament'] = df['Tournament'].astype(
         'string').str.strip().str.replace('_', ' ')
+
+    # errors='coerce' converts unparseable date strings to NaT rather than
+    # raising. The raw file contains occasional nulls and non-standard
+    # entries; coercing lets us filter by year on the valid rows without
+    # crashing on the bad ones.
     df['Date'] = pd.to_datetime(df['Date'].astype(
         str), format='%Y%m%d', errors='coerce')
     df = df[df['Date'].dt.year == TARGET_YEAR]
 
-    # Filter to Grand Slams and drop Juniors
+    # Filter to Grand Slams and drop Juniors. The tournament name field
+    # contains entries like "Australian Open Junior", which would otherwise
+    # pass the Grand Slam filter. Juniors play under entirely different
+    # conditions and should not contribute to a professional momentum study.
     gs_mask      = df['Tournament'].str.contains(
         '|'.join(GRAND_SLAMS), case=False, na=False)
     juniors_mask = df['Tournament'].str.contains(
         'Junior', case=False, na=False)
     df = df[gs_mask & ~juniors_mask]
 
-    # Drop qualifying rounds — main draw only
+    # Qualifying rounds are excluded because qualifiers face a different
+    # player pool, play under less broadcast scrutiny, and are systematically
+    # lower-ranked than main draw entrants. Including them would mix two
+    # distinct competitive contexts and bias any ranking-based controls.
     df = df[~df['Round'].str.startswith('Q', na=False)]
 
     return df
@@ -52,6 +66,8 @@ def load_and_filter_matches(filepath: str) -> pd.DataFrame:
 
 def load_points(filepath: str) -> pd.DataFrame:
     """Load point-by-point CSV and cast to extension types."""
+    # low_memory=False — same reason as load_and_filter_matches: prevents
+    # mid-file dtype inference errors on large point-by-point CSVs.
     df = pd.read_csv(filepath, low_memory=False)
     df['match_id']  = df['match_id'].astype('string').str.strip()
     df['Pts']       = df['Pts'].astype('string')
@@ -74,7 +90,9 @@ def prep_rankings_gs(filepath: str, gs_names: list) -> pd.DataFrame:
     """
     df = pd.read_csv(filepath, low_memory=False)
 
-    # Drop walkovers and retirements
+    # Walkovers and retirements are dropped because their ranking entries
+    # may reflect injury or absence rather than competitive performance,
+    # and they do not produce usable point-by-point data in any case.
     df = df[~df['score'].astype(str).str.contains(
         'W/O|RET', case=False, na=False)]
 
@@ -106,10 +124,16 @@ def prep_rankings_gs(filepath: str, gs_names: list) -> pd.DataFrame:
         rankings['Tournament_Key']
         .astype('string')
         .str.strip()
+        # The ATP/WTA results file uses "Us Open" (mixed case); the charting
+        # project uses "US Open". Normalising here ensures the merge key
+        # matches across both sources.
         .str.replace('Us Open', 'US Open', regex=False)
     )
 
-    # One row per player per tournament
+    # A player can appear multiple times in the same tournament if the
+    # results file includes qualifying rows. Sort by ranking and keep the
+    # first (best) entry so the merge produces exactly one row per player
+    # per tournament — a requirement for validate='m:1' to pass.
     rankings = rankings.sort_values('ranking')
     rankings = rankings.drop_duplicates(
         subset=['Tournament_Key', 'player_name'], keep='first'
@@ -125,7 +149,9 @@ def prep_rankings_fallback(filepath: str) -> pd.DataFrame:
     """
     df = pd.read_csv(filepath, low_memory=False)
 
-    # Drop walkovers and retirements
+    # Same walkover/retirement filter as above — consistency matters here
+    # because a player who retired mid-tournament may have a missing rank
+    # entry that would otherwise contaminate the season median.
     df = df[~df['score'].astype(str).str.contains(
         'W/O|RET', case=False, na=False)]
 
@@ -139,7 +165,10 @@ def prep_rankings_fallback(filepath: str) -> pd.DataFrame:
     rankings = rankings.dropna(subset=['ranking'])
     rankings['ranking'] = rankings['ranking'].astype(float)
 
-    # Median rank across full season — one row per player
+    # Median rather than mean because ATP/WTA rankings are ordinal and
+    # skewed: a player ranked 1 in January and 200 in December should not
+    # be assigned rank 100. The median is more robust to injury-driven
+    # ranking swings within the season.
     rankings = (
         rankings.groupby('player_name')['ranking'].median().reset_index()
     )
@@ -156,6 +185,13 @@ def process_tour(
     rankings_file: str
 ) -> pd.DataFrame:
     """Executes the load, filter, validated merge, rankings attach, and feature prep."""
+
+    # ATP and WTA are processed through identical logic in separate calls
+    # rather than being pooled. Men's and women's tours differ in format
+    # (best-of-five vs best-of-three), player depth, and tiebreak rules.
+    # Mixing them would require tour as a control variable and risk
+    # suppressing tour-specific momentum patterns — exactly the kind of
+    # heterogeneity this analysis is designed to detect.
     print(f'\n--- Processing {tour_name} ---')
 
     matches = load_and_filter_matches(os.path.join(RAW_DIR, matches_file))
@@ -165,7 +201,11 @@ def process_tour(
     pts = load_points(os.path.join(RAW_DIR, points_file))
     print(f'  Loaded {len(pts):,} raw points')
 
-    # Merge points with match metadata
+    # validate='m:1' asserts that match_id is unique in the matches table —
+    # many points map to one match. '1:1' would be wrong here (multiple
+    # points share a match_id) and 'm:m' would allow duplicate matches,
+    # silently inflating the dataset. The indicator=True argument keeps the
+    # merge result column so we can inspect how many points matched.
     merged = pts.merge(
         matches,
         on='match_id',
@@ -204,6 +244,13 @@ def process_tour(
     merged['High_Leverage_TB'] = is_tb_point.astype(int)
 
     # ── 2. Apply Random Positional Mask ───────────────────────────────────────
+    # Each match has two players. We randomly designate one as the "focal"
+    # player per match and track outcomes from their perspective. Without
+    # this, every point would be counted twice (once per player), doubling
+    # the dataset and creating perfectly correlated duplicate observations
+    # that would violate the independence assumption of the causal forest.
+    # Seed 42 ensures the same focal assignment is used every pipeline run,
+    # making results exactly reproducible.
     np.random.seed(42)
     unique_matches = merged['match_id'].unique()
     match_mask = pd.DataFrame({
@@ -231,6 +278,13 @@ def process_tour(
     ).astype(int)
 
     # ── 3. Create Next_Point_Won Outcome Variable ─────────────────────────────
+    # The outcome variable is whether the focal player wins the *next* point,
+    # not the current one. shift(-1) within each match group moves the
+    # following row's Point_Won value back to the current row. After
+    # shifting, the last point of each match has no successor and produces
+    # NaN — those rows are dropped because they cannot contribute a valid
+    # outcome observation. Sorting by Set1/Gm1/Pt first ensures the shift
+    # respects the actual chronological sequence of points within a match.
     merged = merged.sort_values(['match_id', 'Set1', 'Gm1', 'Pt'])
     merged['Next_Point_Won'] = (
         merged.groupby('match_id')['Point_Won']
@@ -241,6 +295,18 @@ def process_tour(
     print(f'  Rows after dropping last points: {len(merged):,}')
 
     # ── 4. Attach Official Rankings ───────────────────────────────────────────
+    # Rankings are attached in two steps to maximise coverage without
+    # sacrificing accuracy. The primary merge uses the GS-specific rankings
+    # table, which gives each player's ranking at the time of that specific
+    # tournament — the most accurate measure of skill at match date.
+    # However, qualifiers and some wildcards appear in the charting data but
+    # not in the GS results file (they lost in qualifying and are absent from
+    # the main draw results). For these players the fallback merge supplies a
+    # season-wide median ranking, which is less precise but far better than
+    # leaving ranking as missing and dropping those observations entirely.
+    # The two-step approach follows the same logic as a primary source /
+    # administrative fallback join: use the best available data first, then
+    # fill gaps from a broader but less granular source.
     rankings_filepath = os.path.join(RAW_DIR, rankings_file)
     gs_rankings  = prep_rankings_gs(rankings_filepath, GRAND_SLAMS)
     all_rankings = prep_rankings_fallback(rankings_filepath)
@@ -256,6 +322,10 @@ def process_tour(
     )
 
     # ── Focal player ranking ──────────────────────────────────────────────────
+    # validate='m:1' confirms the rankings lookup has exactly one row per
+    # (tournament, player) pair. If a duplicate slipped through prep_rankings_gs
+    # the merge would silently fan out and inflate row counts. The validator
+    # catches that before it contaminates downstream analysis.
     merged = merged.merge(
         gs_rankings.rename(columns={
             'player_name': 'Focal_Player',
