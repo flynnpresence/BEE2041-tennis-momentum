@@ -68,7 +68,7 @@ def make_interactive_cusum() -> None:
         x=match_data.index,
         y=match_data['CUSUM'],
         mode='lines',
-        line=dict(color='#4682B4', width=1.5),
+        line=dict(color='coral', width=1.5),
         name='Momentum Score',
         hovertext=hover,
         hoverinfo='text'

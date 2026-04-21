@@ -47,7 +47,7 @@ def plot_chi2_table(tests_path: str) -> None:
     summary['Chi2_Pct'] = (summary['Chi2_Significant'] / summary['Players_Tested'] * 100).round(1)
     summary['Runs_Pct'] = (summary['Runs_Significant'] / summary['Players_Tested'] * 100).round(1)
 
-    fig, ax = plt.subplots(figsize=(10, 3))
+    fig, ax = plt.subplots(figsize=(10, 2))
     ax.axis('off')
     table_data = [
         ['Tour', 'Players\nTested', 'Chi² Sig.\n(n)', 'Chi² Sig.\n(%)', 'Runs Sig.\n(n)', 'Runs Sig.\n(%)'],
@@ -68,7 +68,7 @@ def plot_chi2_table(tests_path: str) -> None:
     t.set_fontsize(11)
     t.scale(1.4, 2.2)
 
-    ax.set_title('Output 1: Per-Player Momentum Test Results (p < 0.05)',
+    ax.set_title('Per-Player Momentum Test Results (p < 0.05)',
                  fontsize=12, fontweight='bold', pad=10)
 
     plt.tight_layout()
@@ -90,14 +90,15 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     p2 = parts[-1].replace('_', ' ') if len(parts) >= 1 else 'Player 2'
 
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(match_data.index, match_data['CUSUM'], color='steelblue', linewidth=1.5)
+    color = 'steelblue' if tour_name == 'ATP' else 'coral'
+    ax.plot(match_data.index, match_data['CUSUM'], color=color, linewidth=1.5)
     ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
     ax.fill_between(match_data.index, match_data['CUSUM'], 0,
                     where=match_data['CUSUM'] > 0, alpha=0.3, color='green', label='Above expectation')
     ax.fill_between(match_data.index, match_data['CUSUM'], 0,
                     where=match_data['CUSUM'] < 0, alpha=0.3, color='red', label='Below expectation')
 
-    ax.set_title(f'Output 2: Cumulative Momentum Score — {tour_name}\n{p1} vs {p2}',
+    ax.set_title(f'Cumulative Momentum Score — {tour_name}\n{p1} vs {p2}',
                  fontsize=12, fontweight='bold')
     ax.set_xlabel('Point Number')
     ax.set_ylabel('Cumulative Deviation from Mean')
@@ -125,13 +126,13 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
                    color=color, alpha=0.7, s=40, edgecolors='none')
         ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
         ax.set_title(f'{label} — Tiebreak Over-Expectation per Player',
-                     fontsize=11, fontweight='bold')
+                     fontsize=12, fontweight='bold')
         ax.set_xlabel('Player Rank (by TBOE)')
         ax.set_ylabel('TBOE (actual minus expected win rate)')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
-    fig.suptitle('Output 3: Tiebreak Over-Expectation (TBOE) by Player',
+    fig.suptitle('Tiebreak Over-Expectation (TBOE) by Player',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DIR, 'output3_tboe_scatter.png'), dpi=150, bbox_inches='tight')
@@ -271,10 +272,10 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         ax.spines['right'].set_visible(False)
         ax.legend(fontsize=9)
 
-    fig.suptitle('Output 4: Heterogeneous Causal Effects (CATE) of High-Leverage Points',
+    fig.suptitle('Heterogeneous Causal Effects (CATE) of High-Leverage Points',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'), dpi=200, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'), dpi=150, bbox_inches='tight')
     plt.close()
     print('  Saved output4_cate_plot.png')
 
@@ -287,7 +288,7 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
         'Streak_k4':        'Winning Streak (Last 4 Points)',
         'CUSUM':            'Momentum Score',
         'High_Leverage':    'Pressure Point',
-        'HL_Win':           'Pressure Point (Win)',
+        'HL_Win':           'Break Point Win (ATP 23.5% / WTA 25.7%)',
     }
     atp_coef = atp_coef.copy()
     wta_coef = wta_coef.copy()
@@ -321,7 +322,7 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
 
     # Add CATE rows
     cate_y = len(all_features)
-    y_labels.append('Pressure Point (Causal Effect)')
+    y_labels.append('Tiebreak Win (ATP 3.5% / WTA 2.3%)')
     y_positions.append(cate_y)
     ax.errorbar(atp_ate, cate_y + offsets['ATP'],
                 xerr=1.96*atp_ate_se, fmt='D',
@@ -336,7 +337,7 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
     ax.set_yticks(y_positions)
     ax.set_yticklabels(y_labels, fontsize=10)
     ax.set_xlabel('Marginal Effect on Win Probability', fontsize=11)
-    ax.set_title('Output 5: Model Results — Logistic Regression + Causal Forest',
+    ax.set_title('Model Results — Logistic Regression + Causal Forest',
                  fontsize=12, fontweight='bold', pad=15)
 
     handles = [plt.Line2D([0], [0], marker='o', color='w',
@@ -383,10 +384,10 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
-    fig.suptitle('Output 6: Feature Importance from Causal Forest',
+    fig.suptitle('Feature Importance from Causal Forest',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'), dpi=200, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'), dpi=150, bbox_inches='tight')
     plt.close()
     print('  Saved output6_feature_importance.png')
 

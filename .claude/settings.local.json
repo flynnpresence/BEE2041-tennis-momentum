@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(quarto render *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(/usr/local/bin/python3 scripts/interactive.py)",
+      "Bash(/usr/local/bin/python3 scripts/model.py)",
+      "Bash(/usr/local/bin/python3 -c ' *)",
+      "Bash(grep -n '`[0-9%+−-]' blog.qmd)"
+    ]
+  }
+}
