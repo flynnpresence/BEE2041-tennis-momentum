@@ -1,0 +1,57 @@
+0
+--- MERGE VALIDATION CHECK ---
+    # per tournament — a requirement for validate='m:1' to pass.
+    # validate='m:1' asserts that match_id is unique in the matches table —
+        validate='m:1',
+    merged = merged.merge(match_mask, on='match_id', validate='m:1')
+    # validate='m:1' confirms the rankings lookup has exactly one row per
+        validate='m:1',
+        validate='m:1',
+        validate='m:1',
+        validate='m:1',
+--- RANDOM SEED CHECK ---
+rng = np.random.default_rng(seed=42)
+SEED      = 42
+            random_state=SEED
+        model_y=GradientBoostingRegressor(n_estimators=200, random_state=SEED),
+        model_t=GradientBoostingRegressor(n_estimators=200, random_state=SEED),
+        random_state=SEED,
+--- ASSERT STATEMENTS CHECK ---
+    # validate='m:1' asserts that match_id is unique in the matches table —
+    assert len(merged) > 0, (
+    assert 'High_Leverage' not in merged.columns, (
+    assert merged['Focal_Ranking'].notna().sum(
+    assert merged['Opponent_Ranking'].notna().sum(
+--- FORWARD ROLLING CHECK ---
+Engineers momentum and control features strictly forward-rolling.
+    All features are strictly forward-rolling within each match.
+        CUSUM           : Cumulative sum of deviations from expanding mean
+        TBOE            : Rolling historical TB win rate minus rolling win %
+        .transform(lambda x: x.shift(1).rolling(STREAK_K, min_periods=STREAK_K).min())
+        .transform(lambda x: x.shift(1).rolling(ROLLING_WIN, min_periods=1).mean())
+    # ── CUSUM (fixed — expanding mean, no look-ahead) ─────────────────────────
+    def cusum_expanding(series: pd.Series) -> pd.Series:
+        shifted = series.shift(1).fillna(0)
+        expanding_mean = shifted.expanding().mean()
+        deviations = shifted - expanding_mean
+        .transform(cusum_expanding)
+        """Calculate BPOR and TBOE using historical (shifted) expanding sums."""
+        ret_played = match_df['is_returning'].shift(1).expanding().sum()
+                      * match_df['Point_Won']).shift(1).expanding().sum()
+        bp_played  = match_df['is_bp'].shift(1).expanding().sum()
+                      * match_df['Point_Won']).shift(1).expanding().sum()
+        tb_played  = match_df['_is_tb_point'].shift(1).expanding().sum()
+                      * match_df['Point_Won']).shift(1).expanding().sum()
+--- IF NAME MAIN CHECK ---
+scripts/clean.py:if __name__ == '__main__':
+scripts/download.py:if __name__ == '__main__':
+scripts/features.py:if __name__ == '__main__':
+scripts/interactive.py:if __name__ == '__main__':
+scripts/model.py:if __name__ == '__main__':
+--- DOWNLOAD.PY ERROR HANDLING CHECK ---
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        try:
+        except Exception as e:
+            time.sleep(2)
+    raise RuntimeError(
+        time.sleep(1)
