@@ -21,7 +21,7 @@ RAW_DIR  = os.path.join(BASE_DIR, 'data', 'raw')
 os.makedirs(RAW_DIR, exist_ok=True)
 
 # ── Source URLs ───────────────────────────────────────────────────────────────
-MCP = 'https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master'
+MCP = 'https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master'  # noqa: E501
 ATP = 'https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master'
 WTA = 'https://raw.githubusercontent.com/JeffSackmann/tennis_wta/master'
 
@@ -58,8 +58,8 @@ def download(filename: str, url: str) -> None:
 
     for attempt in range(3):
         try:
-            # verify=False bypasses macOS SSL certificate verification issues with GitHub
-            # This is a known local environment workaround, not a security endorsement
+            # verify=False bypasses macOS SSL certificate verification issues
+            # with GitHub. Known local environment workaround, not an endorsement.
             response = requests.get(url, headers=HEADERS, verify=False)
             response.raise_for_status()
             with open(dest, 'wb') as f:
@@ -70,7 +70,8 @@ def download(filename: str, url: str) -> None:
             print(f'  Attempt {attempt + 1} failed: {e}')
             time.sleep(2)
 
-    raise RuntimeError(f"Failed to download {filename} after 3 attempts. Pipeline cannot continue.")
+    raise RuntimeError(
+        f"Failed to download {filename} after 3 attempts. Pipeline cannot continue.")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

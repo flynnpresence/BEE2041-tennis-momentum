@@ -31,13 +31,17 @@ def load_and_filter_matches(filepath: str) -> pd.DataFrame:
     df = pd.read_csv(filepath, low_memory=False)
     df.columns = df.columns.str.strip().str.replace(' ', '_')
     df['match_id']   = df['match_id'].astype('string').str.strip()
-    df['Tournament'] = df['Tournament'].astype('string').str.strip().str.replace('_', ' ')
-    df['Date'] = pd.to_datetime(df['Date'].astype(str), format='%Y%m%d', errors='coerce')
+    df['Tournament'] = df['Tournament'].astype(
+        'string').str.strip().str.replace('_', ' ')
+    df['Date'] = pd.to_datetime(df['Date'].astype(
+        str), format='%Y%m%d', errors='coerce')
     df = df[df['Date'].dt.year == TARGET_YEAR]
 
     # Filter to Grand Slams and drop Juniors
-    gs_mask      = df['Tournament'].str.contains('|'.join(GRAND_SLAMS), case=False, na=False)
-    juniors_mask = df['Tournament'].str.contains('Junior', case=False, na=False)
+    gs_mask      = df['Tournament'].str.contains(
+        '|'.join(GRAND_SLAMS), case=False, na=False)
+    juniors_mask = df['Tournament'].str.contains(
+        'Junior', case=False, na=False)
     df = df[gs_mask & ~juniors_mask]
 
     # Drop qualifying rounds — main draw only
@@ -71,7 +75,8 @@ def prep_rankings_gs(filepath: str, gs_names: list) -> pd.DataFrame:
     df = pd.read_csv(filepath, low_memory=False)
 
     # Drop walkovers and retirements
-    df = df[~df['score'].astype(str).str.contains('W/O|RET', case=False, na=False)]
+    df = df[~df['score'].astype(str).str.contains(
+        'W/O|RET', case=False, na=False)]
 
     gs_mask = df['tourney_name'].str.contains(
         '|'.join(gs_names), case=False, na=False
@@ -95,7 +100,8 @@ def prep_rankings_gs(filepath: str, gs_names: list) -> pd.DataFrame:
     rankings = pd.concat([winners, losers], ignore_index=True)
     rankings = rankings.dropna(subset=['ranking'])
     rankings['ranking']        = rankings['ranking'].astype('Int64')
-    rankings['player_name']    = rankings['player_name'].astype('string').str.strip()
+    rankings['player_name']    = rankings['player_name'].astype(
+        'string').str.strip()
     rankings['Tournament_Key'] = (
         rankings['Tournament_Key']
         .astype('string')
@@ -120,7 +126,8 @@ def prep_rankings_fallback(filepath: str) -> pd.DataFrame:
     df = pd.read_csv(filepath, low_memory=False)
 
     # Drop walkovers and retirements
-    df = df[~df['score'].astype(str).str.contains('W/O|RET', case=False, na=False)]
+    df = df[~df['score'].astype(str).str.contains(
+        'W/O|RET', case=False, na=False)]
 
     winners = df[['winner_name', 'winner_rank']].rename(
         columns={'winner_name': 'player_name', 'winner_rank': 'ranking'}
@@ -133,9 +140,12 @@ def prep_rankings_fallback(filepath: str) -> pd.DataFrame:
     rankings['ranking'] = rankings['ranking'].astype(float)
 
     # Median rank across full season — one row per player
-    rankings = rankings.groupby('player_name')['ranking'].median().reset_index()
+    rankings = (
+        rankings.groupby('player_name')['ranking'].median().reset_index()
+    )
     rankings['ranking']     = rankings['ranking'].round().astype('Int64')
-    rankings['player_name'] = rankings['player_name'].astype('string').str.strip()
+    rankings['player_name'] = rankings['player_name'].astype(
+        'string').str.strip()
     return rankings
 
 
@@ -149,7 +159,8 @@ def process_tour(
     print(f'\n--- Processing {tour_name} ---')
 
     matches = load_and_filter_matches(os.path.join(RAW_DIR, matches_file))
-    print(f'  Retained {len(matches):,} {tour_name} Grand Slam matches for {TARGET_YEAR}')
+    print(
+        f'  Retained {len(matches):,} {tour_name} Grand Slam matches for {TARGET_YEAR}')
 
     pts = load_points(os.path.join(RAW_DIR, points_file))
     print(f'  Loaded {len(pts):,} raw points')
@@ -165,13 +176,19 @@ def process_tour(
     print(f'  Merge indicator counts:\n{merged["_merge"].value_counts()}')
     merged = merged.drop(columns=['_merge'])
     print(f'  Retained {len(merged):,} points after merge')
-    assert len(merged) > 0, f"Points/matches merge produced empty dataframe for {tour_name}"
-    assert 'High_Leverage' not in merged.columns, "High_Leverage already exists before engineering"
+    assert len(merged) > 0, (
+        f"Points/matches merge produced empty dataframe for {tour_name}"
+    )
+    assert 'High_Leverage' not in merged.columns, (
+        "High_Leverage already exists before engineering"
+    )
 
     # ── 1. Engineer High_Leverage Treatment Flag ──────────────────────────────
     # Break points: detected from Pts score string
-    bp_p1_serving = (merged['Svr'] == 1) & merged['Pts'].astype('string').str.endswith(('-40', '-AD'))
-    bp_p2_serving = (merged['Svr'] == 2) & merged['Pts'].astype('string').str.startswith(('40-', 'AD-'))
+    bp_p1_serving = (merged['Svr'] == 1) & merged['Pts'].astype(
+        'string').str.endswith(('-40', '-AD'))
+    bp_p2_serving = (merged['Svr'] == 2) & merged['Pts'].astype(
+        'string').str.startswith(('40-', 'AD-'))
     is_bp = bp_p1_serving | bp_p2_serving
 
     # Tiebreak POINTS: score values are NOT standard tennis values {0,15,30,40,AD}
@@ -268,8 +285,10 @@ def process_tour(
     merged['Focal_Ranking'] = merged['Focal_Ranking_GS'].fillna(
         merged['Focal_Ranking_Fallback']
     ).astype('Int64')
-    merged = merged.drop(columns=['Focal_Ranking_GS', 'Focal_Ranking_Fallback'])
-    assert merged['Focal_Ranking'].notna().sum() > 0, f"No focal rankings attached for {tour_name}"
+    merged = merged.drop(
+        columns=['Focal_Ranking_GS', 'Focal_Ranking_Fallback'])
+    assert merged['Focal_Ranking'].notna().sum(
+    ) > 0, f"No focal rankings attached for {tour_name}"
 
     # ── Opponent ranking ──────────────────────────────────────────────────────
     merged = merged.merge(
@@ -301,16 +320,20 @@ def process_tour(
     merged['Opponent_Ranking'] = merged['Opponent_Ranking_GS'].fillna(
         merged['Opponent_Ranking_Fallback']
     ).astype('Int64')
-    merged = merged.drop(columns=['Opponent_Ranking_GS', 'Opponent_Ranking_Fallback'])
-    assert merged['Opponent_Ranking'].notna().sum() > 0, f"No opponent rankings attached for {tour_name}"
+    merged = merged.drop(
+        columns=['Opponent_Ranking_GS', 'Opponent_Ranking_Fallback'])
+    assert merged['Opponent_Ranking'].notna().sum(
+    ) > 0, f"No opponent rankings attached for {tour_name}"
 
     # Ranking difference (positive = focal is worse ranked)
     merged['Ranking_Diff'] = (
         merged['Focal_Ranking'] - merged['Opponent_Ranking']
     ).astype('Int64')
 
-    print(f'  Rankings missing — Focal: {merged["Focal_Ranking"].isna().sum()}')
-    print(f'  Rankings missing — Opponent: {merged["Opponent_Ranking"].isna().sum()}')
+    print(
+        f'  Rankings missing — Focal: {merged["Focal_Ranking"].isna().sum()}')
+    print(
+        f'  Rankings missing — Opponent: {merged["Opponent_Ranking"].isna().sum()}')
     print(f'  Final row count: {len(merged):,}')
 
     return merged

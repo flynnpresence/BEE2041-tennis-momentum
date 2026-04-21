@@ -27,7 +27,7 @@ plt.rcParams.update({
     'font.family':      'sans-serif',
     'font.size':        11,
     'axes.spines.top':  False,
-    'axes.spines.right':False,
+    'axes.spines.right': False,
     'figure.dpi':       150,
     'savefig.dpi':      150,
     'savefig.bbox':     'tight',
@@ -56,13 +56,16 @@ def plot_chi2_table(tests_path: str) -> None:
         Chi2_Significant=('Chi2_Sig', 'sum'),
         Runs_Significant=('Runs_Sig', 'sum'),
     ).reset_index()
-    summary['Chi2_Pct'] = (summary['Chi2_Significant'] / summary['Players_Tested'] * 100).round(1)
-    summary['Runs_Pct'] = (summary['Runs_Significant'] / summary['Players_Tested'] * 100).round(1)
+    summary['Chi2_Pct'] = (summary['Chi2_Significant']
+                           / summary['Players_Tested'] * 100).round(1)
+    summary['Runs_Pct'] = (summary['Runs_Significant']
+                           / summary['Players_Tested'] * 100).round(1)
 
     fig, ax = plt.subplots(figsize=(10, 2))
     ax.axis('off')
     table_data = [
-        ['Tour', 'Players\nTested', 'Chi² Sig.\n(n)', 'Chi² Sig.\n(%)', 'Runs Sig.\n(n)', 'Runs Sig.\n(%)'],
+        ['Tour', 'Players\nTested',
+            'Chi² Sig.\n(n)', 'Chi² Sig.\n(%)', 'Runs Sig.\n(n)', 'Runs Sig.\n(%)'],
     ]
     for _, row in summary.iterrows():
         table_data.append([
@@ -94,7 +97,8 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     # Pick the match with the most points for a clear chart
     match_counts = df.groupby('match_id').size()
     target_match = match_counts.idxmax()
-    match_data = df[df['match_id'] == target_match].copy().reset_index(drop=True)
+    match_data = df[df['match_id']
+                    == target_match].copy().reset_index(drop=True)
 
     # Extract player names from match_id
     parts = target_match.split('-')
@@ -105,10 +109,16 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     color = 'steelblue' if tour_name == 'ATP' else 'coral'
     ax.plot(match_data.index, match_data['CUSUM'], color=color, linewidth=1.5)
     ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
-    ax.fill_between(match_data.index, match_data['CUSUM'], 0,
-                    where=match_data['CUSUM'] > 0, alpha=0.3, color='green', label='Above expectation')
-    ax.fill_between(match_data.index, match_data['CUSUM'], 0,
-                    where=match_data['CUSUM'] < 0, alpha=0.3, color='red', label='Below expectation')
+    ax.fill_between(
+        match_data.index, match_data['CUSUM'], 0,
+        where=match_data['CUSUM'] > 0,
+        alpha=0.3, color='green', label='Above expectation'
+    )
+    ax.fill_between(
+        match_data.index, match_data['CUSUM'], 0,
+        where=match_data['CUSUM'] < 0,
+        alpha=0.3, color='red', label='Below expectation'
+    )
 
     ax.set_title(f'Cumulative Momentum Score — {tour_name}\n{p1} vs {p2}',
                  fontsize=12, fontweight='bold')
@@ -126,7 +136,9 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
 def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    for ax, df, label, color in zip(axes, [atp, wta], ['ATP', 'WTA'], ['steelblue', 'coral']):
+    for ax, df, label, color in zip(
+        axes, [atp, wta], ['ATP', 'WTA'], ['steelblue', 'coral']
+    ):
         player_tboe = df.groupby('Focal_Player')['TBOE'].mean().reset_index()
         player_tboe = player_tboe.sort_values('TBOE')
         player_tboe['rank'] = range(len(player_tboe))
@@ -151,7 +163,8 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     print(f'\n  Logistic regression — {tour_name}')
     keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id']
     data = df[keep].dropna().copy()
-    data['HL_Win'] = ((data['High_Leverage'] == 1) & (data['Point_Won'] == 1)).astype(float)
+    data['HL_Win'] = ((data['High_Leverage'] == 1) & (
+        data['Point_Won'] == 1)).astype(float)
 
     X = sm.add_constant(data[CONTROLS + ['HL_Win']].astype(float))
     y = data[OUTCOME].astype(float)
@@ -195,11 +208,14 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
     data = df[keep].dropna().copy()
 
     if treatment_label == 'bp':
-        data['Treatment'] = ((data['High_Leverage_BP'] == 1) & (data['Point_Won'] == 1)).astype(float)
+        data['Treatment'] = ((data['High_Leverage_BP'] == 1) & (
+            data['Point_Won'] == 1)).astype(float)
     elif treatment_label == 'tb':
-        data['Treatment'] = ((data['High_Leverage_TB'] == 1) & (data['Point_Won'] == 1)).astype(float)
+        data['Treatment'] = ((data['High_Leverage_TB'] == 1) & (
+            data['Point_Won'] == 1)).astype(float)
     else:
-        data['Treatment'] = ((data['High_Leverage'] == 1) & (data['Point_Won'] == 1)).astype(float)
+        data['Treatment'] = ((data['High_Leverage'] == 1) & (
+            data['Point_Won'] == 1)).astype(float)
 
     # Stratified subsampling — preserve treatment balance
     if len(data) > 15000:
@@ -209,7 +225,10 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
             random_state=SEED
         )
         data = pd.concat([treated, control])
-        print(f'    Stratified sample: {len(treated):,} treated, {len(control):,} control')
+        print(
+            f'    Stratified sample: {len(treated):,} treated,'
+            f' {len(control):,} control'
+        )
 
     T = data['Treatment'].values
     Y = data[OUTCOME].astype(float).values
@@ -258,7 +277,8 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         ['steelblue', 'coral']
     ):
         ranking = X['Focal_Ranking'].values
-        ax.scatter(ranking, cates, alpha=0.3, s=15, color=color, edgecolors='none')
+        ax.scatter(ranking, cates, alpha=0.3, s=15,
+                   color=color, edgecolors='none')
 
         # Polynomial trend line
         from numpy.polynomial import polynomial as P
@@ -267,11 +287,14 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         sorted_cates = cates[sort_idx]
         coeffs = P.polyfit(sorted_ranking, sorted_cates, 3)
         smoothed = P.polyval(sorted_ranking, coeffs)
-        ax.plot(sorted_ranking, smoothed, color='black', linewidth=2, label='Trend')
+        ax.plot(sorted_ranking, smoothed, color='black',
+                linewidth=2, label='Trend')
 
         ax.axhline(0, color='red', linewidth=0.8, linestyle='--', alpha=0.7)
-        ax.set_title(f'{label} — Causal Effect by Player Ranking', fontsize=12, fontweight='bold')
-        ax.set_xlabel('Player Ranking (most Grand Slam players ranked below 200)', fontsize=11)
+        ax.set_title(f'{label} — Causal Effect by Player Ranking',
+                     fontsize=12, fontweight='bold')
+        ax.set_xlabel(
+            'Player Ranking (most Grand Slam players ranked below 200)', fontsize=11)
         ax.set_ylabel('CATE (causal effect on next point)', fontsize=11)
         ax.tick_params(labelsize=10)
         ax.legend(fontsize=9)
@@ -285,7 +308,9 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 
 
 # ── Output 5: Coefficient plot ────────────────────────────────────────────────
-def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se) -> None:
+def plot_model_table(
+    atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se
+) -> None:
     label_map = {
         'Focal_Ranking':    'Player Rank',
         'Rolling_Win_Pct':  'Rolling Win %',
@@ -319,10 +344,10 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
             se   = row['SE'].values[0]
             y    = i + offsets[tour]
             ax.errorbar(coef, y, xerr=1.96*se,
-                       fmt='o', color=colors[tour],
-                       capsize=4, capthick=1.5,
-                       markersize=7, linewidth=1.5,
-                       label=tour if i == 0 else '')
+                        fmt='o', color=colors[tour],
+                        capsize=4, capthick=1.5,
+                        markersize=7, linewidth=1.5,
+                        label=tour if i == 0 else '')
 
     # Add CATE rows
     cate_y = len(all_features)
@@ -377,7 +402,8 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
         ['steelblue', 'coral']
     ):
         imp_sorted = imp.sort_values('Importance').copy()
-        ax.barh(imp_sorted['Feature'], imp_sorted['Importance'], color=color, alpha=0.8)
+        ax.barh(imp_sorted['Feature'],
+                imp_sorted['Importance'], color=color, alpha=0.8)
         ax.set_title(f'{label} — Feature Importance (Causal Forest)',
                      fontsize=12, fontweight='bold')
         ax.set_xlabel('Importance', fontsize=11)
@@ -396,7 +422,8 @@ def main() -> None:
     print('=== model.py ===')
 
     # Load checkpoint
-    df = pd.read_csv(os.path.join(PROC_DIR, 'processed_features.csv'), low_memory=False)
+    df = pd.read_csv(os.path.join(
+        PROC_DIR, 'processed_features.csv'), low_memory=False)
     print(f'Loaded processed_features.csv: {len(df):,} rows')
 
     atp = df[df['Tour'] == 'ATP'].copy()
@@ -423,21 +450,31 @@ def main() -> None:
 
     # Causal Forest — combined treatment, full controls
     print('\n--- Causal Forest ---')
-    atp_cates, atp_ate, atp_ate_se, atp_imp, atp_X = run_causal_forest(atp, 'ATP')
-    wta_cates, wta_ate, wta_ate_se, wta_imp, wta_X = run_causal_forest(wta, 'WTA')
+    atp_cates, atp_ate, atp_ate_se, atp_imp, atp_X = run_causal_forest(
+        atp, 'ATP')
+    wta_cates, wta_ate, wta_ate_se, wta_imp, wta_X = run_causal_forest(
+        wta, 'WTA')
 
     # Fix 4: BP vs TB breakdown
-    _, atp_bp_ate, _, _, _ = run_causal_forest(atp, 'ATP', treatment_label='bp')
-    _, wta_bp_ate, _, _, _ = run_causal_forest(wta, 'WTA', treatment_label='bp')
-    _, atp_tb_ate, _, _, _ = run_causal_forest(atp, 'ATP', treatment_label='tb')
-    _, wta_tb_ate, _, _, _ = run_causal_forest(wta, 'WTA', treatment_label='tb')
+    _, atp_bp_ate, _, _, _ = run_causal_forest(
+        atp, 'ATP', treatment_label='bp')
+    _, wta_bp_ate, _, _, _ = run_causal_forest(
+        wta, 'WTA', treatment_label='bp')
+    _, atp_tb_ate, _, _, _ = run_causal_forest(
+        atp, 'ATP', treatment_label='tb')
+    _, wta_tb_ate, _, _, _ = run_causal_forest(
+        wta, 'WTA', treatment_label='tb')
     print(f'\n  ATE by leverage type:')
-    print(f'    ATP — Break Point: {atp_bp_ate:.4f} | Tiebreak: {atp_tb_ate:.4f}')
-    print(f'    WTA — Break Point: {wta_bp_ate:.4f} | Tiebreak: {wta_tb_ate:.4f}')
+    print(
+        f'    ATP — Break Point: {atp_bp_ate:.4f} | Tiebreak: {atp_tb_ate:.4f}')
+    print(
+        f'    WTA — Break Point: {wta_bp_ate:.4f} | Tiebreak: {wta_tb_ate:.4f}')
 
     # Fix 5: Robustness — reduced controls (ranking only)
-    _, atp_ate_r, _, _, _ = run_causal_forest(atp, 'ATP', controls=['Focal_Ranking'])
-    _, wta_ate_r, _, _, _ = run_causal_forest(wta, 'WTA', controls=['Focal_Ranking'])
+    _, atp_ate_r, _, _, _ = run_causal_forest(
+        atp, 'ATP', controls=['Focal_Ranking'])
+    _, wta_ate_r, _, _, _ = run_causal_forest(
+        wta, 'WTA', controls=['Focal_Ranking'])
     print(f'\n  Robustness (ranking-only controls):')
     print(f'    ATP — Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
     print(f'    WTA — Full: {wta_ate:.4f} | Reduced: {wta_ate_r:.4f}')
@@ -448,7 +485,8 @@ def main() -> None:
 
     # Output 5
     print('\n--- Output 5: Model table ---')
-    plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se)
+    plot_model_table(atp_coef, wta_coef, atp_ate,
+                     atp_ate_se, wta_ate, wta_ate_se)
 
     # Output 6
     print('\n--- Output 6: Feature importance ---')

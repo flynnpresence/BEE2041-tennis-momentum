@@ -17,6 +17,8 @@ PROC_DIR = os.path.join(BASE_DIR, 'data', 'processed')
 OUT_DIR  = os.path.join(BASE_DIR, 'outputs')
 
 # ── Interactive CUSUM ─────────────────────────────────────────────────────────
+
+
 def make_interactive_cusum() -> None:
     df = pd.read_csv(os.path.join(PROC_DIR, 'processed_features.csv'))
     wta = df[df['Tour'] == 'WTA'].copy()
@@ -24,7 +26,8 @@ def make_interactive_cusum() -> None:
     # Pick longest match
     match_counts = wta.groupby('match_id').size()
     target_match = match_counts.idxmax()
-    match_data = wta[wta['match_id'] == target_match].copy().reset_index(drop=True)
+    match_data = wta[wta['match_id']
+                     == target_match].copy().reset_index(drop=True)
 
     # Extract player names
     parts = target_match.split('-')
@@ -87,7 +90,8 @@ def make_interactive_cusum() -> None:
         template='plotly_white',
         height=400,
         showlegend=False,
-        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11, color='#222'),
+        font=dict(family='Helvetica Neue, Arial, sans-serif',
+                  size=11, color='#222'),
         paper_bgcolor='white',
         plot_bgcolor='white',
         hoverlabel=dict(bgcolor='white', font_size=12)
@@ -109,7 +113,8 @@ def make_interactive_tboe() -> None:
 
     for col, (tour, color) in enumerate([('ATP', 'steelblue'), ('WTA', 'coral')], 1):
         tour_df = df[df['Tour'] == tour].copy()
-        player_tboe = tour_df.groupby('Focal_Player')['TBOE'].mean().reset_index()
+        player_tboe = tour_df.groupby('Focal_Player')[
+            'TBOE'].mean().reset_index()
         player_tboe = player_tboe.sort_values('TBOE').reset_index(drop=True)
         player_tboe['rank'] = range(len(player_tboe))
 
@@ -138,13 +143,15 @@ def make_interactive_tboe() -> None:
     fig.update_yaxes(title_text='TBOE (actual minus expected win rate)')
     fig.update_layout(
         title=dict(
-            text='<b>Tiebreak Over-Expectation (TBOE) by Player</b> — Hover to See Names',
+            text='<b>Tiebreak Over-Expectation (TBOE) by Player</b>'
+                 ' — Hover to See Names',
             font=dict(size=13, color='#111')
         ),
         template='plotly_white',
         height=450,
         showlegend=False,
-        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11, color='#222'),
+        font=dict(family='Helvetica Neue, Arial, sans-serif',
+                  size=11, color='#222'),
         paper_bgcolor='white',
         plot_bgcolor='white',
         hoverlabel=dict(bgcolor='white', font_size=12)

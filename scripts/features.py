@@ -22,7 +22,7 @@ PROC_DIR = os.path.join(BASE_DIR, 'data', 'processed')
 # ── Constants ─────────────────────────────────────────────────────────────────
 STREAK_K    = 4    # Consecutive points for hot hand flag
 ROLLING_WIN = 10   # Rolling window for win percentage
-ALPHA       = 0.05 # Significance level for per-player tests
+ALPHA       = 0.05  # Significance level for per-player tests
 
 
 # ── Feature Engineering ───────────────────────────────────────────────────────
@@ -35,8 +35,8 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         Streak_k4       : 1 if focal player won last STREAK_K consecutive points
         Rolling_Win_Pct : Rolling win % over last ROLLING_WIN points in match
         CUSUM           : Cumulative sum of deviations from expanding mean
-        BPOR            : Rolling historical break point win rate minus return point win rate (luck proxy)
-        TBOE            : Rolling historical tiebreak win rate minus rolling win percentage (luck proxy)
+        BPOR            : Rolling historical BP win rate minus return point win rate
+        TBOE            : Rolling historical TB win rate minus rolling win %
     """
     df = df.sort_values(['match_id', 'Set1', 'Gm1', 'Pt']).copy()
 
@@ -70,10 +70,13 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
     # ── BPOR & TBOE — Forward-Rolling Luck Proxies ───────────────────────────
     # np.where avoids .map() boolean dtype issues in groupby context
-    df['is_returning'] = (df['Svr'] != np.where(df['focal_is_p1'], 1, 2)).astype(int)
+    df['is_returning'] = (df['Svr'] != np.where(
+        df['focal_is_p1'], 1, 2)).astype(int)
 
-    bp_p1_serving = (df['Svr'] == 1) & df['Pts'].astype('string').str.endswith(('-40', '-AD'))
-    bp_p2_serving = (df['Svr'] == 2) & df['Pts'].astype('string').str.startswith(('40-', 'AD-'))
+    bp_p1_serving = (df['Svr'] == 1) & df['Pts'].astype(
+        'string').str.endswith(('-40', '-AD'))
+    bp_p2_serving = (df['Svr'] == 2) & df['Pts'].astype(
+        'string').str.startswith(('40-', 'AD-'))
     df['is_bp'] = (bp_p1_serving | bp_p2_serving).astype(int)
 
     # Point-level tiebreak flag — consistent with clean.py, more reliable than TbSet
@@ -84,22 +87,25 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     )).astype(int)
 
     def calculate_luck_proxies(match_df: pd.DataFrame) -> pd.DataFrame:
-        """Calculate BPOR and TBOE using strictly historical (shifted) expanding sums."""
+        """Calculate BPOR and TBOE using historical (shifted) expanding sums."""
         match_id = match_df['match_id'].iloc[0]
         # BPOR: historical break point win rate minus historical return point win rate
         ret_played = match_df['is_returning'].shift(1).expanding().sum()
-        ret_won    = (match_df['is_returning'] * match_df['Point_Won']).shift(1).expanding().sum()
+        ret_won    = (match_df['is_returning']
+                      * match_df['Point_Won']).shift(1).expanding().sum()
         ret_rate   = (ret_won / ret_played).fillna(0.38)
 
         bp_played  = match_df['is_bp'].shift(1).expanding().sum()
-        bp_won     = (match_df['is_bp'] * match_df['Point_Won']).shift(1).expanding().sum()
+        bp_won     = (match_df['is_bp']
+                      * match_df['Point_Won']).shift(1).expanding().sum()
         bp_rate    = (bp_won / bp_played).fillna(0.38)
 
         match_df['BPOR'] = bp_rate - ret_rate
 
-        # TBOE: uses point-level tiebreak flag, not TbSet (which is set-level and unreliable)
+        # TBOE: uses point-level flag, not TbSet (set-level and unreliable)
         tb_played  = match_df['_is_tb_point'].shift(1).expanding().sum()
-        tb_won     = (match_df['_is_tb_point'] * match_df['Point_Won']).shift(1).expanding().sum()
+        tb_won     = (match_df['_is_tb_point']
+                      * match_df['Point_Won']).shift(1).expanding().sum()
         tb_rate    = (tb_won / tb_played).fillna(0.5)
 
         match_df['TBOE'] = tb_rate - match_df['Rolling_Win_Pct']
@@ -204,8 +210,12 @@ def run_per_player_tests(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
             var_runs = (2 * n1 * n2 * (2 * n1 * n2 - n1 - n2)) / (
                 ((n1 + n2) ** 2) * (n1 + n2 - 1)
             )
-            z_runs = (runs - exp_runs) / np.sqrt(var_runs) if var_runs > 0 else np.nan
-            p_runs = 2 * (1 - stats.norm.cdf(abs(z_runs))) if not np.isnan(z_runs) else np.nan
+            z_runs = (
+                (runs - exp_runs) / np.sqrt(var_runs)
+                if var_runs > 0 else np.nan
+            )
+            p_runs = 2 * (1 - stats.norm.cdf(abs(z_runs))
+                          ) if not np.isnan(z_runs) else np.nan
         except Exception:
             z_runs, p_runs = np.nan, np.nan
 
@@ -229,8 +239,10 @@ def run_per_player_tests(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     n_runs_sig = results_df['Runs_Sig'].sum()
 
     print(f'  Players tested: {n_tested}')
-    print(f'  Chi-squared significant (p<{ALPHA}): {n_chi2_sig} ({100*n_chi2_sig/n_tested:.1f}%)')
-    print(f'  Runs test significant (p<{ALPHA}): {n_runs_sig} ({100*n_runs_sig/n_tested:.1f}%)')
+    pct_chi2 = 100 * n_chi2_sig / n_tested
+    pct_runs = 100 * n_runs_sig / n_tested
+    print(f'  Chi-squared significant (p<{ALPHA}): {n_chi2_sig} ({pct_chi2:.1f}%)')
+    print(f'  Runs test significant (p<{ALPHA}): {n_runs_sig} ({pct_runs:.1f}%)')
 
     return results_df
 
@@ -240,11 +252,13 @@ def main() -> None:
     print('=== features.py ===')
 
     print('\nLoading ATP cleaned points...')
-    atp = pd.read_csv(os.path.join(PROC_DIR, 'atp_cleaned_points.csv'), low_memory=False)
+    atp = pd.read_csv(os.path.join(
+        PROC_DIR, 'atp_cleaned_points.csv'), low_memory=False)
     print(f'  Loaded {len(atp):,} rows')
 
     print('Loading WTA cleaned points...')
-    wta = pd.read_csv(os.path.join(PROC_DIR, 'wta_cleaned_points.csv'), low_memory=False)
+    wta = pd.read_csv(os.path.join(
+        PROC_DIR, 'wta_cleaned_points.csv'), low_memory=False)
     print(f'  Loaded {len(wta):,} rows')
 
     # Engineer features separately — no cross-tour contamination
