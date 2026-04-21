@@ -165,10 +165,6 @@ Two opposite effects have been cancelling each other out inside the aggregate. T
 <button class="reveal-btn" data-view="split">Split by Pressure Type</button>
 </div>
 
-::: {.content-visible when-format="pdf"}
-![The combined null effect breaks into two opposite effects when break points and tiebreaks are separated.](outputs/output5_model_table.png)
-:::
-
 Winning a break point generates a hangover effect in both tours. The ATP estimate is -0.0242 and the WTA estimate is -0.0164, both negative. Converting a break point appears to slightly reduce the probability of winning the next point. Break points do not generate momentum. They generate a small but measurable drag.
 
 Tiebreaks tell the opposite story entirely. The ATP tiebreak estimate is +0.0564, the dominant feature of the entire chart, reaching close to the top of the y-axis and more than twice the magnitude of the break point hangover. The WTA tiebreak estimate is +0.0209, positive and consistent in direction but notably smaller, roughly a third of the ATP effect. In both tours, winning a tiebreak point genuinely lifts the probability of winning the next one.
