@@ -5,6 +5,12 @@ Saves files to data/raw/ without any modification.
 
 Raw data is sacred — no filtering or cleaning occurs here.
 All filtering and cleaning happens in clean.py.
+
+Compliance note: GitHub's robots.txt permits automated access to
+raw.githubusercontent.com. Jeff Sackmann's tennis repositories are
+published under CC BY 4.0 (Match Charting Project) and are freely
+available for academic use. No rate limits are imposed beyond the
+1-second delay between requests implemented below.
 """
 
 import os
