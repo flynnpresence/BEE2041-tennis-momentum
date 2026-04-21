@@ -11,8 +11,6 @@ Standalone — does not depend on clean.py or features.py.
 import os
 import warnings
 import numpy as np
-
-rng = np.random.default_rng(seed=42)
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
@@ -22,6 +20,18 @@ from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
 
 warnings.filterwarnings('ignore')
+
+rng = np.random.default_rng(seed=42)
+
+plt.rcParams.update({
+    'font.family':      'sans-serif',
+    'font.size':        11,
+    'axes.spines.top':  False,
+    'axes.spines.right':False,
+    'figure.dpi':       150,
+    'savefig.dpi':      150,
+    'savefig.bbox':     'tight',
+})
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -74,7 +84,7 @@ def plot_chi2_table(tests_path: str) -> None:
                  fontsize=12, fontweight='bold', pad=10)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output1_chi2_table.png'), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output1_chi2_table.png'))
     plt.close()
     print('  Saved output1_chi2_table.png')
 
@@ -105,12 +115,9 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     ax.set_xlabel('Point Number')
     ax.set_ylabel('Cumulative Deviation from Mean')
     ax.legend(fontsize=9)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-
     plt.tight_layout()
     fname = f'output2_cusum_{tour_name.lower()}.png'
-    plt.savefig(os.path.join(OUT_DIR, fname), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, fname))
     plt.close()
     print(f'  Saved {fname}')
 
@@ -131,13 +138,10 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
                      fontsize=12, fontweight='bold')
         ax.set_xlabel('Player Rank (by TBOE)')
         ax.set_ylabel('TBOE (actual minus expected win rate)')
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-
     fig.suptitle('Tiebreak Over-Expectation (TBOE) by Player',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output3_tboe_scatter.png'), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output3_tboe_scatter.png'))
     plt.close()
     print('  Saved output3_tboe_scatter.png')
 
@@ -270,14 +274,12 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         ax.set_xlabel('Player Ranking (most Grand Slam players ranked below 200)', fontsize=11)
         ax.set_ylabel('CATE (causal effect on next point)', fontsize=11)
         ax.tick_params(labelsize=10)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
         ax.legend(fontsize=9)
 
     fig.suptitle('Heterogeneous Causal Effects (CATE) of High-Leverage Points',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'))
     plt.close()
     print('  Saved output4_cate_plot.png')
 
@@ -346,12 +348,9 @@ def plot_model_table(atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_s
                           markerfacecolor=c, markersize=9, label=t)
                for t, c in colors.items()]
     ax.legend(handles=handles, fontsize=10)
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output5_model_table.png'),
-                dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output5_model_table.png'))
     plt.close()
     print('  Saved output5_model_table.png')
 
@@ -383,13 +382,11 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
                      fontsize=12, fontweight='bold')
         ax.set_xlabel('Importance', fontsize=11)
         ax.tick_params(labelsize=10)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
 
     fig.suptitle('Feature Importance from Causal Forest',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'), dpi=150, bbox_inches='tight')
+    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'))
     plt.close()
     print('  Saved output6_feature_importance.png')
 
