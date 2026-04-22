@@ -1,4 +1,4 @@
-# BEE2041 Tennis Momentum Project
+# The Wrong Kind of Momentum: Why Break Points Kill It and Tiebreaks Create It
 
 Live blog: https://flynnpresence.github.io/BEE2041-tennis-momentum/blog.html
 
@@ -31,7 +31,7 @@ The processed feature checkpoint is included in the repository. To run the model
 
 ```bash
 pip install -r requirements.txt
-python3 scripts/model.py
+/usr/local/bin/python3 scripts/model.py
 ```
 
 ---
@@ -68,6 +68,7 @@ See `requirements.txt`. Key packages:
 | 4 | output4_cate_plot.png | Heterogeneous causal effects across player rankings |
 | 5 | output5_model_table.png | Logistic regression coefficients and Causal Forest ATE |
 | 6 | output6_feature_importance.png | Causal Forest feature importance |
+| 7 | ate_results.csv | Python-generated ATE values backing the D3 reveal chart |
 
 ---
 
