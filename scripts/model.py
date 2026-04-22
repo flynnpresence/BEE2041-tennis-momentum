@@ -492,6 +492,19 @@ def main() -> None:
     print('\n--- Output 6: Feature importance ---')
     plot_feature_importance(atp_imp, wta_imp)
 
+    # Export ATE results as CSV — provides a Python-generated data file
+    # backing the D3 reveal chart values displayed in the blog
+    ate_summary = pd.DataFrame([
+        {'Tour': 'ATP', 'Type': 'Combined',    'ATE': round(atp_ate, 4),    'SE': round(atp_ate_se, 4)},  # noqa: E501
+        {'Tour': 'WTA', 'Type': 'Combined',    'ATE': round(wta_ate, 4),    'SE': round(wta_ate_se, 4)},  # noqa: E501
+        {'Tour': 'ATP', 'Type': 'Break Point', 'ATE': round(atp_bp_ate, 4), 'SE': 0},
+        {'Tour': 'WTA', 'Type': 'Break Point', 'ATE': round(wta_bp_ate, 4), 'SE': 0},
+        {'Tour': 'ATP', 'Type': 'Tiebreak',   'ATE': round(atp_tb_ate, 4), 'SE': 0},
+        {'Tour': 'WTA', 'Type': 'Tiebreak',   'ATE': round(wta_tb_ate, 4), 'SE': 0},
+    ])
+    ate_summary.to_csv(os.path.join(OUT_DIR, 'ate_results.csv'), index=False)
+    print('  Saved ate_results.csv')
+
     print('\n=== Done — all 6 outputs saved to outputs/ ===')
 
 
