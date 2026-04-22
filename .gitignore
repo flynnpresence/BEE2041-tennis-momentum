@@ -2,3 +2,8 @@
 __pycache__/
 .DS_Store
 venv/
+.venv/
+clean_execution_proof.txt
+code_quality_report.txt
+model_output.txt
+count_words*.py
