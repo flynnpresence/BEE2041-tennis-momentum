@@ -162,18 +162,8 @@
   /* ────────────────────────────────────────────────────────
      3 · Reveal chart
      ──────────────────────────────────────────────────────── */
-  const ATE = {
-    combined: [
-      { tour: "ATP", value: -0.0162 },
-      { tour: "WTA", value: -0.0173 }
-    ],
-    split: [
-      { tour: "ATP", type: "Break Point", value: -0.0242 },
-      { tour: "ATP", type: "Tiebreak", value: 0.0564 },
-      { tour: "WTA", type: "Break Point", value: -0.0164 },
-      { tour: "WTA", type: "Tiebreak", value: 0.0209 }
-    ]
-  };
+  // ATE values loaded from Python-generated blog_data.js
+  // Run scripts/build_blog_data.py to regenerate
 
   function initRevealChart() {
     const container = document.getElementById("reveal-chart");
