@@ -357,8 +357,10 @@ def process_tour(
     ).astype('Int64')
     merged = merged.drop(
         columns=['Focal_Ranking_GS', 'Focal_Ranking_Fallback'])
-    assert merged['Focal_Ranking'].notna().sum(
-    ) > 0, f"No focal rankings attached for {tour_name}"
+    focal_valid = merged['Focal_Ranking'].notna().sum() / len(merged)
+    assert focal_valid >= 0.90, (
+        f"Focal rankings coverage {focal_valid:.1%} below 90% threshold for {tour_name}"
+    )
 
     # ── Opponent ranking ──────────────────────────────────────────────────────
     merged = merged.merge(
@@ -392,8 +394,10 @@ def process_tour(
     ).astype('Int64')
     merged = merged.drop(
         columns=['Opponent_Ranking_GS', 'Opponent_Ranking_Fallback'])
-    assert merged['Opponent_Ranking'].notna().sum(
-    ) > 0, f"No opponent rankings attached for {tour_name}"
+    opp_valid = merged['Opponent_Ranking'].notna().sum() / len(merged)
+    assert opp_valid >= 0.90, (
+        f"Opponent rankings coverage {opp_valid:.1%} below 90% threshold for {tour_name}"
+    )
 
     # Ranking difference (positive = focal is worse ranked)
     merged['Ranking_Diff'] = (

@@ -91,7 +91,7 @@ This project runs the same test at a different scale entirely. Every point playe
 
 :::
 
-The raw data comes from Jeff Sackmann's Match Charting Project, a publicly available volunteer-compiled database where tennis analysts manually record every point played in professional matches, including the exact score state at each moment. This let us identify the highest-pressure situations in the game with precision: break points, where the returner stands one point away from winning the service game, and tiebreak points, where an entire set hangs in the balance. We called these high-leverage moments. Across the ATP tour, 27% of all points fell into this category; across the WTA, 28%.
+The raw data comes from Jeff Sackmann's Match Charting Project, a publicly available volunteer-compiled database where tennis analysts manually record every point played in professional matches, including the exact score state at each moment. This let us identify the highest-pressure situations in the game with precision: break points, where the returner stands one point away from winning the service game, and tiebreak points, where an entire set hangs in the balance. We called these high-leverage moments. Across the ATP tour, 17% of all points fell into this category; across the WTA, 16%.
 
 The ATP dataset covers 35,635 points across 155 matches. The WTA dataset covers 16,679 points across 120 matches. The difference reflects the longer best-of-five format used by men at Grand Slams.
 
@@ -172,7 +172,7 @@ Winning a break point generates a hangover effect in both tours. The ATP estimat
 
 Tiebreaks tell the opposite story entirely. The ATP tiebreak estimate is +0.0564, the dominant feature of the entire chart, reaching close to the top of the y-axis and more than twice the magnitude of the break point hangover. The WTA tiebreak estimate is +0.0209, positive and consistent in direction but notably smaller, roughly a third of the ATP effect. In both tours, winning a tiebreak point genuinely lifts the probability of winning the next one.
 
-This also explains why the combined number is negative. Break points are far more common than tiebreaks: 23.5% of all ATP points are break points, compared to just 3.5% in tiebreaks. The hangover effect happens more often, so it dominates the aggregate. When all high-leverage moments are treated as identical, the tiebreak momentum signal gets buried.
+This also explains why the combined number is negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.5% in tiebreaks. The hangover effect happens more often, so it dominates the aggregate. When all high-leverage moments are treated as identical, the tiebreak momentum signal gets buried.
 
 The WTA tiebreak estimate should be read with caution given only 197 observations, compared to 646 in the ATP.
 
@@ -198,7 +198,7 @@ The finding holds up. Whether I control only for player ranking or include the f
 
 I should be honest about what this analysis cannot do. One season of Grand Slam data skews toward elite broadcast matches. I have no physiological data or fatigue measures. Winning a high-leverage point is not purely random; it may reflect an unobserved player state shaping both points simultaneously. The standard errors are descriptive approximations and the conclusions rest on consistency across specifications rather than any single interval. I only test immediate point-to-point effects.
 
-But the picture is clearer than it has ever been at this scale. In tennis, researchers have long debated whether the hot hand exists. The evidence here suggests they may have been asking too broad a question. It exists in tiebreaks. It runs in reverse at break points. And because break points happen roughly seven times more often than tiebreaks at Grand Slams, the positive effect has always been buried under the negative one.
+But the picture is clearer than it has ever been at this scale. In tennis, researchers have long debated whether the hot hand exists. The evidence here suggests they may have been asking too broad a question. It exists in tiebreaks. It runs in reverse at break points. And because break points happen roughly four times more often than tiebreaks at Grand Slams, the positive effect has always been buried under the negative one.
 
 The next time a commentator says Alcaraz has the momentum after converting a break point, the data suggests caution. If he just won a tiebreak point, they might actually be onto something.
 

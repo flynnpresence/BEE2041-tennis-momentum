@@ -72,8 +72,11 @@ def download(filename: str, url: str) -> None:
                 f.write(response.content)
             print(f'  -> Saved {filename}')
             return
-        except Exception as e:
-            print(f'  Attempt {attempt + 1} failed: {e}')
+        except requests.exceptions.RequestException as e:
+            print(f'  Attempt {attempt + 1} failed (network error): {e}')
+            time.sleep(2)
+        except OSError as e:
+            print(f'  Attempt {attempt + 1} failed (file error): {e}')
             time.sleep(2)
 
     raise RuntimeError(

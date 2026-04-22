@@ -19,7 +19,11 @@ import statsmodels.api as sm
 from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
 
-warnings.filterwarnings('ignore')
+# Suppress known, safe warnings from econml and sklearn only
+# Global suppression avoided — specific known warnings caught locally
+warnings.filterwarnings('ignore', category=UserWarning, module='econml')
+warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
+warnings.filterwarnings('ignore', category=FutureWarning, module='econml')
 
 rng = np.random.default_rng(seed=42)
 
