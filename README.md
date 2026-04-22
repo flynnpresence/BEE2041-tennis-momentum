@@ -63,12 +63,13 @@ See `requirements.txt`. Key packages:
 | # | File | Description |
 |---|------|-------------|
 | 1 | output1_chi2_table.png | Per-player Chi-squared and runs test results |
-| 2 | output2_cusum_atp/wta.png | CUSUM momentum tracker for a specific match |
+| 2 | output2_cusum_wta.png | CUSUM momentum tracker, Alexandrova vs Brengle |
 | 3 | output3_tboe_scatter.png | Tiebreak over-expectation by player |
 | 4 | output4_cate_plot.png | Heterogeneous causal effects across player rankings |
-| 5 | output5_model_table.png | Logistic regression coefficients and Causal Forest ATE |
-| 6 | output6_feature_importance.png | Causal Forest feature importance |
-| 7 | ate_results.csv | Python-generated ATE values backing the D3 reveal chart |
+| 5 | output5_model_table.png | Logistic regression and Causal Forest ATE estimates |
+| 6 | blog.js (D3) | Interactive reveal chart — BP vs tiebreak ATE split |
+| 7 | output6_feature_importance.png | Causal Forest feature importance |
+| — | ate_results.csv | Python-generated ATE values backing the D3 chart |
 
 ---
 
