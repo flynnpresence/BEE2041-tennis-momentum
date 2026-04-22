@@ -456,13 +456,13 @@ def main() -> None:
         wta, 'WTA')
 
     # Fix 4: BP vs TB breakdown
-    _, atp_bp_ate, _, _, _ = run_causal_forest(
+    _, atp_bp_ate, atp_bp_ate_se, _, _ = run_causal_forest(
         atp, 'ATP', treatment_label='bp')
-    _, wta_bp_ate, _, _, _ = run_causal_forest(
+    _, wta_bp_ate, wta_bp_ate_se, _, _ = run_causal_forest(
         wta, 'WTA', treatment_label='bp')
-    _, atp_tb_ate, _, _, _ = run_causal_forest(
+    _, atp_tb_ate, atp_tb_ate_se, _, _ = run_causal_forest(
         atp, 'ATP', treatment_label='tb')
-    _, wta_tb_ate, _, _, _ = run_causal_forest(
+    _, wta_tb_ate, wta_tb_ate_se, _, _ = run_causal_forest(
         wta, 'WTA', treatment_label='tb')
     print(f'\n  ATE by leverage type:')
     print(
@@ -497,10 +497,10 @@ def main() -> None:
     ate_summary = pd.DataFrame([
         {'Tour': 'ATP', 'Type': 'Combined',    'ATE': round(atp_ate, 4),    'SE': round(atp_ate_se, 4)},  # noqa: E501
         {'Tour': 'WTA', 'Type': 'Combined',    'ATE': round(wta_ate, 4),    'SE': round(wta_ate_se, 4)},  # noqa: E501
-        {'Tour': 'ATP', 'Type': 'Break Point', 'ATE': round(atp_bp_ate, 4), 'SE': 0},
-        {'Tour': 'WTA', 'Type': 'Break Point', 'ATE': round(wta_bp_ate, 4), 'SE': 0},
-        {'Tour': 'ATP', 'Type': 'Tiebreak',   'ATE': round(atp_tb_ate, 4), 'SE': 0},
-        {'Tour': 'WTA', 'Type': 'Tiebreak',   'ATE': round(wta_tb_ate, 4), 'SE': 0},
+        {'Tour': 'ATP', 'Type': 'Break Point', 'ATE': round(atp_bp_ate, 4), 'SE': round(atp_bp_ate_se, 4)},  # noqa: E501
+        {'Tour': 'WTA', 'Type': 'Break Point', 'ATE': round(wta_bp_ate, 4), 'SE': round(wta_bp_ate_se, 4)},  # noqa: E501
+        {'Tour': 'ATP', 'Type': 'Tiebreak',   'ATE': round(atp_tb_ate, 4), 'SE': round(atp_tb_ate_se, 4)},  # noqa: E501
+        {'Tour': 'WTA', 'Type': 'Tiebreak',   'ATE': round(wta_tb_ate, 4), 'SE': round(wta_tb_ate_se, 4)},  # noqa: E501
     ])
     ate_summary.to_csv(os.path.join(OUT_DIR, 'ate_results.csv'), index=False)
     print('  Saved ate_results.csv')

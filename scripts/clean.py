@@ -226,9 +226,9 @@ def process_tour(
     # ── 1. Engineer High_Leverage Treatment Flag ──────────────────────────────
     # Break points: detected from Pts score string
     bp_p1_serving = (merged['Svr'] == 1) & merged['Pts'].astype(
-        'string').str.endswith(('-40', '-AD'))
+        'string').isin(['0-40', '15-40', '30-40', '40-AD'])
     bp_p2_serving = (merged['Svr'] == 2) & merged['Pts'].astype(
-        'string').str.startswith(('40-', 'AD-'))
+        'string').isin(['40-0', '40-15', '40-30', 'AD-40'])
     is_bp = bp_p1_serving | bp_p2_serving
 
     # Tiebreak POINTS: score values are NOT standard tennis values {0,15,30,40,AD}

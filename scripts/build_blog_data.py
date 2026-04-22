@@ -8,6 +8,7 @@ This script ensures the D3 chart values are Python-generated and
 automatically updated whenever the model is rerun. No manual hardcoding.
 """
 
+import math
 import os
 import json
 import pandas as pd
@@ -43,6 +44,10 @@ def main():
         'combined': combined,
         'split':    split
     }
+
+    for entry in combined + split:
+        if not math.isfinite(entry['value']):
+            raise ValueError(f"Non-finite ATE value detected: {entry}. Rerun model.py.")
 
     # Write as a JavaScript constants file
     js_content = (

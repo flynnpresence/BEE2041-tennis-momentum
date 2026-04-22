@@ -74,9 +74,9 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         df['focal_is_p1'], 1, 2)).astype(int)
 
     bp_p1_serving = (df['Svr'] == 1) & df['Pts'].astype(
-        'string').str.endswith(('-40', '-AD'))
+        'string').isin(['0-40', '15-40', '30-40', '40-AD'])
     bp_p2_serving = (df['Svr'] == 2) & df['Pts'].astype(
-        'string').str.startswith(('40-', 'AD-'))
+        'string').isin(['40-0', '40-15', '40-30', 'AD-40'])
     df['is_bp'] = (bp_p1_serving | bp_p2_serving).astype(int)
 
     # Point-level tiebreak flag — consistent with clean.py, more reliable than TbSet
