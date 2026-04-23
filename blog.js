@@ -457,13 +457,6 @@
   /* ────────────────────────────────────────────────────────
      4 · Feature importance chart
      ──────────────────────────────────────────────────────── */
-  const featureData = [
-    { feature: "Cumulative Momentum Score", ATP: 0.56, WTA: 0.48 },
-    { feature: "Player Ranking",            ATP: 0.24, WTA: 0.28 },
-    { feature: "Rolling Win % (last 10)",   ATP: 0.17, WTA: 0.21 },
-    { feature: "Winning Streak (last 4)",   ATP: 0.03, WTA: 0.03 }
-  ];
-
   function initFeatureImportanceChart() {
     const container = document.getElementById("feature-chart");
     if (!container) return;

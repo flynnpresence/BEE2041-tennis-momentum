@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
+from numpy.polynomial import polynomial as P
 
 # Suppress known, safe warnings from econml and sklearn only
 # Global suppression avoided — specific known warnings caught locally
@@ -104,10 +105,9 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     match_data = df[df['match_id']
                     == target_match].copy().reset_index(drop=True)
 
-    # Extract player names from match_id
-    parts = target_match.split('-')
-    p1 = parts[-2].replace('_', ' ') if len(parts) >= 2 else 'Player 1'
-    p2 = parts[-1].replace('_', ' ') if len(parts) >= 1 else 'Player 2'
+    match_row = df[df['match_id'] == target_match].iloc[0]
+    p1 = match_row['Focal_Player']
+    p2 = match_row['Opponent_Player']
 
     fig, ax = plt.subplots(figsize=(10, 4))
     color = 'steelblue' if tour_name == 'ATP' else 'coral'
@@ -285,7 +285,6 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
                    color=color, edgecolors='none')
 
         # Polynomial trend line
-        from numpy.polynomial import polynomial as P
         sort_idx = np.argsort(ranking)
         sorted_ranking = ranking[sort_idx]
         sorted_cates = cates[sort_idx]
@@ -508,6 +507,23 @@ def main() -> None:
     ])
     ate_summary.to_csv(os.path.join(OUT_DIR, 'ate_results.csv'), index=False)
     print('  Saved ate_results.csv')
+
+    # Export feature importance for blog.js dynamic rendering
+    _label_map = {
+        'CUSUM':           'Cumulative Momentum Score',
+        'Focal_Ranking':   'Player Ranking',
+        'Rolling_Win_Pct': 'Rolling Win % (last 10)',
+        'Streak_k4':       'Winning Streak (last 4)',
+    }
+    feat_imp_export = pd.DataFrame({
+        'feature': [_label_map[f] for f in CONTROLS],
+        'ATP': [round(float(atp_imp.loc[atp_imp['Feature'] == f, 'Importance'].values[0]), 4)
+                for f in CONTROLS],
+        'WTA': [round(float(wta_imp.loc[wta_imp['Feature'] == f, 'Importance'].values[0]), 4)
+                for f in CONTROLS]
+    })
+    feat_imp_export.to_csv(os.path.join(OUT_DIR, 'feature_importance.csv'), index=False)
+    print('  Saved feature_importance.csv')
 
     print('\n=== Done — all 6 outputs saved to outputs/ ===')
 
