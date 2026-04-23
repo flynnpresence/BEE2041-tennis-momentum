@@ -7,3 +7,7 @@ clean_execution_proof.txt
 code_quality_report.txt
 model_output.txt
 count_words*.py
+
+# Data files
+data/raw/
+data/processed/
