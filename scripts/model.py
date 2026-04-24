@@ -356,76 +356,166 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 
 # ── Output 5: Coefficient plot ────────────────────────────────────────────────
 def plot_model_table(
-    atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se
+    atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se,
+    atp_bp_ate, atp_bp_ate_se, wta_bp_ate, wta_bp_ate_se,
+    atp_tb_ate, atp_tb_ate_se, wta_tb_ate, wta_tb_ate_se
 ) -> None:
+    """
+    Clean Plotly forest plot — logistic regression coefficients
+    plus causal forest ATE rows for BP and TB.
+    """
+    import plotly.graph_objects as go
+
     label_map = {
-        'Focal_Ranking':    'Player Rank',
-        'Rolling_Win_Pct':  'Rolling Win %',
-        'Streak_k4':        'Winning Streak (Last 4 Points)',
-        'CUSUM':            'Momentum Score',
-        'High_Leverage':    'Pressure Point',
-        'HL_Win':           'Break Point Win (ATP 13.5% / WTA 13.5%)',
-        'HL_Win_TB':        'Tiebreak Win (ATP 3.5% / WTA 2.3%)',
+        'Focal_Ranking':   'Player Rank',
+        'Rolling_Win_Pct': 'Rolling Win %',
+        'Streak_k4':       'Winning Streak (Last 4)',
+        'CUSUM':           'Momentum Score',
     }
+
     atp_coef = atp_coef.copy()
     wta_coef = wta_coef.copy()
     atp_coef['Feature'] = atp_coef['Feature'].replace(label_map)
     wta_coef['Feature'] = wta_coef['Feature'].replace(label_map)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Build rows — logistic regression coefficients
+    features = atp_coef[atp_coef['Feature'] != 'const']['Feature'].tolist()
 
-    colors = {'ATP': 'steelblue', 'WTA': 'coral'}
-    offsets = {'ATP': -0.15, 'WTA': 0.15}
-    y_labels = []
-    y_positions = []
+    rows = []
+    for feat in features:
+        atp_row = atp_coef[atp_coef['Feature'] == feat]
+        wta_row = wta_coef[wta_coef['Feature'] == feat]
+        if len(atp_row) == 0 or len(wta_row) == 0:
+            continue
+        rows.append({
+            'label': feat,
+            'atp_coef': atp_row['Coef'].values[0],
+            'atp_se':   atp_row['SE'].values[0],
+            'wta_coef': wta_row['Coef'].values[0],
+            'wta_se':   wta_row['SE'].values[0],
+            'type': 'logistic'
+        })
 
-    all_features = atp_coef[atp_coef['Feature'] != 'const']['Feature'].tolist()
+    # Add causal forest rows
+    rows.append({
+        'label': 'Break Point Win (ATP 13.5% / WTA 13.5%)',
+        'atp_coef': atp_bp_ate, 'atp_se': atp_bp_ate_se,
+        'wta_coef': wta_bp_ate, 'wta_se': wta_bp_ate_se,
+        'type': 'forest'
+    })
+    rows.append({
+        'label': 'Tiebreak Win (ATP 3.5% / WTA 2.3%)',
+        'atp_coef': atp_tb_ate, 'atp_se': atp_tb_ate_se,
+        'wta_coef': wta_tb_ate, 'wta_se': wta_tb_ate_se,
+        'type': 'forest'
+    })
 
-    for i, feature in enumerate(all_features):
-        y_labels.append(feature)
-        y_positions.append(i)
-        for tour, coef_df in [('ATP', atp_coef), ('WTA', wta_coef)]:
-            row = coef_df[coef_df['Feature'] == feature]
-            if len(row) == 0:
-                continue
-            coef = row['Coef'].values[0]
-            se   = row['SE'].values[0]
-            y    = i + offsets[tour]
-            ax.errorbar(coef, y, xerr=1.96*se,
-                        fmt='o', color=colors[tour],
-                        capsize=4, capthick=1.5,
-                        markersize=7, linewidth=1.5,
-                        label=tour if i == 0 else '')
+    # Y axis — reversed so top row appears first
+    y_labels = [r['label'] for r in rows][::-1]
 
-    # Add CATE rows
-    cate_y = len(all_features)
-    y_labels.append('Tiebreak Win (ATP 3.5% / WTA 2.3%)')
-    y_positions.append(cate_y)
-    ax.errorbar(atp_ate, cate_y + offsets['ATP'],
-                xerr=1.96*atp_ate_se, fmt='D',
-                color='steelblue', capsize=4, capthick=1.5,
-                markersize=8, linewidth=1.5)
-    ax.errorbar(wta_ate, cate_y + offsets['WTA'],
-                xerr=1.96*wta_ate_se, fmt='D',
-                color='coral', capsize=4, capthick=1.5,
-                markersize=8, linewidth=1.5)
+    fig = go.Figure()
 
-    ax.axvline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.6)
-    ax.set_yticks(y_positions)
-    ax.set_yticklabels(y_labels, fontsize=10)
-    ax.set_xlabel('Marginal Effect on Win Probability', fontsize=11)
-    ax.set_title('Model Results — Logistic Regression + Causal Forest',
-                 fontsize=12, fontweight='bold', pad=15)
+    for i, row in enumerate(rows[::-1]):
+        symbol = 'diamond' if row['type'] == 'forest' else 'circle'
+        y_pos = i
 
-    handles = [plt.Line2D([0], [0], marker='o', color='w',
-                          markerfacecolor=c, markersize=9, label=t)
-               for t, c in colors.items()]
-    ax.legend(handles=handles, fontsize=10)
+        # ATP
+        fig.add_trace(go.Scatter(
+            x=[row['atp_coef']],
+            y=[y_pos - 0.15],
+            error_x=dict(
+                type='data',
+                array=[1.96 * row['atp_se']],
+                visible=True,
+                color='rgba(74,144,217,0.6)',
+                thickness=1.5,
+                width=5
+            ),
+            mode='markers',
+            marker=dict(
+                symbol=symbol,
+                size=10,
+                color='#4a90d9',
+                line=dict(width=1.5, color='white')
+            ),
+            name='ATP',
+            showlegend=(i == 0),
+            hovertemplate=f"<b>ATP — {row['label']}</b><br>"
+                          f"Effect: {row['atp_coef']:.4f}<br>"
+                          f"95% CI: [{row['atp_coef']-1.96*row['atp_se']:.4f}, "
+                          f"{row['atp_coef']+1.96*row['atp_se']:.4f}]"
+                          f"<extra></extra>",
+            legendgroup='ATP'
+        ))
 
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output5_model_table.png'))
-    plt.close()
-    print('  Saved output5_model_table.png')
+        # WTA
+        fig.add_trace(go.Scatter(
+            x=[row['wta_coef']],
+            y=[y_pos + 0.15],
+            error_x=dict(
+                type='data',
+                array=[1.96 * row['wta_se']],
+                visible=True,
+                color='rgba(232,113,90,0.6)',
+                thickness=1.5,
+                width=5
+            ),
+            mode='markers',
+            marker=dict(
+                symbol=symbol,
+                size=10,
+                color='#e8715a',
+                line=dict(width=1.5, color='white')
+            ),
+            name='WTA',
+            showlegend=(i == 0),
+            hovertemplate=f"<b>WTA — {row['label']}</b><br>"
+                          f"Effect: {row['wta_coef']:.4f}<br>"
+                          f"95% CI: [{row['wta_coef']-1.96*row['wta_se']:.4f}, "
+                          f"{row['wta_coef']+1.96*row['wta_se']:.4f}]"
+                          f"<extra></extra>",
+            legendgroup='WTA'
+        ))
+
+    fig.add_vline(x=0, line_dash='dash', line_color='black',
+                  line_width=1, opacity=0.5)
+
+    fig.update_layout(
+        title=dict(
+            text='Model Results — Logistic Regression + Causal Forest',
+            font=dict(size=14, family='Helvetica Neue, Arial, sans-serif'),
+            x=0.5
+        ),
+        height=480,
+        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        margin=dict(l=260, r=40, t=80, b=60),
+        hoverlabel=dict(bgcolor='white', font_size=12),
+        legend=dict(
+            orientation='v',
+            x=1.02, y=1,
+            bgcolor='white',
+            bordercolor='#eeeeee',
+            borderwidth=1
+        ),
+        xaxis=dict(
+            title='Effect on Win Probability',
+            showgrid=True,
+            gridcolor='#eeeeee',
+            zeroline=False
+        ),
+        yaxis=dict(
+            tickvals=list(range(len(rows))),
+            ticktext=y_labels,
+            showgrid=False,
+            zeroline=False
+        )
+    )
+
+    out_path = os.path.join(OUT_DIR, 'output5_model_table.html')
+    fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
+    print('  Saved output5_model_table.html')
 
 
 # ── Output 6: Feature importance ─────────────────────────────────────────────
@@ -533,8 +623,15 @@ def main() -> None:
 
     # Output 5
     print('\n--- Output 5: Model table ---')
-    plot_model_table(atp_coef, wta_coef, atp_ate,
-                     atp_ate_se, wta_ate, wta_ate_se)
+    plot_model_table(
+        atp_coef, wta_coef,
+        atp_ate, atp_ate_se,
+        wta_ate, wta_ate_se,
+        atp_bp_ate, atp_bp_ate_se,
+        wta_bp_ate, wta_bp_ate_se,
+        atp_tb_ate, atp_tb_ate_se,
+        wta_tb_ate, wta_tb_ate_se
+    )
 
     # Output 6
     print('\n--- Output 6: Feature importance ---')
