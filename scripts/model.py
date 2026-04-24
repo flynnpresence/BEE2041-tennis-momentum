@@ -93,40 +93,96 @@ def plot_chi2_table(tests: pd.DataFrame) -> None:
 
 # ── Output 2: CUSUM line chart ────────────────────────────────────────────────
 def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
-    # Pick the match with the most points for a clear chart
+    import plotly.graph_objects as go
+
     match_counts = df.groupby('match_id').size()
     target_match = match_counts.idxmax()
-    match_data = df[df['match_id']
-                    == target_match].copy().reset_index(drop=True)
-
+    match_data = df[df['match_id'] == target_match].copy().reset_index(drop=True)
     match_row = df[df['match_id'] == target_match].iloc[0]
     p1 = match_row['Focal_Player']
     p2 = match_row['Opponent_Player']
 
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(match_data.index, match_data['CUSUM'], color='#444444', linewidth=1.2)
-    ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
-    ax.fill_between(
-        match_data.index, match_data['CUSUM'], 0,
-        where=match_data['CUSUM'] > 0,
-        alpha=0.3, color='green', label='Above expectation'
-    )
-    ax.fill_between(
-        match_data.index, match_data['CUSUM'], 0,
-        where=match_data['CUSUM'] < 0,
-        alpha=0.3, color='red', label='Below expectation'
+    x = match_data.index.tolist()
+    y = match_data['CUSUM'].tolist()
+
+    def leverage_label(row):
+        if row.get('High_Leverage_TB', 0) == 1:
+            return 'Tiebreak point'
+        elif row.get('High_Leverage_BP', 0) == 1:
+            return 'Break point'
+        elif row.get('High_Leverage', 0) == 1:
+            return 'High leverage'
+        return 'Standard point'
+
+    hover = [
+        f'Point {i+1}<br>Score: {row["Pts"]}<br>'
+        f'CUSUM: {row["CUSUM"]:.3f}<br>{leverage_label(row)}'
+        for i, (_, row) in enumerate(match_data.iterrows())
+    ]
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=x, y=[max(v, 0) for v in y],
+        fill='tozeroy',
+        fillcolor='rgba(74,175,74,0.25)',
+        line=dict(width=0),
+        showlegend=True,
+        name='Above expectation',
+        hoverinfo='skip'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=x, y=[min(v, 0) for v in y],
+        fill='tozeroy',
+        fillcolor='rgba(205,92,92,0.25)',
+        line=dict(width=0),
+        showlegend=True,
+        name='Below expectation',
+        hoverinfo='skip'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=x, y=y,
+        mode='lines',
+        line=dict(color='#444444', width=1.2),
+        showlegend=False,
+        hovertext=hover,
+        hoverinfo='text',
+        name='CUSUM'
+    ))
+
+    fig.add_hline(y=0, line_dash='dash', line_color='black',
+                  line_width=0.8, opacity=0.5)
+
+    fig.update_layout(
+        title=dict(
+            text=(f'Cumulative Momentum Score — {tour_name}<br>'
+                  f'<span style="font-size:11px">{p1} vs {p2}</span>'),
+            font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
+                      color='#111'),
+            x=0.5
+        ),
+        height=380,
+        font=dict(family='Helvetica Neue, Arial, sans-serif',
+                  size=11, color='#111'),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        margin=dict(l=60, r=40, t=90, b=60),
+        hoverlabel=dict(bgcolor='white', font_size=12),
+        legend=dict(
+            orientation='h', x=0.5, xanchor='center', y=-0.15,
+            bgcolor='white'
+        ),
+        xaxis=dict(title='Point Number', showgrid=False, zeroline=False),
+        yaxis=dict(title='Cumulative Deviation from Mean',
+                   showgrid=True, gridcolor='#eeeeee', zeroline=False)
     )
 
-    ax.set_title(f'Cumulative Momentum Score — {tour_name}\n{p1} vs {p2}',
-                 fontsize=12, fontweight='bold')
-    ax.set_xlabel('Point Number')
-    ax.set_ylabel('Cumulative Deviation from Mean')
-    ax.legend(fontsize=9)
-    plt.tight_layout()
-    fname = f'output2_cusum_{tour_name.lower()}.png'
-    plt.savefig(os.path.join(OUT_DIR, fname))
-    plt.close()
-    print(f'  Saved {fname}')
+    suffix = tour_name.lower()
+    out_path = os.path.join(OUT_DIR, f'output2_cusum_{suffix}.html')
+    fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
+    print(f'  Saved output2_cusum_{suffix}.html')
 
 
 # ── Output 3: TBOE scatter plot ───────────────────────────────────────────────
