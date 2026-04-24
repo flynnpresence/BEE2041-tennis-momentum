@@ -167,11 +167,8 @@ Grand Slams · 2 Tours
 <h2 class="anchored" data-anchor-id="does-momentum-even-show-up-in-the-data">Does Momentum Even Show Up in the Data?</h2>
 <p>Before asking whether momentum causes anything, I need to ask whether it exists at all. Does winning a point make the next one more likely to go your way?</p>
 <p>I ran two tests for every player individually: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. I tested 77 ATP players and 78 WTA players separately, rather than pooling everyone together. Pooling would risk hiding individual patterns inside aggregate noise.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="outputs/output1_chi2_table.png" class="img-fluid figure-img"></p>
-<figcaption>Per-player momentum test results across ATP and WTA.</figcaption>
-</figure>
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output1_chi2_table.html" width="100%" height="180" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The results are the first blow to the momentum theory. In the ATP, 10.4% of players showed statistical evidence that their point sequences were non-random on the Chi-squared test, with 13.0% on the runs test. In the WTA, the figures are lower still: 6.4% and 9.0% respectively. The baseline here matters. Even if every player’s shots were completely random, the mathematical tests would still throw up “false alarms” and flag roughly 5% of players purely by accident. My figures exceed that random baseline, but only marginally. If momentum were a real force operating across the tour, I would expect to see the majority of players showing significant results. Instead, roughly 9 in 10 players show no evidence of it at all.</p>
 <p>But I cannot stop here. As Miller and Sanjurjo (2018) mathematically proved, traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences. It is also worth noting that these p-values are not corrected for multiple comparisons across players, meaning a small number of significant results would be expected by chance alone. To see if the hot hand is hiding beneath the surface, I need to look closer with a more advanced tool.</p>

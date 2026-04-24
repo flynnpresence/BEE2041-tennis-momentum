@@ -53,48 +53,42 @@ np.random.seed(SEED)
 
 
 # ── Output 1: Per-player Chi-squared summary table ────────────────────────────
-def plot_chi2_table(tests_path: str) -> None:
-    tests = pd.read_csv(tests_path)
+def plot_chi2_table(tests: pd.DataFrame) -> None:
+    rows = []
+    for tour, grp in tests.groupby('Tour'):
+        n = len(grp)
+        chi2_n = int(grp['Chi2_Sig'].sum())
+        runs_n = int(grp['Runs_Sig'].sum())
+        rows.append({
+            'Tour':           tour,
+            'Players Tested': n,
+            'Chi² Sig. (n)':  chi2_n,
+            'Chi² Sig. (%)':  f"{chi2_n / n * 100:.1f}%",
+            'Runs Sig. (n)':  runs_n,
+            'Runs Sig. (%)':  f"{runs_n / n * 100:.1f}%",
+        })
+    summary = pd.DataFrame(rows)
 
-    summary = tests.groupby('Tour').agg(
-        Players_Tested=('Player', 'count'),
-        Chi2_Significant=('Chi2_Sig', 'sum'),
-        Runs_Significant=('Runs_Sig', 'sum'),
-    ).reset_index()
-    summary['Chi2_Pct'] = (summary['Chi2_Significant']
-                           / summary['Players_Tested'] * 100).round(1)
-    summary['Runs_Pct'] = (summary['Runs_Significant']
-                           / summary['Players_Tested'] * 100).round(1)
+    html_table = summary.to_html(index=False, border=0, classes='momentum-table')
+    full_html = (
+        '<!DOCTYPE html><html><head><meta charset="utf-8">'
+        '<style>'
+        'body{margin:0;padding:16px;font-family:Inter,sans-serif;}'
+        '.table-container{overflow-x:auto;}'
+        'table.momentum-table{width:100%;border-collapse:collapse;font-size:14px;}'
+        'table.momentum-table th{background:#f0f0ec;font-weight:600;padding:10px 14px;'
+        'text-align:left;border-bottom:2px solid #d0d0cc;color:#1a1a1a;}'
+        'table.momentum-table td{padding:9px 14px;border-bottom:1px solid #e8e8e4;color:#1a1a1a;}'
+        'table.momentum-table tr:last-child td{border-bottom:none;}'
+        '</style></head><body>'
+        '<div class="table-container">' + html_table + '</div>'
+        '</body></html>'
+    )
 
-    fig, ax = plt.subplots(figsize=(10, 2))
-    ax.axis('off')
-    table_data = [
-        ['Tour', 'Players\nTested',
-            'Chi² Sig.\n(n)', 'Chi² Sig.\n(%)', 'Runs Sig.\n(n)', 'Runs Sig.\n(%)'],
-    ]
-    for _, row in summary.iterrows():
-        table_data.append([
-            row['Tour'],
-            int(row['Players_Tested']),
-            int(row['Chi2_Significant']),
-            f"{row['Chi2_Pct']}%",
-            int(row['Runs_Significant']),
-            f"{row['Runs_Pct']}%",
-        ])
-
-    t = ax.table(cellText=table_data[1:], colLabels=table_data[0],
-                 loc='center', cellLoc='center')
-    t.auto_set_font_size(False)
-    t.set_fontsize(11)
-    t.scale(1.4, 2.2)
-
-    ax.set_title('Per-Player Momentum Test Results (p < 0.05)',
-                 fontsize=12, fontweight='bold', pad=10)
-
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output1_chi2_table.png'))
-    plt.close()
-    print('  Saved output1_chi2_table.png')
+    out_path = os.path.join(OUT_DIR, 'output1_chi2_table.html')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        f.write(full_html)
+    print('  Saved output1_chi2_table.html')
 
 
 # ── Output 2: CUSUM line chart ────────────────────────────────────────────────
@@ -804,7 +798,8 @@ def main() -> None:
 
     # Output 1
     print('\n--- Output 1: Chi-squared table ---')
-    plot_chi2_table(os.path.join(PROC_DIR, 'per_player_tests.csv'))
+    tests_df = pd.read_csv(os.path.join(PROC_DIR, 'per_player_tests.csv'))
+    plot_chi2_table(tests_df)
 
     # Output 2
     print('\n--- Output 2: CUSUM line charts ---')

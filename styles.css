@@ -746,6 +746,36 @@ main.content iframe {
   border-bottom: 1px solid var(--rule) !important;
 }
 
+/* ─── Momentum table (output1) ─────────────────────────── */
+.table-container {
+  overflow-x: auto;
+}
+
+table.momentum-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+table.momentum-table th {
+  background: var(--bg-inset);
+  font-weight: 600;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid #d0d0cc;
+  color: var(--text-strong);
+}
+
+table.momentum-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid #e8e8e4;
+  color: var(--text);
+}
+
+table.momentum-table tr:last-child td {
+  border-bottom: none;
+}
+
 /* ─── Footer ────────────────────────────────────────────── */
 .article-footer {
   max-width: var(--col-text) !important;

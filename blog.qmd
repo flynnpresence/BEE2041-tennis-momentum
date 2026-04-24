@@ -101,7 +101,11 @@ Before asking whether momentum causes anything, I need to ask whether it exists 
 
 I ran two tests for every player individually: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. I tested 77 ATP players and 78 WTA players separately, rather than pooling everyone together. Pooling would risk hiding individual patterns inside aggregate noise.
 
-![Per-player momentum test results across ATP and WTA.](outputs/output1_chi2_table.png)
+```{=html}
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output1_chi2_table.html" width="100%" height="180" frameborder="0" scrolling="no"></iframe>
+</div>
+```
 
 The results are the first blow to the momentum theory. In the ATP, 10.4% of players showed statistical evidence that their point sequences were non-random on the Chi-squared test, with 13.0% on the runs test. In the WTA, the figures are lower still: 6.4% and 9.0% respectively. The baseline here matters. Even if every player's shots were completely random, the mathematical tests would still throw up "false alarms" and flag roughly 5% of players purely by accident. My figures exceed that random baseline, but only marginally. If momentum were a real force operating across the tour, I would expect to see the majority of players showing significant results. Instead, roughly 9 in 10 players show no evidence of it at all.
 
