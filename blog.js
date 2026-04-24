@@ -237,17 +237,9 @@
       .attr("stroke", "#17150F")
       .attr("stroke-width", 1.25);
 
-    g.append("rect")
-      .attr("x", innerWidth - 65)
-      .attr("y", y(0) - 14)
-      .attr("width", 62)
-      .attr("height", 16)
-      .attr("fill", "white")
-      .attr("opacity", 0.8);
-
     g.append("text")
       .attr("class", "zero-label")
-      .attr("x", innerWidth - 5)
+      .attr("x", innerWidth - 70)
       .attr("y", y(0) - 6)
       .attr("text-anchor", "end")
       .style("font-family", "IBM Plex Sans, sans-serif")
@@ -255,7 +247,7 @@
       .style("font-weight", "600")
       .style("letter-spacing", "0.1em")
       .attr("fill", "#17150F")
-      .text("No Effect");
+      .text("← no effect");
 
     g.append("g")
       .attr("class", "grid")
