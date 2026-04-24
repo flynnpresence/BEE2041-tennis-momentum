@@ -379,7 +379,8 @@ def plot_model_table(
     wta_coef['Feature'] = wta_coef['Feature'].replace(label_map)
 
     # Build rows — logistic regression coefficients
-    features = atp_coef[atp_coef['Feature'] != 'const']['Feature'].tolist()
+    exclude = {'const', 'HL_Win', 'High_Leverage', 'Pressure Point'}
+    features = [f for f in atp_coef['Feature'].tolist() if f not in exclude]
 
     rows = []
     for feat in features:
@@ -490,7 +491,7 @@ def plot_model_table(
         font=dict(family='Helvetica Neue, Arial, sans-serif', size=11),
         paper_bgcolor='white',
         plot_bgcolor='white',
-        margin=dict(l=260, r=40, t=80, b=60),
+        margin=dict(l=260, r=40, t=80, b=80),
         hoverlabel=dict(bgcolor='white', font_size=12),
         legend=dict(
             orientation='v',
