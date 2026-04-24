@@ -137,45 +137,37 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
 
 # ── Output 3: TBOE scatter plot ───────────────────────────────────────────────
 def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
-    """
-    Two-panel Plotly scatter — ATP and WTA separately, with player name hover.
-    Separate panels because ATP and WTA players are ranked independently.
-    """
     import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
 
-    fig = make_subplots(
-        rows=1, cols=2,
-        subplot_titles=['', '']
-    )
+    atp_tboe = atp.groupby('Focal_Player')['TBOE'].mean().reset_index()
+    atp_tboe = atp_tboe.sort_values('TBOE').reset_index(drop=True)
+    atp_tboe['rank'] = range(len(atp_tboe))
 
-    for col, (df, label, color) in enumerate(zip(
-        [atp, wta],
-        ['ATP', 'WTA'],
-        ['#4a90d9', '#e8715a']
-    ), start=1):
-        player_tboe = df.groupby('Focal_Player')['TBOE'].mean().reset_index()
-        player_tboe = player_tboe.sort_values('TBOE').reset_index(drop=True)
-        player_tboe['rank'] = range(len(player_tboe))
+    wta_tboe = wta.groupby('Focal_Player')['TBOE'].mean().reset_index()
+    wta_tboe = wta_tboe.sort_values('TBOE').reset_index(drop=True)
+    wta_tboe['rank'] = range(len(wta_tboe))
 
-        fig.add_trace(go.Scatter(
-            x=player_tboe['rank'],
-            y=player_tboe['TBOE'],
-            mode='markers',
-            name=label,
-            marker=dict(size=7, color=color, opacity=0.75,
-                        line=dict(width=0)),
-            hovertemplate=(
-                '<b>%{customdata}</b><br>'
-                'TBOE: %{y:.3f}<br>'
-                '<extra>' + label + '</extra>'
-            ),
-            customdata=player_tboe['Focal_Player'],
-            showlegend=True
-        ), row=1, col=col)
+    fig = go.Figure()
 
-        fig.add_hline(y=0, line_dash='dash', line_color='black',
-                      line_width=1, opacity=0.4, row=1, col=col)
+    # ATP — left panel (x-axis 1, y-axis 1)
+    fig.add_trace(go.Scatter(
+        x=atp_tboe['rank'], y=atp_tboe['TBOE'],
+        mode='markers', name='ATP',
+        marker=dict(size=7, color='#4a90d9', opacity=0.75),
+        hovertemplate='<b>%{customdata}</b><br>TBOE: %{y:.3f}<extra>ATP</extra>',
+        customdata=atp_tboe['Focal_Player'],
+        xaxis='x1', yaxis='y1'
+    ))
+
+    # WTA — right panel (x-axis 2, y-axis 2)
+    fig.add_trace(go.Scatter(
+        x=wta_tboe['rank'], y=wta_tboe['TBOE'],
+        mode='markers', name='WTA',
+        marker=dict(size=7, color='#e8715a', opacity=0.75),
+        hovertemplate='<b>%{customdata}</b><br>TBOE: %{y:.3f}<extra>WTA</extra>',
+        customdata=wta_tboe['Focal_Player'],
+        xaxis='x2', yaxis='y2'
+    ))
 
     fig.update_layout(
         title=dict(
@@ -191,24 +183,36 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
         plot_bgcolor='white',
         margin=dict(l=60, r=40, t=80, b=80),
         hoverlabel=dict(bgcolor='white', font_size=12),
-        legend=dict(
-            orientation='h', x=0.5, xanchor='center', y=-0.2,
-            bgcolor='white'
-        )
-    )
-
-    fig.update_xaxes(
-        title_text='Player Rank (by TBOE, lowest to highest)',
-        showgrid=False, zeroline=False
-    )
-    fig.update_yaxes(
-        title_text='TBOE (actual minus expected win rate)',
-        showgrid=True, gridcolor='#eeeeee', zeroline=False,
-        col=1
-    )
-    fig.update_yaxes(
-        showgrid=True, gridcolor='#eeeeee', zeroline=False,
-        col=2
+        legend=dict(orientation='h', x=0.5, xanchor='center',
+                    y=-0.2, bgcolor='white'),
+        xaxis=dict(
+            domain=[0, 0.45],
+            title='Player Rank (by TBOE)',
+            showgrid=False, zeroline=False
+        ),
+        yaxis=dict(
+            title='TBOE (actual minus expected win rate)',
+            showgrid=True, gridcolor='#eeeeee', zeroline=False,
+            anchor='x1'
+        ),
+        xaxis2=dict(
+            domain=[0.55, 1.0],
+            title='Player Rank (by TBOE)',
+            showgrid=False, zeroline=False,
+            anchor='y2'
+        ),
+        yaxis2=dict(
+            showgrid=True, gridcolor='#eeeeee', zeroline=False,
+            anchor='x2'
+        ),
+        shapes=[
+            dict(type='line', xref='x1', yref='y1',
+                 x0=0, x1=len(atp_tboe), y0=0, y1=0,
+                 line=dict(color='black', width=1, dash='dash')),
+            dict(type='line', xref='x2', yref='y2',
+                 x0=0, x1=len(wta_tboe), y0=0, y1=0,
+                 line=dict(color='black', width=1, dash='dash')),
+        ]
     )
 
     out_path = os.path.join(OUT_DIR, 'output3_tboe_scatter.html')
