@@ -299,12 +299,22 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         rows=1, cols=2,
         subplot_titles=['', '']
     )
-    fig.add_annotation(text='ATP — Causal Effect by Ranking Band',
-        xref='paper', yref='paper', x=0.225, y=1.05,
-        showarrow=False, font=dict(size=12, color='#111', family='Helvetica Neue, Arial, sans-serif'))
-    fig.add_annotation(text='WTA — Causal Effect by Ranking Band',
-        xref='paper', yref='paper', x=0.775, y=1.05,
-        showarrow=False, font=dict(size=12, color='#111', family='Helvetica Neue, Arial, sans-serif'))
+    fig.add_annotation(
+        text='ATP — Causal Effect by Ranking Band',
+        xref='paper', yref='paper',
+        x=0.18, y=1.08,
+        showarrow=False,
+        font=dict(size=12, color='#111',
+                  family='Helvetica Neue, Arial, sans-serif')
+    )
+    fig.add_annotation(
+        text='WTA — Causal Effect by Ranking Band',
+        xref='paper', yref='paper',
+        x=0.82, y=1.08,
+        showarrow=False,
+        font=dict(size=12, color='#111',
+                  family='Helvetica Neue, Arial, sans-serif')
+    )
 
     for col, (cates, X, color) in enumerate(zip(
         [atp_cates, wta_cates],
