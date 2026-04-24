@@ -133,7 +133,7 @@ Everything so far has tested whether momentum correlates with winning the next p
 
 We use a causal forest to estimate whether winning a pressure point causes a higher probability of winning the next, not just correlates with it. Think of it as a more rigorous version of asking "what would have happened otherwise." Standard regression assumes the effect of winning a pressure point is identical for every player in every situation. The causal forest drops that assumption entirely. It splits the data into subgroups, estimates the effect separately within each one, and uses a portion of the data purely to check its own work, preventing it from finding patterns that are not really there.
 
-I define a high-leverage win as a point where the player faced a break point or tiebreak situation and won it. This follows directly from the academic literature. Gilovich et al. (1985) and Miller and Sanjurjo (2018) both define momentum as success breeding success, not merely exposure to pressure.
+I define a high-leverage win as a point where the player faced a break point or tiebreak situation and won it. This follows directly from the academic literature. Gilovich et al. (1985) and Miller and Sanjurjo (2018) both define momentum as success breeding success, not merely exposure to pressure. Restricting the control group to lost pressure points alone was considered but rejected: in tiebreaks, the alternating serve structure mechanically disadvantages the point winner by forcing them to receive next, which would mask genuine momentum effects behind the rules of the sport.
 
 The model controls for four variables: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. Holding all of that constant, it asks one question: does winning a high-leverage point actually shift what happens next?
 
@@ -145,7 +145,7 @@ The first chart shows the estimated causal effect for every observation, plotted
 
 The second chart breaks this down by variable. Two findings stand out. First, the pressure point causal effect sits just below zero in both tours, with tight error bars. Second, rolling win percentage behaves in completely opposite directions between tours: negative for ATP, strongly positive for WTA, with the WTA error bar barely crossing zero. This suggests recent form plays a meaningfully different role in women's tennis than in men's, a tour-specific pattern that would have been invisible if the two datasets had been merged.
 
-The combined causal effect of winning a pressure point is -0.0325 for the ATP and -0.0363 for the WTA. Both are negative. Both are precise.
+The combined causal effect of winning a pressure point is -0.0325 for the ATP and -0.0363 for the WTA. Both are negative. Both are consistent in direction across tours and control specifications.
 
 If we stopped here, the universal hot hand would look like a fallacy. But remember, this combined number treats all high-leverage moments as identical. What happens if we split the two types of pressure apart?
 
