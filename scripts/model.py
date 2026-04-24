@@ -177,22 +177,6 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
         fig.add_hline(y=0, line_dash='dash', line_color='black',
                       line_width=1, opacity=0.4, row=1, col=col)
 
-    # Manual annotations to avoid flatly theme link styling
-    fig.add_annotation(
-        text='ATP — Tiebreak Over-Expectation per Player',
-        xref='paper', yref='paper', x=0.18, y=1.08,
-        showarrow=False,
-        font=dict(size=12, color='#111',
-                  family='Helvetica Neue, Arial, sans-serif')
-    )
-    fig.add_annotation(
-        text='WTA — Tiebreak Over-Expectation per Player',
-        xref='paper', yref='paper', x=0.82, y=1.08,
-        showarrow=False,
-        font=dict(size=12, color='#111',
-                  family='Helvetica Neue, Arial, sans-serif')
-    )
-
     fig.update_layout(
         title=dict(
             text='Tiebreak Over-Expectation (TBOE) by Player',
@@ -205,7 +189,7 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
                   size=11, color='#111'),
         paper_bgcolor='white',
         plot_bgcolor='white',
-        margin=dict(l=60, r=40, t=100, b=80),
+        margin=dict(l=60, r=40, t=80, b=80),
         hoverlabel=dict(bgcolor='white', font_size=12),
         legend=dict(
             orientation='h', x=0.5, xanchor='center', y=-0.2,
