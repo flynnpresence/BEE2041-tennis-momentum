@@ -562,9 +562,9 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
     fig.suptitle('Feature Importance from Causal Forest',
                  fontsize=13, fontweight='bold', y=1.02)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output6_feature_importance.png'))
+    plt.savefig(os.path.join(OUT_DIR, 'output7_feature_importance.png'))
     plt.close()
-    print('  Saved output6_feature_importance.png')
+    print('  Saved output7_feature_importance.png')
 
 
 # ── Reveal chart ─────────────────────────────────────────────────────────────
@@ -683,9 +683,9 @@ def plot_reveal_chart(
         )]
     )
 
-    out_path = os.path.join(OUT_DIR, 'reveal_chart.html')
+    out_path = os.path.join(OUT_DIR, 'output6_reveal_chart.html')
     fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
-    print('  Saved reveal_chart.html')
+    print('  Saved output6_reveal_chart.html')
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

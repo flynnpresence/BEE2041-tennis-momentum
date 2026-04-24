@@ -163,7 +163,7 @@ Two opposite effects have been cancelling each other out inside the aggregate. T
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
-<iframe src="outputs/reveal_chart.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
+<iframe src="outputs/output6_reveal_chart.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
 
@@ -185,7 +185,11 @@ Two opposite effects have been cancelling each other out in every previous study
 
 Outside of tiebreaks, if momentum does not drive point outcomes, what does? The chart below ranks the four variables by how much each one drives heterogeneity in the causal effect. In other words, which variables most determine whether the momentum effect is stronger or weaker for a given player in a given situation.
 
-![Causal Forest feature importance, ATP and WTA.](outputs/output6_feature_importance.png)
+```{=html}
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output7_feature_importance.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
+</div>
+```
 
 The result is clear and consistent across both tours. The cumulative momentum score dominates everything else. In the ATP it scores 0.56, more than twice the weight of player rank at 0.24 and more than three times that of rolling win percentage at 0.17. In the WTA the pattern holds, though the gap is slightly smaller: momentum score at 0.48, player rank at 0.28, rolling win percentage at 0.21.
 

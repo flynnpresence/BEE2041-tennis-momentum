@@ -222,7 +222,7 @@ Grand Slams · 2 Tours
 <p>When I separate break points from tiebreaks, the combined picture breaks apart into something far more interesting.</p>
 <p>Two opposite effects have been cancelling each other out inside the aggregate. Toggle the view to see how.</p>
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
-<iframe src="outputs/reveal_chart.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
+<iframe src="outputs/output6_reveal_chart.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>Winning a break point generates a hangover effect in both tours. The ATP estimate is -0.0601 and the WTA estimate is -0.0291, both negative. Converting a break point appears to slightly reduce the probability of winning the next point. Break points do not generate momentum. They generate a small but measurable drag.</p>
 <p>Tiebreaks tell the opposite story entirely. The ATP tiebreak estimate is +0.0564, the dominant feature of the entire chart, reaching close to the top of the y-axis and more than twice the magnitude of the break point hangover. The WTA tiebreak estimate is +0.0209, positive and consistent in direction but notably smaller, roughly a third of the ATP effect. In both tours, winning a tiebreak point genuinely lifts the probability of winning the next one.</p>
@@ -233,11 +233,8 @@ Grand Slams · 2 Tours
 <section id="if-not-momentum-then-what" class="level2">
 <h2 class="anchored" data-anchor-id="if-not-momentum-then-what">If Not Momentum, Then What?</h2>
 <p>Outside of tiebreaks, if momentum does not drive point outcomes, what does? The chart below ranks the four variables by how much each one drives heterogeneity in the causal effect. In other words, which variables most determine whether the momentum effect is stronger or weaker for a given player in a given situation.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="outputs/output6_feature_importance.png" class="img-fluid figure-img"></p>
-<figcaption>Causal Forest feature importance, ATP and WTA.</figcaption>
-</figure>
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output7_feature_importance.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The result is clear and consistent across both tours. The cumulative momentum score dominates everything else. In the ATP it scores 0.56, more than twice the weight of player rank at 0.24 and more than three times that of rolling win percentage at 0.17. In the WTA the pattern holds, though the gap is slightly smaller: momentum score at 0.48, player rank at 0.28, rolling win percentage at 0.21.</p>
 <p>The most striking feature of the chart is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores approximately 0.03 in both tours. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the cumulative trajectory is already accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
