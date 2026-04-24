@@ -29,10 +29,6 @@ format:
 
   <div class="hero-banner__court">
   <svg class="bounce-svg" viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="120" cy="108" rx="14" ry="4" fill="rgba(0,0,0,0.2)"/>
-    <ellipse cx="280" cy="108" rx="11" ry="3" fill="rgba(0,0,0,0.2)"/>
-    <ellipse cx="440" cy="108" rx="8" ry="2.5" fill="rgba(0,0,0,0.2)"/>
-    <ellipse cx="580" cy="108" rx="6" ry="2" fill="rgba(0,0,0,0.2)"/>
     <circle class="tennis-ball" r="14" fill="#c8e63c"/>
   </svg>
   </div>
