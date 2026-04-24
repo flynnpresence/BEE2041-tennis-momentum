@@ -567,6 +567,127 @@ def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> Non
     print('  Saved output6_feature_importance.png')
 
 
+# ── Reveal chart ─────────────────────────────────────────────────────────────
+def plot_reveal_chart(
+    atp_ate, wta_ate,
+    atp_bp_ate, wta_bp_ate,
+    atp_tb_ate, wta_tb_ate
+) -> None:
+    """
+    Interactive reveal chart — Plotly replacement for D3 reveal chart.
+    Toggles between combined ATE view and split BP/TB view.
+    """
+    import plotly.graph_objects as go
+
+    # Colours
+    NEG = '#e05252'
+    POS = '#4caf7d'
+
+    def bar_color(val):
+        return POS if val >= 0 else NEG
+
+    # Combined view data
+    combined_x = ['ATP', 'WTA']
+    combined_y = [atp_ate, wta_ate]
+    combined_colors = [bar_color(v) for v in combined_y]
+
+    # Split view data
+    split_x = ['ATP Break Point', 'WTA Break Point',
+                'ATP Tiebreak', 'WTA Tiebreak']
+    split_y = [atp_bp_ate, wta_bp_ate, atp_tb_ate, wta_tb_ate]
+    split_colors = [bar_color(v) for v in split_y]
+
+    fig = go.Figure()
+
+    # Trace 0 — combined (visible by default)
+    fig.add_trace(go.Bar(
+        x=combined_x,
+        y=combined_y,
+        marker_color=combined_colors,
+        marker_line=dict(width=0),
+        text=[f'{v:+.4f}' for v in combined_y],
+        textposition='outside',
+        textfont=dict(size=12, family='Helvetica Neue, Arial, sans-serif'),
+        hovertemplate='<b>%{x}</b><br>ATE: %{y:.4f}<extra></extra>',
+        visible=True,
+        name='Combined'
+    ))
+
+    # Trace 1 — split (hidden by default)
+    fig.add_trace(go.Bar(
+        x=split_x,
+        y=split_y,
+        marker_color=split_colors,
+        marker_line=dict(width=0),
+        text=[f'{v:+.4f}' for v in split_y],
+        textposition='outside',
+        textfont=dict(size=12, family='Helvetica Neue, Arial, sans-serif'),
+        hovertemplate='<b>%{x}</b><br>ATE: %{y:.4f}<extra></extra>',
+        visible=False,
+        name='Split'
+    ))
+
+    fig.add_hline(y=0, line_color='black', line_width=1, opacity=0.4)
+
+    fig.update_layout(
+        title=dict(
+            text='Average Treatment Effect of Winning a High-Leverage Point',
+            font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
+                      color='#111'),
+            x=0.5
+        ),
+        height=420,
+        font=dict(family='Helvetica Neue, Arial, sans-serif',
+                  size=11, color='#111'),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        showlegend=False,
+        margin=dict(l=60, r=40, t=120, b=80),
+        hoverlabel=dict(bgcolor='white', font_size=12),
+        yaxis=dict(
+            title='Effect on probability of winning next point',
+            showgrid=True,
+            gridcolor='#eeeeee',
+            zeroline=False,
+            range=[-0.12, 0.10]
+        ),
+        xaxis=dict(showgrid=False, zeroline=False),
+        updatemenus=[dict(
+            type='buttons',
+            direction='left',
+            x=0.5,
+            xanchor='center',
+            y=1.18,
+            yanchor='top',
+            buttons=[
+                dict(
+                    label='Combined Effect',
+                    method='update',
+                    args=[{'visible': [True, False]}]
+                ),
+                dict(
+                    label='Split by Pressure Type',
+                    method='update',
+                    args=[{'visible': [False, True]}]
+                )
+            ],
+            bgcolor='white',
+            bordercolor='#cccccc',
+            borderwidth=1,
+            font=dict(size=12,
+                      family='Helvetica Neue, Arial, sans-serif',
+                      color='#111'),
+            pad=dict(r=10, t=5, b=5, l=10),
+            showactive=True,
+            active=0
+        )]
+    )
+
+    out_path = os.path.join(OUT_DIR, 'reveal_chart.html')
+    fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
+    print('  Saved reveal_chart.html')
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main() -> None:
     print('=== model.py ===')
@@ -619,6 +740,13 @@ def main() -> None:
         f'    ATP — Break Point: {atp_bp_ate:.4f} | Tiebreak: {atp_tb_ate:.4f}')
     print(
         f'    WTA — Break Point: {wta_bp_ate:.4f} | Tiebreak: {wta_tb_ate:.4f}')
+
+    print('\n--- Reveal chart ---')
+    plot_reveal_chart(
+        atp_ate, wta_ate,
+        atp_bp_ate, wta_bp_ate,
+        atp_tb_ate, wta_tb_ate
+    )
 
     # Fix 5: Robustness — reduced controls (ranking only)
     _, atp_ate_r, _, _, _ = run_causal_forest(
