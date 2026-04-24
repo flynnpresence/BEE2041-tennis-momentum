@@ -137,7 +137,11 @@ I define a high-leverage win as a point where the player faced a break point or 
 
 The model controls for four variables: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. Holding all of that constant, it asks one question: does winning a high-leverage point actually shift what happens next?
 
-![Causal effect of winning a high-leverage point, across player rankings.](outputs/output4_cate_plot.png)
+```{=html}
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output4_cate_plot.html" width="100%" height="480" frameborder="0" scrolling="no"></iframe>
+</div>
+```
 
 The first chart shows the estimated causal effect for every observation, plotted against player ranking. The trend line sits at or below zero across all ranking levels in both tours. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.
 

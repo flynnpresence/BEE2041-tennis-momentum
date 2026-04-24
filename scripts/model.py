@@ -271,43 +271,87 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
 
 # ── Output 4: CATE plot ───────────────────────────────────────────────────────
 def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    """
+    Replaces 15k-point scatter with a clean binned dot plot.
+    Four ranking bands — average CATE with 95% error bars per band.
+    Saved as interactive Plotly HTML.
+    """
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
 
-    for ax, cates, X, label, color in zip(
-        axes,
+    bins = [0, 50, 100, 200, 1000]
+    labels = ['Top 50', '51–100', '101–200', '200+']
+
+    def bin_cates(cates, X):
+        ranking = X['Focal_Ranking'].values
+        means, errors, centres = [], [], []
+        for lo, hi, lab in zip(bins[:-1], bins[1:], labels):
+            mask = (ranking >= lo) & (ranking < hi)
+            if mask.sum() < 5:
+                continue
+            vals = cates[mask]
+            means.append(vals.mean())
+            errors.append(1.96 * vals.std() / np.sqrt(len(vals)))
+            centres.append(lab)
+        return centres, means, errors
+
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=['ATP — Causal Effect by Ranking Band',
+                        'WTA — Causal Effect by Ranking Band']
+    )
+
+    for col, (cates, X, color) in enumerate(zip(
         [atp_cates, wta_cates],
         [atp_X, wta_X],
-        ['ATP', 'WTA'],
-        ['steelblue', 'coral']
-    ):
-        ranking = X['Focal_Ranking'].values
-        ax.scatter(ranking, cates, alpha=0.3, s=15,
-                   color=color, edgecolors='none')
+        ['#4a90d9', '#e8715a']
+    ), start=1):
+        centres, means, errors = bin_cates(cates, X)
+        fig.add_trace(go.Scatter(
+            x=centres,
+            y=means,
+            error_y=dict(type='data', array=errors, visible=True,
+                         color='rgba(0,0,0,0.4)', thickness=1.5, width=6),
+            mode='markers',
+            marker=dict(size=12, color=color,
+                        line=dict(width=1.5, color='white')),
+            hovertemplate='%{x}<br>CATE: %{y:.4f}<extra></extra>',
+            showlegend=False
+        ), row=1, col=col)
 
-        # Polynomial trend line
-        sort_idx = np.argsort(ranking)
-        sorted_ranking = ranking[sort_idx]
-        sorted_cates = cates[sort_idx]
-        coeffs = P.polyfit(sorted_ranking, sorted_cates, 3)
-        smoothed = P.polyval(sorted_ranking, coeffs)
-        ax.plot(sorted_ranking, smoothed, color='black',
-                linewidth=2, label='Trend')
+        fig.add_hline(y=0, line_dash='dash', line_color='red',
+                      line_width=1, opacity=0.6, row=1, col=col)
 
-        ax.axhline(0, color='red', linewidth=0.8, linestyle='--', alpha=0.7)
-        ax.set_title(f'{label} — Causal Effect by Player Ranking',
-                     fontsize=12, fontweight='bold')
-        ax.set_xlabel(
-            'Player Ranking (most Grand Slam players ranked below 200)', fontsize=11)
-        ax.set_ylabel('CATE (causal effect on next point)', fontsize=11)
-        ax.tick_params(labelsize=10)
-        ax.legend(fontsize=9)
+    fig.update_layout(
+        title=dict(
+            text='Heterogeneous Causal Effects (CATE) of High-Leverage Points',
+            font=dict(size=14, family='Helvetica Neue, Arial, sans-serif'),
+            x=0.5
+        ),
+        height=450,
+        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        margin=dict(l=60, r=40, t=80, b=60),
+        hoverlabel=dict(bgcolor='white', font_size=12)
+    )
+    fig.update_yaxes(
+        title_text='CATE (causal effect on next point)',
+        zeroline=False, showgrid=True, gridcolor='#eeeeee',
+        col=1
+    )
+    fig.update_yaxes(
+        zeroline=False, showgrid=True, gridcolor='#eeeeee',
+        col=2
+    )
+    fig.update_xaxes(
+        title_text='Player Ranking Band',
+        showgrid=False
+    )
 
-    fig.suptitle('Heterogeneous Causal Effects (CATE) of High-Leverage Points',
-                 fontsize=13, fontweight='bold', y=1.02)
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output4_cate_plot.png'))
-    plt.close()
-    print('  Saved output4_cate_plot.png')
+    out_path = os.path.join(OUT_DIR, 'output4_cate_plot.html')
+    fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
+    print('  Saved output4_cate_plot.html')
 
 
 # ── Output 5: Coefficient plot ────────────────────────────────────────────────
@@ -320,7 +364,8 @@ def plot_model_table(
         'Streak_k4':        'Winning Streak (Last 4 Points)',
         'CUSUM':            'Momentum Score',
         'High_Leverage':    'Pressure Point',
-        'HL_Win':           'Break Point Win (ATP 23.5% / WTA 25.7%)',
+        'HL_Win':           'Break Point Win (ATP 13.5% / WTA 13.5%)',
+        'HL_Win_TB':        'Tiebreak Win (ATP 3.5% / WTA 2.3%)',
     }
     atp_coef = atp_coef.copy()
     wta_coef = wta_coef.copy()

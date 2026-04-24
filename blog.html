@@ -206,11 +206,8 @@ Grand Slams · 2 Tours
 <p>We use a causal forest to estimate whether winning a pressure point causes a higher probability of winning the next, not just correlates with it. Think of it as a more rigorous version of asking “what would have happened otherwise.” Standard regression assumes the effect of winning a pressure point is identical for every player in every situation. The causal forest drops that assumption entirely. It splits the data into subgroups, estimates the effect separately within each one, and uses a portion of the data purely to check its own work, preventing it from finding patterns that are not really there.</p>
 <p>I define a high-leverage win as a point where the player faced a break point or tiebreak situation and won it. This follows directly from the academic literature. Gilovich et al.&nbsp;(1985) and Miller and Sanjurjo (2018) both define momentum as success breeding success, not merely exposure to pressure. Restricting the control group to lost pressure points alone was considered but rejected: in tiebreaks, the alternating serve structure mechanically disadvantages the point winner by forcing them to receive next, which would mask genuine momentum effects behind the rules of the sport.</p>
 <p>The model controls for four variables: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. Holding all of that constant, it asks one question: does winning a high-leverage point actually shift what happens next?</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="outputs/output4_cate_plot.png" class="img-fluid figure-img"></p>
-<figcaption>Causal effect of winning a high-leverage point, across player rankings.</figcaption>
-</figure>
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output4_cate_plot.html" width="100%" height="480" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The first chart shows the estimated causal effect for every observation, plotted against player ranking. The trend line sits at or below zero across all ranking levels in both tours. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.</p>
 <div class="quarto-figure quarto-figure-center">
