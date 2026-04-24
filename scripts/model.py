@@ -297,9 +297,14 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 
     fig = make_subplots(
         rows=1, cols=2,
-        subplot_titles=['ATP — Causal Effect by Ranking Band',
-                        'WTA — Causal Effect by Ranking Band']
+        subplot_titles=['', '']
     )
+    fig.add_annotation(text='ATP — Causal Effect by Ranking Band',
+        xref='paper', yref='paper', x=0.225, y=1.05,
+        showarrow=False, font=dict(size=12, color='#111', family='Helvetica Neue, Arial, sans-serif'))
+    fig.add_annotation(text='WTA — Causal Effect by Ranking Band',
+        xref='paper', yref='paper', x=0.775, y=1.05,
+        showarrow=False, font=dict(size=12, color='#111', family='Helvetica Neue, Arial, sans-serif'))
 
     for col, (cates, X, color) in enumerate(zip(
         [atp_cates, wta_cates],
@@ -375,12 +380,15 @@ def plot_model_table(
 
     atp_coef = atp_coef.copy()
     wta_coef = wta_coef.copy()
+    # Exclude raw feature names before mapping
+    exclude_raw = {'const', 'HL_Win', 'High_Leverage'}
+    atp_coef = atp_coef[~atp_coef['Feature'].isin(exclude_raw)].copy()
+    wta_coef = wta_coef[~wta_coef['Feature'].isin(exclude_raw)].copy()
     atp_coef['Feature'] = atp_coef['Feature'].replace(label_map)
     wta_coef['Feature'] = wta_coef['Feature'].replace(label_map)
 
     # Build rows — logistic regression coefficients
-    exclude = {'const', 'HL_Win', 'High_Leverage', 'Pressure Point'}
-    features = [f for f in atp_coef['Feature'].tolist() if f not in exclude]
+    features = atp_coef['Feature'].tolist()
 
     rows = []
     for feat in features:
