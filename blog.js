@@ -237,18 +237,6 @@
       .attr("stroke", "#17150F")
       .attr("stroke-width", 1.25);
 
-    g.append("text")
-      .attr("class", "zero-label")
-      .attr("x", innerWidth - 70)
-      .attr("y", y(0) - 6)
-      .attr("text-anchor", "end")
-      .style("font-family", "IBM Plex Sans, sans-serif")
-      .style("font-size", "10px")
-      .style("font-weight", "600")
-      .style("letter-spacing", "0.1em")
-      .attr("fill", "#17150F")
-      .text("← no effect");
-
     g.append("g")
       .attr("class", "grid")
       .selectAll("line")
