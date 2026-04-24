@@ -110,7 +110,7 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     p2 = match_row['Opponent_Player']
 
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(match_data.index, match_data['CUSUM'], color='black', linewidth=1.5)
+    ax.plot(match_data.index, match_data['CUSUM'], color='#444444', linewidth=1.2)
     ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
     ax.fill_between(
         match_data.index, match_data['CUSUM'], 0,
@@ -138,16 +138,22 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
 # ── Output 3: TBOE scatter plot ───────────────────────────────────────────────
 def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
     """
-    Interactive Plotly scatter — TBOE by player with hover showing player name.
-    Single chart with ATP and WTA as separate traces.
+    Two-panel Plotly scatter — ATP and WTA separately, with player name hover.
+    Separate panels because ATP and WTA players are ranked independently.
     """
     import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
 
-    fig = go.Figure()
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=['', '']
+    )
 
-    for df, label, color in zip(
-        [atp, wta], ['ATP', 'WTA'], ['#4a90d9', '#e8715a']
-    ):
+    for col, (df, label, color) in enumerate(zip(
+        [atp, wta],
+        ['ATP', 'WTA'],
+        ['#4a90d9', '#e8715a']
+    ), start=1):
         player_tboe = df.groupby('Focal_Player')['TBOE'].mean().reset_index()
         player_tboe = player_tboe.sort_values('TBOE').reset_index(drop=True)
         player_tboe['rank'] = range(len(player_tboe))
@@ -164,17 +170,34 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
                 'TBOE: %{y:.3f}<br>'
                 '<extra>' + label + '</extra>'
             ),
-            customdata=player_tboe['Focal_Player']
-        ))
+            customdata=player_tboe['Focal_Player'],
+            showlegend=True
+        ), row=1, col=col)
 
-    fig.add_hline(y=0, line_dash='dash', line_color='black',
-                  line_width=1, opacity=0.4)
+        fig.add_hline(y=0, line_dash='dash', line_color='black',
+                      line_width=1, opacity=0.4, row=1, col=col)
+
+    # Manual annotations to avoid flatly theme link styling
+    fig.add_annotation(
+        text='ATP — Tiebreak Over-Expectation per Player',
+        xref='paper', yref='paper', x=0.18, y=1.08,
+        showarrow=False,
+        font=dict(size=12, color='#111',
+                  family='Helvetica Neue, Arial, sans-serif')
+    )
+    fig.add_annotation(
+        text='WTA — Tiebreak Over-Expectation per Player',
+        xref='paper', yref='paper', x=0.82, y=1.08,
+        showarrow=False,
+        font=dict(size=12, color='#111',
+                  family='Helvetica Neue, Arial, sans-serif')
+    )
 
     fig.update_layout(
         title=dict(
             text='Tiebreak Over-Expectation (TBOE) by Player',
             font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
-                      color='#111', weight='bold'),
+                      color='#111'),
             x=0.5
         ),
         height=420,
@@ -182,20 +205,26 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
                   size=11, color='#111'),
         paper_bgcolor='white',
         plot_bgcolor='white',
-        margin=dict(l=60, r=40, t=80, b=80),
+        margin=dict(l=60, r=40, t=100, b=80),
         hoverlabel=dict(bgcolor='white', font_size=12),
         legend=dict(
             orientation='h', x=0.5, xanchor='center', y=-0.2,
             bgcolor='white'
-        ),
-        xaxis=dict(
-            title='Player Rank (by TBOE, lowest to highest)',
-            showgrid=False, zeroline=False
-        ),
-        yaxis=dict(
-            title='TBOE (actual minus expected tiebreak win rate)',
-            showgrid=True, gridcolor='#eeeeee', zeroline=False
         )
+    )
+
+    fig.update_xaxes(
+        title_text='Player Rank (by TBOE, lowest to highest)',
+        showgrid=False, zeroline=False
+    )
+    fig.update_yaxes(
+        title_text='TBOE (actual minus expected win rate)',
+        showgrid=True, gridcolor='#eeeeee', zeroline=False,
+        col=1
+    )
+    fig.update_yaxes(
+        showgrid=True, gridcolor='#eeeeee', zeroline=False,
+        col=2
     )
 
     out_path = os.path.join(OUT_DIR, 'output3_tboe_scatter.html')
@@ -536,11 +565,13 @@ def plot_model_table(
     fig.update_layout(
         title=dict(
             text='Model Results — Logistic Regression + Causal Forest',
-            font=dict(size=14, family='Helvetica Neue, Arial, sans-serif'),
+            font=dict(size=14, family='Helvetica Neue, Arial, sans-serif',
+                      color='#111'),
             x=0.5
         ),
         height=480,
-        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11),
+        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11,
+                  color='#111'),
         paper_bgcolor='white',
         plot_bgcolor='white',
         margin=dict(l=260, r=40, t=80, b=80),
@@ -553,7 +584,7 @@ def plot_model_table(
             borderwidth=1
         ),
         xaxis=dict(
-            title='Effect on Win Probability',
+            title=dict(text='Effect on Win Probability', font=dict(color='#111')),
             showgrid=True,
             gridcolor='#eeeeee',
             zeroline=False
@@ -562,7 +593,8 @@ def plot_model_table(
             tickvals=list(range(len(rows))),
             ticktext=y_labels,
             showgrid=False,
-            zeroline=False
+            zeroline=False,
+            tickfont=dict(color='#111')
         )
     )
 
