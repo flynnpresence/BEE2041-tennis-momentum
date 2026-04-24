@@ -16,23 +16,12 @@ BEE2041 Data Science in Economics — Tennis Momentum Project
 
 ## Replication
 
-### Option A — Full pipeline (downloads raw data)
-
 ```bash
 pip install -r requirements.txt
 make all
 ```
 
-This runs download → clean → features → model in sequence.
-
-### Option B — From checkpoint (skips download and cleaning)
-
-The processed feature checkpoint is included in the repository. To run the model directly:
-
-```bash
-pip install -r requirements.txt
-/usr/local/bin/python3 scripts/model.py
-```
+This runs download → clean → features → model → build_blog_data in sequence.
 
 ---
 

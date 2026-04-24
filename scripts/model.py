@@ -25,6 +25,7 @@ from numpy.polynomial import polynomial as P
 warnings.filterwarnings('ignore', category=UserWarning, module='econml')
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 warnings.filterwarnings('ignore', category=FutureWarning, module='econml')
+warnings.filterwarnings('ignore', category=RuntimeWarning, module='statsmodels')
 
 rng = np.random.default_rng(seed=42)
 
