@@ -139,7 +139,7 @@ The model controls for four variables: player ranking, rolling win percentage ov
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
-<iframe src="outputs/output4_cate_plot.html" width="100%" height="480" frameborder="0" scrolling="no"></iframe>
+<iframe src="outputs/output4_cate_plot.html" width="100%" height="520" frameborder="0" scrolling="auto"></iframe>
 </div>
 ```
 

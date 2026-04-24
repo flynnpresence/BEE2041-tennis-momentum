@@ -333,11 +333,11 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
             font=dict(size=14, family='Helvetica Neue, Arial, sans-serif'),
             x=0.5
         ),
-        height=450,
+        height=500,
         font=dict(family='Helvetica Neue, Arial, sans-serif', size=11),
         paper_bgcolor='white',
         plot_bgcolor='white',
-        margin=dict(l=60, r=40, t=80, b=60),
+        margin=dict(l=60, r=60, t=100, b=80),
         hoverlabel=dict(bgcolor='white', font_size=12)
     )
     fig.update_yaxes(
