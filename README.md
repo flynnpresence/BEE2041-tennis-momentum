@@ -21,7 +21,7 @@ pip install -r requirements.txt
 make all
 ```
 
-This runs download → clean → features → model → build_blog_data in sequence.
+This runs the full pipeline: download → clean → features → model → build_blog_data.
 
 ---
 

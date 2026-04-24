@@ -27,8 +27,6 @@ warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 warnings.filterwarnings('ignore', category=FutureWarning, module='econml')
 warnings.filterwarnings('ignore', category=RuntimeWarning, module='statsmodels')
 
-rng = np.random.default_rng(seed=42)
-
 plt.rcParams.update({
     'font.family':      'sans-serif',
     'font.size':        11,
@@ -51,6 +49,7 @@ TREATMENT = 'High_Leverage'
 OUTCOME   = 'Next_Point_Won'
 ALPHA     = 0.05
 SEED      = 42
+np.random.seed(SEED)
 
 
 # ── Output 1: Per-player Chi-squared summary table ────────────────────────────
