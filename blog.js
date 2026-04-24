@@ -360,8 +360,8 @@
       const tourData = view === "combined"
         ? positions
         : [
-            { tour: "ATP", x: positions[0].x + barWidth + 6 - (barWidth + 12) / 2 },
-            { tour: "WTA", x: positions[2].x + barWidth + 6 - (barWidth + 12) / 2 }
+            { tour: "ATP", x: (positions[0].x + positions[2].x) / 2 + barWidth / 2 },
+            { tour: "WTA", x: (positions[1].x + positions[3].x) / 2 + barWidth / 2 }
           ];
 
       const tourLabels = labelGroup
