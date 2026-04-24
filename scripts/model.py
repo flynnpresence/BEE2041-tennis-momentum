@@ -272,96 +272,89 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
 # ── Output 4: CATE plot ───────────────────────────────────────────────────────
 def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
     """
-    Replaces 15k-point scatter with a clean binned dot plot.
-    Four ranking bands — average CATE with 95% error bars per band.
-    Saved as interactive Plotly HTML.
+    Single grouped dot plot — ATP and WTA side by side per ranking band.
+    Cleaner than two subplots, avoids annotation overlap issues.
     """
     import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
 
-    bins = [0, 50, 100, 200, 1000]
+    bins   = [0, 50, 100, 200, 1000]
     labels = ['Top 50', '51–100', '101–200', '200+']
 
     def bin_cates(cates, X):
         ranking = X['Focal_Ranking'].values
-        means, errors, centres = [], [], []
-        for lo, hi, lab in zip(bins[:-1], bins[1:], labels):
+        means, errors = [], []
+        for lo, hi in zip(bins[:-1], bins[1:]):
             mask = (ranking >= lo) & (ranking < hi)
             if mask.sum() < 5:
+                means.append(None)
+                errors.append(None)
                 continue
             vals = cates[mask]
-            means.append(vals.mean())
-            errors.append(1.96 * vals.std() / np.sqrt(len(vals)))
-            centres.append(lab)
-        return centres, means, errors
+            means.append(round(float(vals.mean()), 4))
+            errors.append(round(float(1.96 * vals.std() / np.sqrt(len(vals))), 4))
+        return means, errors
 
-    fig = make_subplots(
-        rows=1, cols=2,
-        subplot_titles=['', '']
-    )
-    fig.add_annotation(
-        text='ATP — Causal Effect by Ranking Band',
-        xref='paper', yref='paper',
-        x=0.18, y=1.08,
-        showarrow=False,
-        font=dict(size=12, color='#111',
-                  family='Helvetica Neue, Arial, sans-serif')
-    )
-    fig.add_annotation(
-        text='WTA — Causal Effect by Ranking Band',
-        xref='paper', yref='paper',
-        x=0.82, y=1.08,
-        showarrow=False,
-        font=dict(size=12, color='#111',
-                  family='Helvetica Neue, Arial, sans-serif')
-    )
+    atp_means, atp_errors = bin_cates(atp_cates, atp_X)
+    wta_means, wta_errors = bin_cates(wta_cates, wta_X)
 
-    for col, (cates, X, color) in enumerate(zip(
-        [atp_cates, wta_cates],
-        [atp_X, wta_X],
-        ['#4a90d9', '#e8715a']
-    ), start=1):
-        centres, means, errors = bin_cates(cates, X)
-        fig.add_trace(go.Scatter(
-            x=centres,
-            y=means,
-            error_y=dict(type='data', array=errors, visible=True,
-                         color='rgba(0,0,0,0.4)', thickness=1.5, width=6),
-            mode='markers',
-            marker=dict(size=12, color=color,
-                        line=dict(width=1.5, color='white')),
-            hovertemplate='%{x}<br>CATE: %{y:.4f}<extra></extra>',
-            showlegend=False
-        ), row=1, col=col)
+    fig = go.Figure()
 
-        fig.add_hline(y=0, line_dash='dash', line_color='red',
-                      line_width=1, opacity=0.6, row=1, col=col)
+    fig.add_trace(go.Scatter(
+        x=labels,
+        y=atp_means,
+        error_y=dict(type='data', array=atp_errors, visible=True,
+                     color='rgba(74,144,217,0.5)', thickness=1.5, width=6),
+        mode='markers',
+        name='ATP',
+        marker=dict(size=12, color='#4a90d9',
+                    line=dict(width=1.5, color='white')),
+        hovertemplate='<b>ATP — %{x}</b><br>CATE: %{y:.4f}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=labels,
+        y=wta_means,
+        error_y=dict(type='data', array=wta_errors, visible=True,
+                     color='rgba(232,113,90,0.5)', thickness=1.5, width=6),
+        mode='markers',
+        name='WTA',
+        marker=dict(size=12, color='#e8715a',
+                    line=dict(width=1.5, color='white')),
+        hovertemplate='<b>WTA — %{x}</b><br>CATE: %{y:.4f}<extra></extra>'
+    ))
+
+    fig.add_hline(y=0, line_dash='dash', line_color='red',
+                  line_width=1, opacity=0.5)
 
     fig.update_layout(
         title=dict(
-            text='Heterogeneous Causal Effects (CATE) of High-Leverage Points',
-            font=dict(size=14, family='Helvetica Neue, Arial, sans-serif'),
+            text='Causal Effect of Winning a High-Leverage Point by Player Ranking',
+            font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
+                      color='#111'),
             x=0.5
         ),
-        height=500,
-        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11),
+        height=420,
+        font=dict(family='Helvetica Neue, Arial, sans-serif', size=11,
+                  color='#111'),
         paper_bgcolor='white',
         plot_bgcolor='white',
-        margin=dict(l=60, r=60, t=100, b=80),
-        hoverlabel=dict(bgcolor='white', font_size=12)
-    )
-    fig.update_yaxes(
-        title_text='CATE (causal effect on next point)',
-        zeroline=False, showgrid=True, gridcolor='#eeeeee',
-        col=1
-    )
-    fig.update_yaxes(
-        zeroline=False, showgrid=True, gridcolor='#eeeeee',
-        col=2
-    )
-    fig.update_xaxes(
-        title_text='Player Ranking Band',
-        showgrid=False
+        margin=dict(l=60, r=40, t=80, b=80),
+        hoverlabel=dict(bgcolor='white', font_size=12),
+        legend=dict(
+            orientation='h', x=0.5, xanchor='center', y=-0.2,
+            bgcolor='white'
+        ),
+        xaxis=dict(
+            title='Player Ranking Band',
+            showgrid=False,
+            zeroline=False
+        ),
+        yaxis=dict(
+            title='CATE (causal effect on next point)',
+            showgrid=True,
+            gridcolor='#eeeeee',
+            zeroline=False
+        )
     )
 
     out_path = os.path.join(OUT_DIR, 'output4_cate_plot.html')
