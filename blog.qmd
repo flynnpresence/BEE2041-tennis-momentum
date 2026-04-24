@@ -121,7 +121,11 @@ Perhaps momentum does not operate across an entire match. Perhaps it concentrate
 
 I tested this directly. For every player, I calculated their Tiebreak Over-Expectation (TBOE): their actual tiebreak win rate minus their predicted win rate based on official ranking and recent form. A positive TBOE means a player outperforms expectations under tiebreak pressure. A negative TBOE means they underperform. If certain players consistently raise their game when it matters most, I would expect to see clear outliers pulling sharply away from zero in either direction.
 
-![Tiebreak over-expectation by player, ATP and WTA.](outputs/output3_tboe_scatter.png)
+```{=html}
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output3_tboe_scatter.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
+</div>
+```
 
 The chart plots every player's TBOE score from lowest to highest. The pattern is telling. In both the ATP and WTA, the distribution is smooth and continuous, running gradually from around -0.12 at the low end to +0.17 at the high end in the ATP, and from -0.20 to +0.25 in the WTA. There are no dramatic outliers. No player separates themselves convincingly from the pack as a consistent clutch performer. The curve drifts upward steadily, which is exactly what you would expect from natural variation across a group of players, not from a subset of genuinely pressure-proof competitors.
 
@@ -187,7 +191,7 @@ Outside of tiebreaks, if momentum does not drive point outcomes, what does? The 
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
-<iframe src="outputs/output7_feature_importance.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
+<iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
 

@@ -110,8 +110,7 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
     p2 = match_row['Opponent_Player']
 
     fig, ax = plt.subplots(figsize=(10, 4))
-    color = 'steelblue' if tour_name == 'ATP' else 'coral'
-    ax.plot(match_data.index, match_data['CUSUM'], color=color, linewidth=1.5)
+    ax.plot(match_data.index, match_data['CUSUM'], color='black', linewidth=1.5)
     ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
     ax.fill_between(
         match_data.index, match_data['CUSUM'], 0,
@@ -138,28 +137,70 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
 
 # ── Output 3: TBOE scatter plot ───────────────────────────────────────────────
 def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    """
+    Interactive Plotly scatter — TBOE by player with hover showing player name.
+    Single chart with ATP and WTA as separate traces.
+    """
+    import plotly.graph_objects as go
 
-    for ax, df, label, color in zip(
-        axes, [atp, wta], ['ATP', 'WTA'], ['steelblue', 'coral']
+    fig = go.Figure()
+
+    for df, label, color in zip(
+        [atp, wta], ['ATP', 'WTA'], ['#4a90d9', '#e8715a']
     ):
         player_tboe = df.groupby('Focal_Player')['TBOE'].mean().reset_index()
-        player_tboe = player_tboe.sort_values('TBOE')
+        player_tboe = player_tboe.sort_values('TBOE').reset_index(drop=True)
         player_tboe['rank'] = range(len(player_tboe))
 
-        ax.scatter(player_tboe['rank'], player_tboe['TBOE'],
-                   color=color, alpha=0.7, s=40, edgecolors='none')
-        ax.axhline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.5)
-        ax.set_title(f'{label} — Tiebreak Over-Expectation per Player',
-                     fontsize=12, fontweight='bold')
-        ax.set_xlabel('Player Rank (by TBOE)')
-        ax.set_ylabel('TBOE (actual minus expected win rate)')
-    fig.suptitle('Tiebreak Over-Expectation (TBOE) by Player',
-                 fontsize=13, fontweight='bold', y=1.02)
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output3_tboe_scatter.png'))
-    plt.close()
-    print('  Saved output3_tboe_scatter.png')
+        fig.add_trace(go.Scatter(
+            x=player_tboe['rank'],
+            y=player_tboe['TBOE'],
+            mode='markers',
+            name=label,
+            marker=dict(size=7, color=color, opacity=0.75,
+                        line=dict(width=0)),
+            hovertemplate=(
+                '<b>%{customdata}</b><br>'
+                'TBOE: %{y:.3f}<br>'
+                '<extra>' + label + '</extra>'
+            ),
+            customdata=player_tboe['Focal_Player']
+        ))
+
+    fig.add_hline(y=0, line_dash='dash', line_color='black',
+                  line_width=1, opacity=0.4)
+
+    fig.update_layout(
+        title=dict(
+            text='Tiebreak Over-Expectation (TBOE) by Player',
+            font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
+                      color='#111', weight='bold'),
+            x=0.5
+        ),
+        height=420,
+        font=dict(family='Helvetica Neue, Arial, sans-serif',
+                  size=11, color='#111'),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        margin=dict(l=60, r=40, t=80, b=80),
+        hoverlabel=dict(bgcolor='white', font_size=12),
+        legend=dict(
+            orientation='h', x=0.5, xanchor='center', y=-0.2,
+            bgcolor='white'
+        ),
+        xaxis=dict(
+            title='Player Rank (by TBOE, lowest to highest)',
+            showgrid=False, zeroline=False
+        ),
+        yaxis=dict(
+            title='TBOE (actual minus expected tiebreak win rate)',
+            showgrid=True, gridcolor='#eeeeee', zeroline=False
+        )
+    )
+
+    out_path = os.path.join(OUT_DIR, 'output3_tboe_scatter.html')
+    fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
+    print('  Saved output3_tboe_scatter.html')
 
 
 # ── Logistic Regression ───────────────────────────────────────────────────────
@@ -530,41 +571,81 @@ def plot_model_table(
     print('  Saved output5_model_table.html')
 
 
-# ── Output 6: Feature importance ─────────────────────────────────────────────
-def plot_feature_importance(atp_imp: pd.DataFrame, wta_imp: pd.DataFrame) -> None:
+# ── Output 7: Feature importance ─────────────────────────────────────────────
+def plot_feature_importance(atp_imp: pd.DataFrame,
+                            wta_imp: pd.DataFrame) -> None:
+    """
+    Interactive Plotly horizontal bar chart — feature importance.
+    Single chart with ATP and WTA side by side per feature.
+    """
+    import plotly.graph_objects as go
+
     label_map = {
-        'Focal_Ranking':    'Player Rank',
-        'Rolling_Win_Pct':  'Rolling Win %',
-        'Streak_k4':        'Winning Streak (Last 4 Points)',
-        'CUSUM':            'Momentum Score',
+        'Focal_Ranking':   'Player Rank',
+        'Rolling_Win_Pct': 'Rolling Win %',
+        'Streak_k4':       'Winning Streak (Last 4)',
+        'CUSUM':           'Momentum Score',
     }
+
     atp_imp = atp_imp.copy()
     wta_imp = wta_imp.copy()
     atp_imp['Feature'] = atp_imp['Feature'].replace(label_map)
     wta_imp['Feature'] = wta_imp['Feature'].replace(label_map)
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    # Sort by ATP importance descending
+    atp_sorted = atp_imp.sort_values('Importance', ascending=True)
+    features = atp_sorted['Feature'].tolist()
+    wta_sorted = wta_imp.set_index('Feature').loc[features].reset_index()
 
-    for ax, imp, label, color in zip(
-        axes,
-        [atp_imp, wta_imp],
-        ['ATP', 'WTA'],
-        ['steelblue', 'coral']
-    ):
-        imp_sorted = imp.sort_values('Importance').copy()
-        ax.barh(imp_sorted['Feature'],
-                imp_sorted['Importance'], color=color, alpha=0.8)
-        ax.set_title(f'{label} — Feature Importance (Causal Forest)',
-                     fontsize=12, fontweight='bold')
-        ax.set_xlabel('Importance', fontsize=11)
-        ax.tick_params(labelsize=10)
+    fig = go.Figure()
 
-    fig.suptitle('Feature Importance from Causal Forest',
-                 fontsize=13, fontweight='bold', y=1.02)
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUT_DIR, 'output7_feature_importance.png'))
-    plt.close()
-    print('  Saved output7_feature_importance.png')
+    fig.add_trace(go.Bar(
+        y=features,
+        x=atp_sorted['Importance'],
+        name='ATP',
+        orientation='h',
+        marker=dict(color='#4a90d9', opacity=0.85),
+        hovertemplate='<b>ATP — %{y}</b><br>Importance: %{x:.4f}<extra></extra>'
+    ))
+
+    fig.add_trace(go.Bar(
+        y=features,
+        x=wta_sorted['Importance'],
+        name='WTA',
+        orientation='h',
+        marker=dict(color='#e8715a', opacity=0.85),
+        hovertemplate='<b>WTA — %{y}</b><br>Importance: %{x:.4f}<extra></extra>'
+    ))
+
+    fig.update_layout(
+        title=dict(
+            text='Feature Importance from Causal Forest',
+            font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
+                      color='#111', weight='bold'),
+            x=0.5
+        ),
+        barmode='group',
+        height=380,
+        font=dict(family='Helvetica Neue, Arial, sans-serif',
+                  size=11, color='#111'),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        margin=dict(l=160, r=40, t=80, b=80),
+        hoverlabel=dict(bgcolor='white', font_size=12),
+        legend=dict(
+            orientation='h', x=0.5, xanchor='center', y=-0.2,
+            bgcolor='white'
+        ),
+        xaxis=dict(
+            title='Importance (higher = stronger driver of heterogeneity)',
+            showgrid=True, gridcolor='#eeeeee', zeroline=False
+        ),
+        yaxis=dict(showgrid=False, zeroline=False)
+    )
+
+    out_path = os.path.join(OUT_DIR, 'output7_feature_importance.html')
+    fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
+    print('  Saved output7_feature_importance.html')
 
 
 # ── Reveal chart ─────────────────────────────────────────────────────────────

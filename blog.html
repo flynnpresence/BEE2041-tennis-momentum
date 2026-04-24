@@ -192,11 +192,8 @@ Grand Slams · 2 Tours
 <h2 class="anchored" data-anchor-id="what-about-the-biggest-moments">What About the Biggest Moments?</h2>
 <p>Perhaps momentum does not operate across an entire match. Perhaps it concentrates in the highest-pressure moments: break points, tiebreaks, the situations where crowds hold their breath.</p>
 <p>I tested this directly. For every player, I calculated their Tiebreak Over-Expectation (TBOE): their actual tiebreak win rate minus their predicted win rate based on official ranking and recent form. A positive TBOE means a player outperforms expectations under tiebreak pressure. A negative TBOE means they underperform. If certain players consistently raise their game when it matters most, I would expect to see clear outliers pulling sharply away from zero in either direction.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="outputs/output3_tboe_scatter.png" class="img-fluid figure-img"></p>
-<figcaption>Tiebreak over-expectation by player, ATP and WTA.</figcaption>
-</figure>
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<iframe src="outputs/output3_tboe_scatter.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The chart plots every player’s TBOE score from lowest to highest. The pattern is telling. In both the ATP and WTA, the distribution is smooth and continuous, running gradually from around -0.12 at the low end to +0.17 at the high end in the ATP, and from -0.20 to +0.25 in the WTA. There are no dramatic outliers. No player separates themselves convincingly from the pack as a consistent clutch performer. The curve drifts upward steadily, which is exactly what you would expect from natural variation across a group of players, not from a subset of genuinely pressure-proof competitors.</p>
 </section>
@@ -234,7 +231,7 @@ Grand Slams · 2 Tours
 <h2 class="anchored" data-anchor-id="if-not-momentum-then-what">If Not Momentum, Then What?</h2>
 <p>Outside of tiebreaks, if momentum does not drive point outcomes, what does? The chart below ranks the four variables by how much each one drives heterogeneity in the causal effect. In other words, which variables most determine whether the momentum effect is stronger or weaker for a given player in a given situation.</p>
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
-<iframe src="outputs/output7_feature_importance.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
+<iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The result is clear and consistent across both tours. The cumulative momentum score dominates everything else. In the ATP it scores 0.56, more than twice the weight of player rank at 0.24 and more than three times that of rolling win percentage at 0.17. In the WTA the pattern holds, though the gap is slightly smaller: momentum score at 0.48, player rank at 0.28, rolling win percentage at 0.21.</p>
 <p>The most striking feature of the chart is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores approximately 0.03 in both tours. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the cumulative trajectory is already accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
