@@ -110,7 +110,7 @@ The results are the first blow to the momentum theory. In the ATP, 10.4% of play
 
 But I cannot stop here. As Miller and Sanjurjo (2018) mathematically proved, traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences. It is also worth noting that these p-values are not corrected for multiple comparisons across players, meaning a small number of significant results would be expected by chance alone. To see if the hot hand is hiding beneath the surface, I need to look closer with a more advanced tool.
 
-The chart below tracks the cumulative momentum score across a WTA match between Ekaterina Alexandrova and Madison Brengle, the longest match in the WTA dataset by point count. Think of it as a running total of performance drift: the line rises when the player is winning points above her average rate for that match, and falls when she drops below it. If momentum were real and self-reinforcing, the line would climb and stay up, or fall and stay down. A genuine hot hand would look like a staircase, not a weather chart.
+The chart below tracks the cumulative momentum score across a WTA match between Ekaterina Alexandrova and Madison Brengle, the longest match in the WTA dataset by point count. Think of it as a running total of performance drift: the line rises when the player wins points above her average rate, and falls when she drops below. If momentum were real and self-reinforcing, the line would climb and stay up, or fall and stay down. A genuine hot hand would look like a staircase, not a weather chart.
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
