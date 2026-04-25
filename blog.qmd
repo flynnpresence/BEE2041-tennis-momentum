@@ -51,7 +51,7 @@ It is the fourth set of the 2023 Wimbledon final. Carlos Alcaraz, twenty years o
 
 He went on to win the match. The narrative wrote itself.
 
-But did winning that break point actually make the next one more likely to go his way? Or did fifteen thousand people in the stands and millions watching at home just fall for one of sport's oldest statistical traps?
+But did winning that break point actually make the next one more likely to go his way? Or did fifteen thousand people in the stands just fall for one of sport's oldest statistical traps?
 
 In 1985, psychologists Gilovich, Vallone and Tversky published one of the most influential papers in sports statistics, arguing that the "hot hand" in basketball was a cognitive illusion. Fans and players were pattern-matching on random sequences. Their conclusion was blunt: streaks happen by chance, and momentum is a story we tell ourselves.
 
