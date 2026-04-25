@@ -199,9 +199,9 @@ Outside of tiebreaks, if momentum does not drive point outcomes, what does? The 
 </div>
 ```
 
-The result is clear and consistent across both tours. The cumulative momentum score dominates everything else. In the ATP it scores 0.56, more than twice the weight of player rank at 0.24 and more than three times that of rolling win percentage at 0.17. In the WTA the pattern holds, though the gap is slightly smaller: momentum score at 0.48, player rank at 0.28, rolling win percentage at 0.21.
+The result is clear and consistent across both tours. The cumulative momentum score dominates everything else. In the ATP it scores 0.50, significantly ahead of player rank at 0.32 and rolling win percentage at 0.16. In the WTA the pattern holds: momentum score at 0.52, player rank at 0.28, rolling win percentage at 0.19.
 
-The most striking feature of the chart is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores approximately 0.03 in both tours. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the cumulative trajectory is already accounted for. The hot hand, in its most literal form, has no predictive power here.
+The most striking feature of the chart is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores 0.024 in the ATP and 0.010 in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the cumulative trajectory is already accounted for. The hot hand, in its most literal form, has no predictive power here.
 
 What most shapes whether the momentum effect is large or small is the accumulated drift of performance across the entire match, not any short-term burst of form.
 
