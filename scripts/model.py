@@ -115,7 +115,7 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
         return 'Standard point'
 
     hover = [
-        f'Point {i+1}<br>Score: {row["Pts"]}<br>'
+        f'Point {i+1}<br>'
         f'CUSUM: {row["CUSUM"]:.3f}<br>{leverage_label(row)}'
         for i, (_, row) in enumerate(match_data.iterrows())
     ]
