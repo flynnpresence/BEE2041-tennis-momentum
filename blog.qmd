@@ -149,7 +149,7 @@ The model controls for four variables: player ranking, rolling win percentage ov
 </div>
 ```
 
-The first chart shows the estimated causal effect for every observation, plotted against player ranking. The trend line sits at or below zero across all ranking levels in both tours. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.
+The first chart shows the estimated causal effect broken down by player ranking band. Across all four bands in both tours, the effect sits below zero. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
@@ -159,8 +159,7 @@ The first chart shows the estimated causal effect for every observation, plotted
 
 The second chart breaks this down by variable. Two findings stand out. First, the pressure point causal effect sits just below zero in both tours, with tight error bars. Second, rolling win percentage behaves in completely opposite directions between tours: negative for ATP, strongly positive for WTA, with the WTA error bar barely crossing zero. This suggests recent form plays a meaningfully different role in women's tennis than in men's, a tour-specific pattern that would have been invisible if the two datasets had been merged.
 
-The combined causal effect of winning a pressure point is -0.0325 for the ATP and -0.0363 for the WTA. Both are negative. Both are consistent in direction across tours and control specifications.
-
+The combined causal effect of winning a pressure point is -0.0325 for the ATP and -0.0363 for the WTA. Both are negative.
 If we stopped here, the universal hot hand would look like a fallacy. But remember, this combined number treats all high-leverage moments as identical. What happens if we split the two types of pressure apart?
 
 ## The Finding That Changes Everything
