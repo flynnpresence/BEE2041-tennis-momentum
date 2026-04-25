@@ -18,14 +18,14 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
-from numpy.polynomial import polynomial as P
 
 # Suppress known, safe warnings from econml and sklearn only
 # Global suppression avoided — specific known warnings caught locally
 warnings.filterwarnings('ignore', category=UserWarning, module='econml')
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 warnings.filterwarnings('ignore', category=FutureWarning, module='econml')
-warnings.filterwarnings('ignore', category=RuntimeWarning, module='statsmodels')
+warnings.filterwarnings(
+    'ignore', category=RuntimeWarning, module='statsmodels')
 
 plt.rcParams.update({
     'font.family':      'sans-serif',
@@ -69,7 +69,8 @@ def plot_chi2_table(tests: pd.DataFrame) -> None:
         })
     summary = pd.DataFrame(rows)
 
-    html_table = summary.to_html(index=False, border=0, classes='momentum-table')
+    html_table = summary.to_html(
+        index=False, border=0, classes='momentum-table')
     full_html = (
         '<!DOCTYPE html><html><head><meta charset="utf-8">'
         '<style>'
@@ -78,7 +79,8 @@ def plot_chi2_table(tests: pd.DataFrame) -> None:
         'table.momentum-table{width:100%;border-collapse:collapse;font-size:14px;}'
         'table.momentum-table th{background:#f0f0ec;font-weight:600;padding:10px 14px;'
         'text-align:left;border-bottom:2px solid #d0d0cc;color:#1a1a1a;}'
-        'table.momentum-table td{padding:9px 14px;border-bottom:1px solid #e8e8e4;color:#1a1a1a;}'
+        'table.momentum-table td{'
+        'padding:9px 14px;border-bottom:1px solid #e8e8e4;color:#1a1a1a;}'
         'table.momentum-table tr:last-child td{border-bottom:none;}'
         '</style></head><body>'
         '<div class="table-container">' + html_table + '</div>'
@@ -399,7 +401,8 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
                 continue
             vals = cates[mask]
             means.append(round(float(vals.mean()), 4))
-            errors.append(round(float(1.96 * vals.std() / np.sqrt(len(vals))), 4))
+            errors.append(
+                round(float(1.96 * vals.std() / np.sqrt(len(vals))), 4))
         return means, errors
 
     atp_means, atp_errors = bin_cates(atp_cates, atp_X)
@@ -622,7 +625,8 @@ def plot_model_table(
             borderwidth=1
         ),
         xaxis=dict(
-            title=dict(text='Effect on Win Probability', font=dict(color='#111')),
+            title=dict(text='Effect on Win Probability',
+                       font=dict(color='#111')),
             showgrid=True,
             gridcolor='#eeeeee',
             zeroline=False
@@ -744,7 +748,7 @@ def plot_reveal_chart(
 
     # Split view data
     split_x = ['ATP Break Point', 'WTA Break Point',
-                'ATP Tiebreak', 'WTA Tiebreak']
+               'ATP Tiebreak', 'WTA Tiebreak']
     split_y = [atp_bp_ate, wta_bp_ate, atp_tb_ate, wta_tb_ate]
     split_colors = [bar_color(v) for v in split_y]
 
@@ -951,12 +955,17 @@ def main() -> None:
     }
     feat_imp_export = pd.DataFrame({
         'feature': [_label_map[f] for f in CONTROLS],
-        'ATP': [round(float(atp_imp.loc[atp_imp['Feature'] == f, 'Importance'].values[0]), 4)
-                for f in CONTROLS],
-        'WTA': [round(float(wta_imp.loc[wta_imp['Feature'] == f, 'Importance'].values[0]), 4)
-                for f in CONTROLS]
+        'ATP': [
+            round(float(
+                atp_imp.loc[atp_imp['Feature'] == f, 'Importance'].values[0]), 4)
+            for f in CONTROLS],
+        'WTA': [
+            round(float(
+                wta_imp.loc[wta_imp['Feature'] == f, 'Importance'].values[0]), 4)
+            for f in CONTROLS]
     })
-    feat_imp_export.to_csv(os.path.join(OUT_DIR, 'feature_importance.csv'), index=False)
+    feat_imp_export.to_csv(os.path.join(
+        OUT_DIR, 'feature_importance.csv'), index=False)
     print('  Saved feature_importance.csv')
 
     print('\n=== Done — all 6 outputs saved to outputs/ ===')

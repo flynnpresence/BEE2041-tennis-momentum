@@ -396,7 +396,8 @@ def process_tour(
         columns=['Opponent_Ranking_GS', 'Opponent_Ranking_Fallback'])
     opp_valid = merged['Opponent_Ranking'].notna().sum() / len(merged)
     assert opp_valid >= 0.90, (
-        f"Opponent rankings coverage {opp_valid:.1%} below 90% threshold for {tour_name}"
+        f"Opponent rankings coverage {opp_valid:.1%} below 90% threshold"
+        f" for {tour_name}"
     )
 
     # Ranking difference (positive = focal is worse ranked)
