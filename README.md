@@ -23,6 +23,8 @@ make all
 
 This runs the full pipeline: download → clean → features → model → build_blog_data.
 
+Note: Raw data is read from `data/raw/` and never modified. All analysis-ready outputs are written to `data/processed/`, following the principle that raw data is sacred.
+
 ---
 
 ## Dependencies
