@@ -166,6 +166,13 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
     df['BPOR']            = df['BPOR'].astype(float)
     df['TBOE']            = df['TBOE'].astype(float)
 
+    # ── Validation: confirm no NaNs in core predictive columns ───────────────
+    assert df['Rolling_Win_Pct'].notna().all(), "NaNs in Rolling_Win_Pct"
+    assert df['CUSUM'].notna().all(), "NaNs in CUSUM"
+    assert df['BPOR'].notna().all(), "NaNs in BPOR"
+    assert df['TBOE'].notna().all(), "NaNs in TBOE"
+    assert df['Next_Point_Won'].notna().all(), "NaNs in Next_Point_Won"
+
     return df
 
 
