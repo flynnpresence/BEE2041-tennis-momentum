@@ -133,6 +133,7 @@ I tested this directly. For every player, I calculated their Tiebreak Over-Expec
 ```
 
 The chart plots every player's TBOE score from lowest to highest. The pattern is telling. In both the ATP and WTA, the distribution is smooth and continuous, running gradually from around -0.12 at the low end to +0.17 at the high end in the ATP, and from -0.20 to +0.25 in the WTA. There are no dramatic outliers. No player separates themselves convincingly from the pack as a consistent clutch performer.
+
 ## Correlation or Causation?
 
 Everything so far has tested whether momentum correlates with winning the next point. But correlation is not causation. A player who is already dominating will naturally win more break points. The association might simply reflect that good players win more of everything, not that winning one big point causes them to win the next.

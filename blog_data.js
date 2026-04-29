@@ -32,28 +32,6 @@ const ATE = {
       "type": "Tiebreak",
       "value": 0.0209
     }
-  ],
-  "featureImportance": [
-    {
-      "feature": "Player Ranking",
-      "ATP": 0.315,
-      "WTA": 0.2807
-    },
-    {
-      "feature": "Rolling Win % (last 10)",
-      "ATP": 0.1564,
-      "WTA": 0.1874
-    },
-    {
-      "feature": "Winning Streak (last 4)",
-      "ATP": 0.0243,
-      "WTA": 0.0101
-    },
-    {
-      "feature": "Cumulative Momentum Score",
-      "ATP": 0.5043,
-      "WTA": 0.5218
-    }
   ]
 };
 const featureData = [
