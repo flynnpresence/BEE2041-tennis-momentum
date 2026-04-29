@@ -15,9 +15,11 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import statsmodels.api as sm
+import statsmodels.formula.api as smf
 from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
 
 # Suppress known, safe warnings from econml and sklearn only
 # Global suppression avoided — specific known warnings caught locally
@@ -276,14 +278,16 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
 def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     print(f'\n  Logistic regression — {tour_name}')
     keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id']
+    nan_counts = df[keep].isna().sum()
+    if nan_counts.sum() > 0:
+        print(f"    Warning: Dropping rows with NaNs:\n{nan_counts[nan_counts > 0]}")
     data = df[keep].dropna().copy()
     data['HL_Win'] = ((data['High_Leverage'] == 1) & (
         data['Point_Won'] == 1)).astype(float)
 
-    X = sm.add_constant(data[CONTROLS + ['HL_Win']].astype(float))
-    y = data[OUTCOME].astype(float)
-
-    model = sm.Logit(y, X)
+    # Formula API — equivalent to sm.Logit but uses R-style patsy formula
+    formula = f"{OUTCOME} ~ " + " + ".join(CONTROLS) + " + HL_Win"
+    model = smf.logit(formula=formula, data=data)
     result = model.fit(
         disp=0,
         method='bfgs',
@@ -301,6 +305,18 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     })
     coef_df['Tour'] = tour_name
     print(f'    N = {len(data):,} | Log-likelihood = {result.llf:.1f}')
+
+    # 5-fold cross-validation on sklearn LogisticRegression
+    # Tests predictive stability — distinct from econometric robustness check
+    sk_model = LogisticRegression(max_iter=1000, random_state=SEED)
+    X_arr = data[CONTROLS + ['HL_Win']].astype(float).values
+    y_arr = data[OUTCOME].astype(float).values
+    cv_scores = cross_val_score(sk_model, X_arr, y_arr, cv=5, scoring='accuracy')
+    print(
+        f'    5-Fold CV Accuracy: {cv_scores.mean():.4f}'
+        f' (±{cv_scores.std():.4f})'
+    )
+
     return coef_df
 
 
@@ -319,6 +335,9 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
         extra_cols.append('High_Leverage_TB')
 
     keep = controls + [TREATMENT, OUTCOME] + extra_cols
+    nan_counts = df[keep].isna().sum()
+    if nan_counts.sum() > 0:
+        print(f"    Warning: Dropping rows with NaNs:\n{nan_counts[nan_counts > 0]}")
     data = df[keep].dropna().copy()
 
     if treatment_label == 'bp':
