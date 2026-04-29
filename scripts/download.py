@@ -60,6 +60,9 @@ def download(filename: str, url: str) -> None:
         url      (str): Remote CSV URL to fetch.
     """
     dest = os.path.join(RAW_DIR, filename)
+    if os.path.exists(dest):
+        print(f'  -> Already exists, skipping {filename}')
+        return
     print(f'  Downloading {filename}...')
 
     for attempt in range(3):
