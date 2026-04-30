@@ -41,6 +41,9 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.sort_values(['match_id', 'Set1', 'Gm1', 'Pt']).copy()
 
     # ── Streak_k4 ─────────────────────────────────────────────────────────────
+    # Streak_k4 — 1 if player won ALL of the last STREAK_K points.
+    # .min() on a binary series returns 1 only if every value is 1.
+    # .shift(1) ensures we use only past points — no look-ahead bias.
     df['Streak_k4'] = (
         df.groupby('match_id')['Point_Won']
         .transform(lambda x: x.shift(1).rolling(STREAK_K, min_periods=STREAK_K).min())
@@ -49,6 +52,9 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # ── Rolling_Win_Pct ───────────────────────────────────────────────────────
+    # Rolling_Win_Pct — proportion of last ROLLING_WIN points won.
+    # min_periods=1 avoids NaN at match start; fillna(0.5) applies
+    # a neutral prior (50/50) for the very first point of each match.
     df['Rolling_Win_Pct'] = (
         df.groupby('match_id')['Point_Won']
         .transform(lambda x: x.shift(1).rolling(ROLLING_WIN, min_periods=1).mean())
@@ -57,8 +63,11 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
     # ── CUSUM (fixed — expanding mean, no look-ahead) ─────────────────────────
     def cusum_expanding(series: pd.Series) -> pd.Series:
+        # CUSUM tracks cumulative deviation from the player's own
+        # expanding mean win rate within the match. A rising CUSUM
+        # means the player is winning points above their match average.
+        # expanding().mean() uses only past points — no look-ahead.
         shifted = series.shift(1).fillna(0)
-        # Expanding mean uses only past observations — no look-ahead
         expanding_mean = shifted.expanding().mean()
         deviations = shifted - expanding_mean
         return deviations.cumsum()
@@ -110,8 +119,13 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         tb_played  = match_df['_is_tb_point'].shift(1).expanding().sum()
         tb_won     = (match_df['_is_tb_point']
                       * match_df['Point_Won']).shift(1).expanding().sum()
+        # 0.5 prior for tiebreak rate — neutral assumption when no
+        # tiebreak history exists yet in this match.
         tb_rate    = (tb_won / tb_played).fillna(0.5)
 
+        # TBOE = tiebreak win rate minus general rolling win rate.
+        # Positive TBOE means the player outperforms in tiebreaks
+        # relative to their overall form.
         match_df['TBOE'] = tb_rate - match_df['Rolling_Win_Pct']
         match_df['match_id'] = match_id
 
