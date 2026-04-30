@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    blog.js — Interactive charts + TOC polish + scroll animations
-   The Illusion of Momentum
+   The Wrong Kind of Momentum
    ═══════════════════════════════════════════════════════════════ */
 
 (function () {
