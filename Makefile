@@ -44,4 +44,5 @@ reset:
 	rm -f data/processed/*.csv outputs/*.html outputs/*.csv \
 	      outputs/*.png blog_data.js blog.html
 	rm -rf data/raw/*
+	touch data/raw/.gitkeep data/processed/.gitkeep
 	@echo "Pipeline reset — run make all to rebuild"
