@@ -20,7 +20,8 @@
       "Bash(/usr/local/bin/python3 -m autopep8 --in-place --select=E501,E502,E127,E126,W504 scripts/features.py scripts/model.py scripts/download.py scripts/interactive.py)",
       "Bash(/usr/local/bin/python3 -m flake8 scripts/clean.py scripts/features.py scripts/model.py scripts/download.py scripts/interactive.py --max-line-length=88 --ignore=E221,E241,E226,E402,F541,W503,W504)",
       "Bash(/usr/local/bin/python3 -m flake8 scripts/model.py --max-line-length=88 --ignore=E221,E226,E241,E402,F541,W503,W504)",
-      "Bash(/usr/local/bin/python3 -m flake8 scripts/build_blog_data.py --max-line-length=88 --ignore=E221,E226,E241,E402,F541,W503,W504)"
+      "Bash(/usr/local/bin/python3 -m flake8 scripts/build_blog_data.py --max-line-length=88 --ignore=E221,E226,E241,E402,F541,W503,W504)",
+      "Bash(git rm *)"
     ]
   }
 }
