@@ -8,7 +8,10 @@ Merges datasets with validation.
 Adds official rankings using primary GS merge + season median fallback.
 Outputs data/processed/atp_cleaned_points.csv and wta_cleaned_points.csv.
 
-No feature engineering occurs here — that happens in features.py.
+Treatment flags (High_Leverage, High_Leverage_BP, High_Leverage_TB),
+outcome variables (Point_Won, Next_Point_Won), and player identity
+columns are engineered here. Rolling momentum features (CUSUM, BPOR,
+TBOE, Streak_k4) are computed separately in features.py.
 """
 
 import os
