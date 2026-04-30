@@ -11,3 +11,5 @@ count_words*.py
 # Data files
 data/raw/
 data/processed/
+.claude/
+CLAUDE.md
