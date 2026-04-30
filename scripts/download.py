@@ -7,9 +7,10 @@ Raw data is sacred — no filtering or cleaning occurs here.
 All filtering and cleaning happens in clean.py.
 
 Compliance note: GitHub's robots.txt permits automated access to
-raw.githubusercontent.com. Jeff Sackmann's tennis repositories are
-published under CC BY 4.0 (Match Charting Project) and are freely
-available for academic use. No rate limits are imposed beyond the
+raw.githubusercontent.com. The Match Charting Project is published
+under CC BY 4.0. The ATP and WTA results repositories are published
+under CC BY-NC-SA 4.0 (non-commercial use only). Both licences permit
+academic use with attribution. No rate limits are imposed beyond the
 1-second delay between requests implemented below.
 """
 
