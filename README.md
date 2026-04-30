@@ -78,7 +78,7 @@ See `requirements.txt`. Key packages:
   https://github.com/JeffSackmann/tennis_atp
   https://github.com/JeffSackmann/tennis_wta
 
-Data licensed under CC BY 4.0 and freely available for academic use.
+The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results repositories are licensed under CC BY-NC-SA 4.0 (non-commercial use only). Both licences permit academic use with attribution.
 
 ---
 
