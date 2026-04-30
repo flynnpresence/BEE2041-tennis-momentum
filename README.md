@@ -23,6 +23,8 @@ make all
 
 This runs the full pipeline in sequence: download → clean → features → model → build_blog_data → render.
 
+Requires Python 3.9+, pip, and [Quarto](https://quarto.org) installed on your system.
+
 Run `make reset` to wipe all generated files and start fresh.
 
 Note: Raw data is read from `data/raw/` and never modified. All analysis-ready outputs are written to `data/processed/`, following the principle that raw data is sacred.
@@ -49,6 +51,7 @@ BEE2041-tennis-momentum/
 ├── blog_data.js        # Python-generated data constants (auto-generated)
 ├── styles.css          # Blog styling
 ├── Makefile            # Pipeline orchestration
+├── README.md           # Project documentation
 └── requirements.txt    # Python dependencies
 ```
 
@@ -75,7 +78,7 @@ See `requirements.txt`. Key packages:
   https://github.com/JeffSackmann/tennis_atp
   https://github.com/JeffSackmann/tennis_wta
 
-Data licensed under CC BY 4.0. robots.txt permits automated access to raw.githubusercontent.com.
+Data licensed under CC BY 4.0 and freely available for academic use.
 
 ---
 
