@@ -1,30 +1,41 @@
+# ─── Core Data Wrangling ──────────────────────────────────────────────
+numpy==2.1.3
+pandas==3.0.1
+scipy==1.14.1
+
+# ─── Econometrics & Baseline Modelling ───────────────────────────────
+statsmodels==0.14.6
+patsy==1.0.2
+
+# ─── Causal Machine Learning ─────────────────────────────────────────
+scikit-learn==1.6.1
+econml==0.16.0
+lightgbm==4.6.0
+shap==0.51.0
+
+# ─── Data Collection ─────────────────────────────────────────────────
+requests==2.33.1
+
+# ─── Visualisation ───────────────────────────────────────────────────
+matplotlib==3.10.0
+plotly==6.7.0
+
+# ─── Pipeline Dependencies ───────────────────────────────────────────
 cloudpickle==3.1.2
 contourpy==1.3.1
 cycler==0.12.1
-econml==0.16.0
 fonttools==4.56.0
 joblib==1.5.3
 kiwisolver==1.4.8
-lightgbm==4.6.0
 llvmlite==0.45.1
-matplotlib==3.10.0
 numba==0.62.1
-numpy==2.1.3
 packaging==24.2
-pandas==3.0.1
-patsy==1.0.2
 pillow==11.1.0
-plotly==6.7.0
 pyparsing==3.2.1
 python-dateutil==2.9.0.post0
-requests==2.33.1
-scikit-learn==1.6.1
-scipy==1.14.1
-shap==0.51.0
 six==1.17.0
 slicer==0.0.8
 sparse==0.14.0
-statsmodels==0.14.6
 threadpoolctl==3.6.0
 tqdm==4.67.3
 typing_extensions==4.15.0
