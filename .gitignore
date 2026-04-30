@@ -8,8 +8,10 @@ code_quality_report.txt
 model_output.txt
 count_words*.py
 
-# Data files
-data/raw/
-data/processed/
+# Data files — ignore contents but keep folder structure
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
 .claude/
 CLAUDE.md
