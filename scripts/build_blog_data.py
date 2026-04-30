@@ -1,11 +1,13 @@
 """
 build_blog_data.py
 ------------------
-Reads processed model results and generates blog_data.js —
-a JavaScript constants file consumed by blog.js for the D3 reveal chart.
+Reads model outputs (ate_results.csv, feature_importance.csv) and
+generates blog_data.js — a JavaScript constants file loaded via script
+tag in blog.html, making ATE and feature importance values globally
+available to blog.js without any fetch() or CORS risk.
 
-This script ensures the D3 chart values are Python-generated and
-automatically updated whenever the model is rerun. No manual hardcoding.
+Ensures all D3 chart values are Python-generated and automatically
+updated when the model is rerun. No manual hardcoding in the frontend.
 """
 
 import os
