@@ -3,7 +3,7 @@ features.py
 -----------
 Loads cleaned point-by-point data for ATP and WTA.
 Engineers momentum and control features strictly forward-rolling.
-Runs per-player Chi-squared and runs tests (Warning 7).
+Runs per-player Chi-squared and runs tests (no pooling — aggregation bias risk).
 Outputs data/processed/processed_features.csv as the model checkpoint.
 
 All features computed within match groups — no look-ahead bias.
@@ -190,11 +190,11 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# ── Per-Player Statistical Tests (Warning 7) ──────────────────────────────────
+# ── Per-Player Statistical Tests ─────────────────────────────────────────────
 def run_per_player_tests(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     """
     Runs per-player Chi-squared independence test and Wald-Wolfowitz runs test.
-    Warning 7: Do not pool players — aggregation bias risk.
+    Do not pool players — aggregation bias risk.
 
     Returns a summary DataFrame with one row per player.
     """
@@ -301,7 +301,7 @@ def main() -> None:
     wta['Tour'] = 'WTA'
     print(f'  WTA feature rows: {len(wta):,}')
 
-    # Per-player statistical tests (Warning 7 — no pooling)
+    # Per-player statistical tests — run separately per tour, no pooling
     atp_tests = run_per_player_tests(atp, 'ATP')
     wta_tests = run_per_player_tests(wta, 'WTA')
     all_tests = pd.concat([atp_tests, wta_tests], ignore_index=True)
