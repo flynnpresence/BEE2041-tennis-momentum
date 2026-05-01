@@ -986,7 +986,7 @@ def main() -> None:
         OUT_DIR, 'feature_importance.csv'), index=False)
     print('  Saved feature_importance.csv')
 
-    print('\n=== Done — all 6 outputs saved to outputs/ ===')
+    print('\n=== Done — all 7 outputs saved to outputs/ ===')
 
 
 if __name__ == '__main__':
