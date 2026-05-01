@@ -5,7 +5,7 @@
 #   make reset — wipes all generated files for a clean rebuild
 # ══════════════════════════════════════════════════════════════════════
 
-PYTHON = /usr/local/bin/python3
+PYTHON = python3
 
 .PHONY: all reset
 
