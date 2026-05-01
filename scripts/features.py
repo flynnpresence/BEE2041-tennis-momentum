@@ -105,13 +105,14 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         # 0.38 is the approximate ATP/WTA return point win rate used as a
         # Bayesian prior for players with no historical return data in this match.
         # Derived from tour-wide averages — returners win ~38% of points served.
-        ret_rate   = (ret_won / ret_played).fillna(0.38)
+        # Applied symmetrically to both terms so initial BPOR = 0 (neutral).
+        ret_rate   = (ret_won / ret_played).fillna(0.38)  # Prior: tour avg return win rate
 
         bp_played  = match_df['is_bp'].shift(1).expanding().sum()
         bp_won     = (match_df['is_bp']
                       * match_df['Point_Won']).shift(1).expanding().sum()
         # Same 0.38 prior applied to break point conversion rate.
-        bp_rate    = (bp_won / bp_played).fillna(0.38)
+        bp_rate    = (bp_won / bp_played).fillna(0.38)  # Prior: tour avg return win rate
 
         match_df['BPOR'] = bp_rate - ret_rate
 
