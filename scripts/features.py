@@ -13,6 +13,7 @@ import os
 import numpy as np
 import pandas as pd
 from scipy import stats
+from statsmodels.stats.multitest import multipletests
 
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -266,11 +267,28 @@ def run_per_player_tests(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     n_chi2_sig = results_df['Chi2_Sig'].sum()
     n_runs_sig = results_df['Runs_Sig'].sum()
 
+    # ── Benjamini-Hochberg correction for multiple comparisons ────────────────
+    chi2_reject, chi2_p_adj, _, _ = multipletests(
+        results_df['Chi2_P'].fillna(1), method='fdr_bh')
+    runs_reject, runs_p_adj, _, _ = multipletests(
+        results_df['Runs_P'].fillna(1), method='fdr_bh')
+    results_df['Chi2_P_BH']   = chi2_p_adj
+    results_df['Chi2_Sig_BH'] = chi2_reject.astype(int)
+    results_df['Runs_P_BH']   = runs_p_adj
+    results_df['Runs_Sig_BH'] = runs_reject.astype(int)
+
+    n_chi2_sig_bh = results_df['Chi2_Sig_BH'].sum()
+    n_runs_sig_bh = results_df['Runs_Sig_BH'].sum()
+
     print(f'  Players tested: {n_tested}')
     pct_chi2 = 100 * n_chi2_sig / n_tested
     pct_runs = 100 * n_runs_sig / n_tested
     print(f'  Chi-squared significant (p<{ALPHA}): {n_chi2_sig} ({pct_chi2:.1f}%)')
     print(f'  Runs test significant (p<{ALPHA}): {n_runs_sig} ({pct_runs:.1f}%)')
+    pct_chi2_bh = 100 * n_chi2_sig_bh / n_tested
+    pct_runs_bh = 100 * n_runs_sig_bh / n_tested
+    print(f'  Chi-squared significant (BH corrected): {n_chi2_sig_bh} ({pct_chi2_bh:.1f}%)')
+    print(f'  Runs test significant (BH corrected): {n_runs_sig_bh} ({pct_runs_bh:.1f}%)')
 
     return results_df
 
