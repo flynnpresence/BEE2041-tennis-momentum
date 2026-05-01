@@ -14,6 +14,18 @@ This project tests whether point-by-point momentum exists in professional tennis
 
 ---
 
+## Methodological Rigor
+
+To address conflicting conclusions in existing literature (Gilovich 1985 vs. Miller & Sanjurjo 2018), this project implements several safeguards:
+
+- **Random Focal Player Mask:** Each match is randomly viewed from the perspective of one player to prevent perfectly correlated duplicate observations and satisfy independence assumptions.
+- **Forward-Rolling Priors:** Luck proxies use neutral tour-wide Bayesian priors (0.38 for return points; 0.5 for tiebreaks) to avoid cold-start bias at match beginnings.
+- **Deconfounding Baseline Skill:** Consistent with Kovalchik (2016), official rankings are attached via a two-step validated merge (tournament-specific then season-median fallback) to isolate momentum from player quality.
+- **Clustered Standard Errors:** Logistic models use match-level clustering to account for intra-match point dependency.
+- **Causal Forest (DML):** Employs econml to estimate the Average Treatment Effect while controlling for rolling win percentage, momentum scores, and streaks, isolating the "success breeds success" mechanic.
+
+---
+
 ## Replication
 
 ```bash
