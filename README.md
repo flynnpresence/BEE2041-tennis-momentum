@@ -102,8 +102,8 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 
 - Gilovich, T., Vallone, R., & Tversky, A. (1985). The hot hand in basketball. *Cognitive Psychology*, 17(3), 295–314.
 - Miller, J. B., & Sanjurjo, A. (2018). Surprised by the hot hand fallacy? *Econometrica*, 86(6), 2019–2047.
-- Du, Y., et al. (2025). Momentum in tennis. *Journal of Sports Sciences*.
-- Kovalchik, S., & Reid, M. (2017). Predicting winner of tennis matches. *Journal of Quantitative Analysis in Sports*.
+- Du, C., Zhang, C., & Zhou, L. (2025). A novel methodological framework for analyzing the momentum effect in tennis singles. *arXiv preprint arXiv:2509.01243*.
+- Kovalchik, S. (2016). Searching for the GOAT of tennis win prediction. *Journal of Quantitative Analysis in Sports*, 12(3), 127–138.
 
 ---
 
