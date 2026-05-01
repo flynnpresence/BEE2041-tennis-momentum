@@ -6,8 +6,8 @@ Saves files to data/raw/ without any modification.
 Raw data is sacred — no filtering or cleaning occurs here.
 All filtering and cleaning happens in clean.py.
 
-Compliance note: GitHub's robots.txt permits automated access to
-raw.githubusercontent.com. The Match Charting Project is published
+Compliance note: raw.githubusercontent.com has no robots.txt,
+meaning automated access is unrestricted by convention. The Match Charting Project is published
 under CC BY 4.0. The ATP and WTA results repositories are published
 under CC BY-NC-SA 4.0 (non-commercial use only). Both licences permit
 academic use with attribution. No rate limits are imposed beyond the
