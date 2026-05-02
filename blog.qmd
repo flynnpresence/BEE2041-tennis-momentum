@@ -127,7 +127,7 @@ For every player, I calculated their Tiebreak Over-Expectation (TBOE): their act
 </div>
 ```
 
-The chart plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest. Of the full sample, 23 ATP players and 6 WTA players qualify. The WTA panel is illustrative given the small qualifying sample. In the ATP, the distribution runs gradually from Milos Raonic at -0.11 to Holger Rune at +0.07, with no player pulling sharply away from the pack. The WTA sample is too small to draw strong conclusions: only 6 players qualify, and Martina Trevisan at +0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
+The chart plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest. Of the full sample, 23 ATP players and 6 WTA players qualify. In the ATP, the distribution runs gradually from Milos Raonic at -0.11 to Holger Rune at +0.07, with no player pulling sharply away from the pack. The WTA sample is too small to draw strong conclusions: only 6 players qualify, and Martina Trevisan at +0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
 
 ## Correlation or Causation?
 
