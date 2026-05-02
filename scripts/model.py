@@ -160,7 +160,7 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
 
     fig.update_layout(
         title=dict(
-            text=(f'Cumulative Momentum Score — {tour_name}<br>'
+            text=(f'Cumulative Momentum Score: {tour_name}<br>'
                   f'<span style="font-size:11px">{p1} vs {p2}</span>'),
             font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
                       color='#111'),
@@ -623,7 +623,7 @@ def plot_model_table(
 
     fig.update_layout(
         title=dict(
-            text='Model Results — Logistic Regression + Causal Forest',
+            text='Model Results: Logistic Regression + Causal Forest',
             font=dict(size=14, family='Helvetica Neue, Arial, sans-serif',
                       color='#111'),
             x=0.5
