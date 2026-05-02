@@ -192,11 +192,21 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
 def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
     import plotly.graph_objects as go
 
+    # Minimum 20 tiebreak points to prevent finite-sample variance
+    # creating artificial outliers (Miller & Sanjurjo, 2018)
+    TBOE_MIN_TB = 20
+    atp_tb_counts = atp.groupby('Focal_Player')['High_Leverage_TB'].sum()
+    wta_tb_counts = wta.groupby('Focal_Player')['High_Leverage_TB'].sum()
+
     atp_tboe = atp.groupby('Focal_Player')['TBOE'].mean().reset_index()
+    atp_tboe = atp_tboe[atp_tboe['Focal_Player'].isin(
+        atp_tb_counts[atp_tb_counts >= TBOE_MIN_TB].index)]
     atp_tboe = atp_tboe.sort_values('TBOE').reset_index(drop=True)
     atp_tboe['rank'] = range(len(atp_tboe))
 
     wta_tboe = wta.groupby('Focal_Player')['TBOE'].mean().reset_index()
+    wta_tboe = wta_tboe[wta_tboe['Focal_Player'].isin(
+        wta_tb_counts[wta_tb_counts >= TBOE_MIN_TB].index)]
     wta_tboe = wta_tboe.sort_values('TBOE').reset_index(drop=True)
     wta_tboe['rank'] = range(len(wta_tboe))
 

@@ -127,7 +127,7 @@ For every player, I calculated their Tiebreak Over-Expectation (TBOE): their act
 </div>
 ```
 
-The chart plots every player's TBOE score from lowest to highest. In both the ATP and WTA, the distribution is smooth and continuous, running gradually from around -0.12 at the low end to +0.17 at the high end in the ATP, and from -0.20 to +0.25 in the WTA. There are no dramatic outliers. No player separates themselves convincingly from the pack as a consistent clutch performer.
+The chart plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest. In both the ATP and WTA, the distribution is smooth and continuous, running gradually from around -0.12 at the low end to +0.18 at the high end in the ATP, and from -0.22 to +0.26 in the WTA. There are no dramatic outliers. No player separates themselves convincingly from the pack as a consistent clutch performer.
 
 ## Correlation or Causation?
 
