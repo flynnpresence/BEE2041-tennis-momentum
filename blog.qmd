@@ -83,19 +83,19 @@ This project scales the test entirely. I analysed 52,314 points across all four 
 
 :::
 
-The raw data comes from Jeff Sackmann's Match Charting Project, a publicly available volunteer-compiled database where tennis analysts manually record every point played in professional matches, including the exact score state at each moment. As a volunteer-compiled database, marginal human input error is possible, though the scale of 52,314 observations substantially mitigates the impact of random data-entry errors. The same dataset has been used in prior momentum research, including Du et al. (2025); the contribution here is scale and the break point vs tiebreak distinction. This allowed me to identify high-pressure situations with precision: break points (where the returner is one point from winning the game) and tiebreaks (where a set hangs in the balance). I defined these as high-leverage moments, a category combining break points (13.5% of all points) and tiebreak points (3.5%). Across the ATP tour, 17% of points were high-leverage; across the WTA, 16%.
+The raw data comes from Jeff Sackmann's Match Charting Project, a publicly available volunteer-compiled database where tennis analysts manually record every point played in professional matches, including the exact score state at each moment. Marginal human input error is possible, though 52,314 observations substantially mitigates its impact. The same dataset has been used in prior momentum research, including Du et al. (2025); the contribution here is scale and the break point vs tiebreak distinction. This allowed me to identify high-pressure situations with precision: break points (where the returner is one point from winning the game) and tiebreaks (where a set hangs in the balance). I defined these as high-leverage moments, a category combining break points (13.5%) and tiebreak points (3.5%). Across the ATP tour, 17% of points were high-leverage; across the WTA, 16%.
 
 The dataset covers 35,635 ATP points (155 matches) and 16,679 WTA points (120 matches), reflecting the men's best-of-five format.
 
 Data was standardised by matching player records and excluding retirements and qualifying rounds. I used official ATP and WTA rankings to measure baseline skill, consistent with Kovalchik (2016). Rankings were chosen over Elo because a two-stage matching process, using tournament-specific rankings with season-average fallback, achieved full coverage across all 52,314 points.
 
-I kept the tours separate throughout, since pooling them would have obscured the comparison that matters most.
+I kept the tours separate, since pooling would have obscured the comparison that matters most.
 
 ## Does Momentum Even Show Up in the Data?
 
 Does winning a point make the next one more likely to go your way?
 
-I ran two tests for every player individually: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether point outcomes are independent; the runs test asks whether wins and losses cluster beyond chance. I tested 77 ATP players and 78 WTA players separately, rather than pooling everyone. Pooling would risk hiding individual patterns inside aggregate noise.
+I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether point outcomes are independent; the runs test whether wins and losses cluster beyond chance. I tested 77 ATP players and 78 WTA players separately, rather than pooling everyone. Pooling would risk hiding individual patterns inside aggregate noise.
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
@@ -119,7 +119,7 @@ The chart shows a sustained above-average run that eventually collapses. The lin
 
 ## What About the Biggest Moments?
 
-For every player, I calculated their Tiebreak Over-Expectation (TBOE): their actual tiebreak win rate minus their predicted win rate based on official ranking and recent form. If certain players consistently raise their game when it matters most, I would expect to see clear outliers pulling sharply away from zero in either direction.
+For every player, I calculated their Tiebreak Over-Expectation (TBOE): their actual tiebreak win rate minus their predicted win rate based on official ranking and recent form. If certain players consistently raise their game, I would expect outliers pulling sharply away from zero.
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
@@ -129,15 +129,17 @@ For every player, I calculated their Tiebreak Over-Expectation (TBOE): their act
 
 The chart plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 23 ATP players and 6 WTA players qualify. In the ATP, the distribution runs gradually from Milos Raonic at -0.11 to Holger Rune at +0.07, with no player pulling sharply away from the pack. The WTA sample is too small to draw strong conclusions: only 6 players qualify, and Martina Trevisan at +0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
 
+TBOE captures average seasonal tendencies; what it cannot reveal is whether winning a specific pressure point causes the next one to go the same way.
+
 ## Correlation or Causation?
 
 Everything so far has tested whether momentum correlates with winning the next point. But correlation is not causation. A player who is already dominating will naturally win more break points. The association might simply reflect that good players win more of everything, not that winning one big point is responsible for winning the next.
 
-I use a causal forest to estimate whether winning a pressure point causes a higher probability of winning the next. Unlike standard regression, which assumes identical effects for everyone, the causal forest estimates heterogeneous effects. It splits the data into subgroups and estimates the effect, using sample-splitting to prevent overfitting and spurious pattern matching. The key assumption is that controlling for the four control variables captures all systematic differences between players who win and lose high-leverage points, with no hidden factor simultaneously driving the pressure outcome and the next point.
+I use a causal forest to estimate whether winning a pressure point causes a higher probability of winning the next. Unlike standard regression, which assumes identical effects for everyone, the causal forest estimates heterogeneous effects. It uses sample-splitting to estimate subgroup effects without overfitting. The key assumption is that controlling for the four control variables captures all systematic differences between players who win and lose high-leverage points, with no hidden factor simultaneously driving the pressure outcome and the next point.
 
-I define a high-leverage win as a point where the player faced a break point or tiebreak situation and won it, consistent with Gilovich et al. (1985) and Miller and Sanjurjo (2018), who both define momentum as success breeding success, not merely exposure to pressure. Restricting the control group to lost pressure points was rejected because, in tiebreaks, the alternating serve structure can mechanically disadvantage the point winner on the next point. The baseline therefore comprises all other match points.
+I define a high-leverage win as a point where the player faced a break point or tiebreak situation and won it, consistent with Gilovich et al. (1985) and Miller and Sanjurjo (2018), who define momentum as success breeding success. Restricting the control group to lost pressure points was rejected because, in tiebreaks, the alternating serve structure can mechanically disadvantage the point winner on the next point. The baseline therefore comprises all other match points, with score-state pressure gradients partially absorbed by the CUSUM and rolling win percentage controls.
 
-The model holds four variables constant to isolate the pressure point effect: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial break point expectations. Standard errors are clustered by match, since points within the same match are not independent. To avoid double-counting zero-sum points, one focal player is randomly selected per match and all observations are tracked from their perspective. A Variance Inflation Factor check confirmed no multicollinearity among the baseline predictors, with all VIF scores below 1.2. Early-match points are included as CUSUM volatility is lower, not higher, at match start.
+The model holds four variables constant to isolate the pressure point effect: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. Window lengths of 10 and 4 were chosen to balance responsiveness with stability; sensitivity to these choices was not formally tested. CUSUM is included to absorb accumulated match-level drift; the treatment effect is estimated as the residual impact of winning a pressure point after this drift is removed, which is the quantity of interest. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial break point expectations. Standard errors are clustered by match, since points within the same match are not independent. To avoid double-counting zero-sum points, one focal player is randomly selected per match and all observations are tracked from their perspective. A VIF check confirmed no multicollinearity (all scores below 1.2).
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
