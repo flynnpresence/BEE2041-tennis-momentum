@@ -90,6 +90,8 @@ See `requirements.txt`. Key packages:
   https://github.com/JeffSackmann/tennis_atp
   https://github.com/JeffSackmann/tennis_wta
 
+Each points file contains one row per point with columns for score state (Pts), server (Svr), set and game counters, and point outcome. Each results file contains one row per match with player names, tournament, round, surface, and ranking data.
+
 The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results repositories are licensed under CC BY-NC-SA 4.0 (non-commercial use only). Both licences permit academic use with attribution.
 
 ---
