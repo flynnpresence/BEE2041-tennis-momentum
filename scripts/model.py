@@ -18,7 +18,7 @@ import statsmodels.formula.api as smf
 from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, GroupKFold
 
 # Suppress known, safe warnings from econml and sklearn only
 # Global suppression avoided — specific known warnings caught locally
@@ -320,7 +320,10 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     sk_model = LogisticRegression(max_iter=1000, random_state=SEED)
     X_arr = data[CONTROLS + ['HL_Win']].astype(float).values
     y_arr = data[OUTCOME].astype(float).values
-    cv_scores = cross_val_score(sk_model, X_arr, y_arr, cv=5, scoring='accuracy')
+    groups = data['match_id'].values
+    cv_scores = cross_val_score(sk_model, X_arr, y_arr,
+                                cv=GroupKFold(n_splits=5), groups=groups,
+                                scoring='accuracy')
     print(
         f'    5-Fold CV Accuracy: {cv_scores.mean():.4f}'
         f' (±{cv_scores.std():.4f})'
