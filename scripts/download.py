@@ -17,10 +17,8 @@ academic use with attribution. No rate limits are imposed beyond the
 import os
 import time
 
+import certifi
 import requests
-import urllib3
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -51,7 +49,6 @@ def download(filename: str, url: str) -> None:
     """
     Download a single CSV from url and save to data/raw/ unmodified.
 
-    Uses requests.get with verify=False to bypass macOS SSL issues.
     Retries up to 3 times with a 2-second delay between attempts.
     Writes raw binary content directly — pandas is bypassed entirely
     to guarantee files are saved bit-for-bit identically to the source.
@@ -68,9 +65,8 @@ def download(filename: str, url: str) -> None:
 
     for attempt in range(3):
         try:
-            # verify=False bypasses macOS SSL certificate verification issues
-            # with GitHub. Known local environment workaround, not an endorsement.
-            response = requests.get(url, headers=HEADERS, verify=False)
+            # certifi provides a trusted CA bundle for SSL verification
+            response = requests.get(url, headers=HEADERS, verify=certifi.where())
             response.raise_for_status()
             with open(dest, 'wb') as f:
                 f.write(response.content)
