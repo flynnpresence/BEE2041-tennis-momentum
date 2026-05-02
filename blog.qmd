@@ -115,7 +115,7 @@ The chart below tracks the cumulative momentum score across the longest WTA matc
 </div>
 ```
 
-What the chart actually shows is continuous oscillation. The line spends the first 150 points above zero, suggesting Alexandrova is controlling the match. Then it collapses sharply around point 190, dropping to its lowest point before recovering. There is no sustained directional run anywhere. Du et al. (2025) argue that this kind of oscillation is itself evidence of momentum shifting between players. I read it differently: it looks like the natural variance of two evenly matched competitors trading points.
+What the chart actually shows is a sustained above-average run that eventually collapses. The line spends the first 150 points predominantly above zero, suggesting Alexandrova is controlling the match, before oscillating around the baseline. It then drops sharply from around point 180, reaching its lowest point at 187 before recovering. There is no sustained directional run anywhere. Du et al. (2025) argue that this kind of oscillation is itself evidence of momentum shifting between players. I read it differently: it looks like the natural variance of two evenly matched competitors trading points.
 
 ## What About the Biggest Moments?
 
