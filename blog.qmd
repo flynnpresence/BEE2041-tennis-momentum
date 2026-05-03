@@ -115,7 +115,7 @@ Figure 2 tracks the cumulative momentum score across the longest WTA match in th
 </div>
 ```
 
-The chart shows a sustained above-average run that eventually collapses. The line spends the first 150 points predominantly above zero, suggesting Alexandrova is controlling the match, before dropping sharply from around point 180 to its lowest point at 187. There is no sustained directional run anywhere. Du et al. (2025) argue that this kind of oscillation is itself evidence of momentum shifting between players. I read it differently: it looks like the natural variance of two evenly matched competitors trading points.
+Figure 2 shows a sustained above-average run that eventually collapses. The line spends the first 150 points predominantly above zero, suggesting Alexandrova is controlling the match, before dropping sharply from around point 180 to its lowest point at 187. There is no sustained directional run anywhere. Du et al. (2025) argue that this kind of oscillation is itself evidence of momentum shifting between players. I read it differently: it looks like the natural variance of two evenly matched competitors trading points.
 
 ## What About the Biggest Moments?
 
@@ -127,7 +127,7 @@ For every player, I calculated their Tiebreak Over-Expectation (TBOE): their act
 </div>
 ```
 
-The chart plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 23 ATP players and 6 WTA players qualify. In the ATP, the distribution runs gradually from Milos Raonic at -0.11 to Holger Rune at +0.07, with no player pulling sharply away from the pack. The WTA sample is too small to draw strong conclusions: only 6 players qualify, and Martina Trevisan at +0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
+Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 23 ATP players and 6 WTA players qualify. In the ATP, the distribution runs gradually from Milos Raonic at -0.11 to Holger Rune at +0.07, with no player pulling sharply away from the pack. The WTA sample is too small to draw strong conclusions: only 6 players qualify, and Martina Trevisan at +0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
 
 TBOE captures average seasonal tendencies; what it cannot reveal is whether winning a specific pressure point causes the next one to go the same way.
 
@@ -177,7 +177,7 @@ If I stopped here, the hot hand would look like a fallacy. But this combined num
 ![The combined null effect breaks into two opposite effects when break points and tiebreaks are separated.](outputs/output5_model_table.png)
 :::
 
-As Figure 6 shows, converting a break point is associated with a reduced probability of winning the next point in both tours. Break points appear to generate a clear, measurable drag. Tiebreaks tell the opposite story. The ATP estimate (+0.0564) is the chart's dominant feature, comparable in magnitude to the break point hangover and opposite in sign. The WTA effect (+0.0209) is consistent in direction, statistically significant (p=0.0006, 95% CI: 0.009 to 0.033), and smaller in magnitude, reflecting the limited 197-observation sample.
+As Figure 6 shows, converting a break point is associated with a reduced probability of winning the next point in both tours. Break points appear to generate a clear, measurable drag. Tiebreaks tell the opposite story. The ATP estimate (+0.0564) is the dominant feature, comparable in magnitude to the break point hangover and opposite in sign. The WTA effect (+0.0209) is consistent in direction, statistically significant (p=0.0006, 95% CI: 0.009 to 0.033), and smaller in magnitude, reflecting the limited 197-observation sample.
 
 This explains why the combined number is negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.5% in tiebreaks. The hangover effect happens more often, so it dominates the aggregate. When all high-leverage moments are treated as identical, the tiebreak momentum signal gets buried.
 
@@ -193,7 +193,7 @@ Outside of tiebreaks, if momentum does not drive point outcomes, what does? Figu
 
 The cumulative momentum score dominates everything else. In the ATP, it accounts for 0.50 of the variance in the treatment effect, significantly ahead of player rank at 0.32 and rolling win percentage at 0.16. In the WTA, the pattern holds: momentum score at 0.52, player rank at 0.28, rolling win percentage at 0.19.
 
-The most striking feature of the chart is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores 0.024 in the ATP and 0.010 in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the cumulative trajectory is accounted for. The hot hand, in its most literal form, has no predictive power here.
+The most striking feature of Figure 7 is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores 0.024 in the ATP and 0.010 in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the cumulative trajectory is accounted for. The hot hand, in its most literal form, has no predictive power here.
 
 What shapes the momentum effect most is accumulated match drift, not short-term bursts of form.
 
