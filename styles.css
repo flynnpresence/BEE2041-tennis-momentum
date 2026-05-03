@@ -7,17 +7,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  background-color: #f2f7f2 !important;
-  min-height: 100% !important;
-}
-
-html {
-  scroll-behavior: auto !important;
-}
-
 /* ─── Tokens ────────────────────────────────────────────── */
 :root {
   --bg: #ffffff;
@@ -87,15 +76,15 @@ header#title-block-header,
 #quarto-content.page-columns {
   display: grid !important;
   grid-template-columns: var(--toc-width) minmax(0, 1fr) !important;
-  column-gap: 80px !important;
+  column-gap: 48px !important;
   width: 100% !important;
-  max-width: 100% !important;
+  max-width: var(--col-wide) !important;
   margin: 0 auto !important;
   padding: 0 24px !important;
   align-items: start !important;
 }
 
-body {
+#quarto-content.page-columns {
   background-color: #f2f7f2 !important;
 }
 
@@ -679,7 +668,8 @@ main.content iframe {
   margin: 64px auto !important;
   margin-top: 32px !important;
   padding: 20px !important;
-  background: #f2f7f2 !important;
+  background: #ffffff !important;
+  border: 1px solid var(--rule) !important;
 }
 
 .reveal-chart {
@@ -687,7 +677,8 @@ main.content iframe {
   max-width: 880px;
   margin: 0 auto;
   padding: 24px;
-  background: #ffffff;
+  background: var(--bg);
+  border: 1px solid var(--rule);
 }
 
 .reveal-chart svg {
