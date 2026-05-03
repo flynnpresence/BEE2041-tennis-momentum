@@ -98,7 +98,7 @@ Does winning a point make the next one more likely to go your way?
 I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether point outcomes are independent; the runs test whether wins and losses cluster beyond chance. I tested 77 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.
 
 ```{=html}
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output1_chi2_table.html" width="100%" height="180" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
@@ -110,7 +110,7 @@ But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods li
 Figure 2 tracks the cumulative momentum score across the longest WTA match. The line rises when the player wins above her average rate and falls when she drops below. Genuine momentum would look like a staircase, not a weather chart.
 
 ```{=html}
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output2_cusum_wta.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
@@ -122,7 +122,7 @@ Figure 2 shows a sustained above-average run that eventually collapses. The line
 For every player, I calculated their Tiebreak Over-Expectation (TBOE): actual tiebreak win rate minus predicted win rate based on ranking and recent form. If certain players consistently raise their game, I would expect outliers pulling sharply away from zero.
 
 ```{=html}
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output3_tboe_scatter.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
@@ -142,7 +142,7 @@ A high-leverage win is a point at a break point or tiebreak score won by the foc
 Four variables are held constant: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. Window lengths of 10 and 4 balance responsiveness with stability; sensitivity was not formally tested. To manage computation, the Causal Forest subsamples to 15,000 observations per run using stratified sampling; ATP is subsampled from 35,635 points while WTA fits within the limit. CUSUM absorbs accumulated match-level drift; the treatment effect is estimated as the residual impact of winning a pressure point after this drift is removed. CUSUM is therefore treated as a control for match drift, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond the existing trajectory. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial break point expectations. Standard errors are clustered by match to account for intra-match dependence. One focal player is randomly selected per match to avoid double-counting zero-sum points. A VIF check confirmed no multicollinearity (all scores below 1.2).
 
 ```{=html}
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output4_cate_plot.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
@@ -150,7 +150,7 @@ Four variables are held constant: player ranking, rolling win percentage over th
 Figure 4 shows the causal effect by ranking band. Across all four bands in both tours, the effect sits below zero. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.
 
 ```{=html}
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output5_model_table.html" width="100%" height="540" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
@@ -183,7 +183,7 @@ This explains why the combined number is negative. Break points are far more com
 Outside of tiebreaks, if momentum does not drive point outcomes, what does? Figure 7 ranks the four variables by how much each one drives variation in the causal effect.
 
 ```{=html}
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
+<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
 ```
