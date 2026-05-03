@@ -795,6 +795,19 @@ table.momentum-table tr:last-child td {
   line-height: 1.65 !important;
 }
 
+.article-footer li {
+  font-family: var(--sans) !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+  color: var(--text-muted) !important;
+  margin-bottom: 4px !important;
+}
+
+.article-footer ul {
+  padding-left: 20px !important;
+  margin-bottom: 0 !important;
+}
+
 .article-footer strong {
   font-weight: 600 !important;
   color: var(--text-strong) !important;
