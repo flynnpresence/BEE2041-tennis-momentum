@@ -83,7 +83,7 @@
         }
       }
 
-      if (!current && links.length) {
+      if (!current && links.length && window.scrollY > 0) {
         current = links[0];
       }
 
