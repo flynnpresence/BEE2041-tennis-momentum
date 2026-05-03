@@ -681,7 +681,7 @@ main.content iframe {
   max-width: 880px;
   margin: 0 auto;
   padding: 24px;
-  background: var(--bg);
+  background: #f2f7f2;
 }
 
 .reveal-chart svg {
