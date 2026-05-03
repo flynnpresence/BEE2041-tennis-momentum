@@ -229,6 +229,6 @@ The next time a commentator says Alcaraz has the momentum after converting a bre
 - Miller, J. B., & Sanjurjo, A. (2018). Surprised by the hot hand fallacy? A truth in the law of small numbers. *Econometrica*, 86(6), 2019–2047.
 - Du, C., Zhang, C., & Zhou, L. (2025). A novel methodological framework for analyzing the momentum effect in tennis singles. *arXiv:2509.01243*.
 - Kovalchik, S. (2016). Searching for the GOAT of tennis win prediction. *Journal of Quantitative Analysis in Sports*, 12(3), 127–138.
-- Sackmann, J. (2023). Match Charting Project. GitHub. https://github.com/JeffSackmann/tennis_MatchChartingProject
+- Sackmann, J. (n.d.). Tennis Match Charting Project. GitHub. https://github.com/JeffSackmann/tennis_MatchChartingProject
 
 :::
