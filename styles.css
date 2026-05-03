@@ -84,6 +84,10 @@ header#title-block-header,
   align-items: start !important;
 }
 
+#quarto-content.page-columns {
+  background-color: #f2f7f2 !important;
+}
+
 #quarto-sidebar-toc-left {
   grid-column: 1 !important;
   width: var(--toc-width) !important;
@@ -92,6 +96,7 @@ header#title-block-header,
   position: sticky !important;
   top: 32px !important;
   align-self: start !important;
+  padding-left: 16px !important;
 }
 
 #quarto-margin-sidebar {

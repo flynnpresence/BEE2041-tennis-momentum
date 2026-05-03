@@ -897,7 +897,6 @@ def main() -> None:
 
     # Output 2
     print('\n--- Output 2: CUSUM line charts ---')
-    plot_cusum(atp, 'ATP')
     plot_cusum(wta, 'WTA')
 
     # Output 3

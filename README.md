@@ -41,6 +41,8 @@ Run `make reset` to wipe all generated files and start fresh.
 
 Note: Raw data is read from `data/raw/` and never modified. All analysis-ready outputs are written to `data/processed/`, following the principle that raw data is sacred.
 
+Note: The Makefile uses `outputs/ate_results.csv` as the sentinel for the model step. If individual chart files are deleted while this CSV exists, run `make reset && make all` to force a full rebuild.
+
 ---
 
 ## Directory Structure
