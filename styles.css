@@ -76,7 +76,7 @@ header#title-block-header,
 #quarto-content.page-columns {
   display: grid !important;
   grid-template-columns: var(--toc-width) minmax(0, 1fr) !important;
-  column-gap: 48px !important;
+  column-gap: 80px !important;
   width: 100% !important;
   max-width: var(--col-wide) !important;
   margin: 0 auto !important;
@@ -84,7 +84,7 @@ header#title-block-header,
   align-items: start !important;
 }
 
-#quarto-content.page-columns {
+body {
   background-color: #f2f7f2 !important;
 }
 
