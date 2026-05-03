@@ -85,7 +85,7 @@ def plot_chi2_table(tests: pd.DataFrame) -> None:
         'table.momentum-table tr:last-child td{border-bottom:none;}'
         '</style></head><body>'
         '<p style="font-family:Inter,sans-serif;font-size:14px;font-weight:600;'
-        'margin:0 0 8px 0;color:#1a1a1a;">Figure 1: Independence Tests: '
+        'margin:0 0 8px 0;color:#1a1a1a;font-weight:bold;">Figure 1: Independence Tests: '
         'Chi-squared and Runs Test Results</p>'
         '<div class="table-container">' + html_table + '</div>'
         '</body></html>'
@@ -163,7 +163,7 @@ def plot_cusum(df: pd.DataFrame, tour_name: str) -> None:
 
     fig.update_layout(
         title=dict(
-            text=(f'Figure 2: Cumulative Momentum Score: {tour_name}<br>'
+            text=(f'<b>Figure 2: Cumulative Momentum Score: {tour_name}</b><br>'
                   f'<span style="font-size:11px">{p1} vs {p2}</span>'),
             font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
                       color='#111'),
@@ -237,7 +237,7 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
 
     fig.update_layout(
         title=dict(
-            text='Figure 3: Tiebreak Over-Expectation (TBOE) by Player',
+            text='<b>Figure 3: Tiebreak Over-Expectation (TBOE) by Player</b>',
             font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
                       color='#111'),
             x=0.5
@@ -473,7 +473,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 
     fig.update_layout(
         title=dict(
-            text='Figure 4: Causal Effect of Winning a High-Leverage Point by Player Ranking',
+            text='<b>Figure 4: Causal Effect of Winning a High-Leverage Point by Player Ranking</b>',
             font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
                       color='#111'),
             x=0.5
@@ -639,7 +639,7 @@ def plot_model_table(
 
     fig.update_layout(
         title=dict(
-            text='Figure 5: Model Results: Logistic Regression + Causal Forest',
+            text='<b>Figure 5: Model Results: Logistic Regression + Causal Forest</b>',
             font=dict(size=14, family='Helvetica Neue, Arial, sans-serif',
                       color='#111'),
             x=0.5
@@ -727,7 +727,7 @@ def plot_feature_importance(atp_imp: pd.DataFrame,
 
     fig.update_layout(
         title=dict(
-            text='Figure 7: Feature Importance from Causal Forest',
+            text='<b>Figure 7: Feature Importance from Causal Forest</b>',
             font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
                       color='#111', weight='bold'),
             x=0.5
@@ -820,7 +820,7 @@ def plot_reveal_chart(
 
     fig.update_layout(
         title=dict(
-            text='Figure 6: Average Treatment Effect of Winning a High-Leverage Point',
+            text='<b>Figure 6: Average Treatment Effect of Winning a High-Leverage Point</b>',
             font=dict(size=13, family='Helvetica Neue, Arial, sans-serif',
                       color='#111'),
             x=0.5
