@@ -165,13 +165,13 @@ Grand Slams · 2 Tours
 <h2 class="anchored" data-anchor-id="does-momentum-even-show-up-in-the-data">Does Momentum Even Show Up in the Data?</h2>
 <p>Does winning a point make the next one more likely to go your way?</p>
 <p>I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether point outcomes are independent; the runs test whether wins and losses cluster beyond chance. I tested 77 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.</p>
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
+<div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output1_chi2_table.html" width="100%" height="180" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The results are the first blow to the momentum theory. In the ATP, 10.4% of players showed evidence of non-random sequences on the Chi-squared test, and 13.0% on the runs test. In the WTA, the figures are lower still: 6.4% and 9.0%. After applying a Benjamini-Hochberg correction to control the false discovery rate (the proportion of flagged results that are actually false alarms) across all players, zero remain significant on the Chi-squared test in either tour, and only one per tour survives on the runs test. The uncorrected figures barely exceeded the 5% random baseline; once adjusted, evidence for individual momentum vanishes.</p>
 <p>But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences.</p>
 <p>Figure 2 tracks the cumulative momentum score across the longest WTA match. The line rises when the player wins above her average rate and falls when she drops below. Genuine momentum would look like a staircase, not a weather chart.</p>
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
+<div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output2_cusum_wta.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>Figure 2 shows a sustained above-average run that eventually collapses. The line spends the first 150 points predominantly above zero, suggesting Alexandrova is controlling the match, before dropping sharply from around point 180 to its lowest point at 187. There is no sustained directional run anywhere. Du et al.&nbsp;(2025) argue this oscillation is itself evidence of momentum shifting between players. I read it differently: it looks like the natural variance of two evenly matched competitors trading points.</p>
@@ -179,7 +179,7 @@ Grand Slams · 2 Tours
 <section id="what-about-the-biggest-moments" class="level2">
 <h2 class="anchored" data-anchor-id="what-about-the-biggest-moments">What About the Biggest Moments?</h2>
 <p>For every player, I calculated their Tiebreak Over-Expectation (TBOE): actual tiebreak win rate minus predicted win rate based on ranking and recent form. If certain players consistently raise their game, I would expect outliers pulling sharply away from zero.</p>
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
+<div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output3_tboe_scatter.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 23 ATP players and 6 WTA players qualify. In the ATP, the distribution runs gradually from Milos Raonic at -0.11 to Holger Rune at +0.07, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 6 players qualify, and Martina Trevisan at +0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.</p>
@@ -191,11 +191,11 @@ Grand Slams · 2 Tours
 <p>I use a causal forest to estimate whether winning a pressure point causes a higher probability of winning the next. Unlike standard regression, which assumes identical effects for everyone, the causal forest estimates heterogeneous effects. It uses sample-splitting to estimate subgroup effects without overfitting. The key assumption is that controlling for the four control variables captures all systematic differences between players who win and lose high-leverage points, with no hidden factor simultaneously driving the pressure outcome and the next point.</p>
 <p>A high-leverage win is a point at a break point or tiebreak score won by the focal player, consistent with Gilovich et al.&nbsp;(1985) and Miller and Sanjurjo (2018), who define momentum as success breeding success. Restricting the control group to lost pressure points was rejected because, in tiebreaks, the alternating serve structure can mechanically disadvantage the point winner on the next point. The baseline therefore comprises all other match points, with score-state pressure gradients partially absorbed by the CUSUM and rolling win percentage controls.</p>
 <p>Four variables are held constant: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. Window lengths of 10 and 4 balance responsiveness with stability; sensitivity was not formally tested. To manage computation, the Causal Forest subsamples to 15,000 observations per run using stratified sampling; ATP is subsampled from 35,635 points while WTA fits within the limit. CUSUM absorbs accumulated match-level drift; the treatment effect is estimated as the residual impact of winning a pressure point after this drift is removed. CUSUM is therefore treated as a control for match drift, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond the existing trajectory. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial break point expectations. Standard errors are clustered by match to account for intra-match dependence. One focal player is randomly selected per match to avoid double-counting zero-sum points. A VIF check confirmed no multicollinearity (all scores below 1.2).</p>
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
+<div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output4_cate_plot.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>Figure 4 shows the causal effect by ranking band. Across all four bands in both tours, the effect sits below zero. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.</p>
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
+<div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output5_model_table.html" width="100%" height="540" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>Figure 5 breaks this down by variable. Two findings stand out. First, the Break Point Win row sits left of zero in both tours, while the Tiebreak Win row sits right of zero. Second, rolling win percentage runs in opposite directions between tours: negative for ATP and positive for WTA, though the WTA error bar is wide, making the estimate imprecise. This suggests recent form plays a different role across tours, invisible if the datasets had been merged. Player rank and the other control rows sit close to zero across both tours, suggesting baseline skill alone does not determine who wins the next point.</p>
@@ -223,7 +223,7 @@ Split by Pressure Type
 <section id="if-not-momentum-then-what" class="level2">
 <h2 class="anchored" data-anchor-id="if-not-momentum-then-what">If Not Momentum, Then What?</h2>
 <p>Outside of tiebreaks, if momentum does not drive point outcomes, what does? Figure 7 ranks the four variables by how much each one drives variation in the causal effect.</p>
-<div style="border:1px solid #e5e7eb; border-radius:8px; overflow:visible; margin:1.5rem 0;">
+<div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The cumulative momentum score dominates everything else. In the ATP, it accounts for 0.50 of the variance in the treatment effect, significantly ahead of player rank at 0.32 and rolling win percentage at 0.16. In the WTA, the pattern holds: momentum score at 0.52, player rank at 0.28, rolling win percentage at 0.19.</p>
