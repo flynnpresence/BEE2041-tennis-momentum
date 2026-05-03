@@ -788,6 +788,11 @@ table.momentum-table tr:last-child td {
   border-top: 1px solid var(--rule) !important;
 }
 
+.article-footer + .article-footer {
+  margin-top: 0 !important;
+  margin-bottom: 40px !important;
+}
+
 .article-footer p {
   margin-bottom: 18px !important;
   font-family: var(--sans) !important;
