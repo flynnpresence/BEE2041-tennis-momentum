@@ -193,7 +193,7 @@
       .style("font-size", "13px")
       .style("font-weight", "700")
       .style("fill", "#17150F")
-      .text("Average Treatment Effect of Winning a High-Leverage Point");
+      .text("Figure 6: Average Treatment Effect of Winning a High-Leverage Point");
 
     const y = d3
       .scaleLinear()

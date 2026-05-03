@@ -85,7 +85,7 @@ def plot_chi2_table(tests: pd.DataFrame) -> None:
         'table.momentum-table tr:last-child td{border-bottom:none;}'
         '</style></head><body>'
         '<p style="font-family:Inter,sans-serif;font-size:14px;font-weight:600;'
-        'margin:0 0 8px 0;color:#1a1a1a;">Figure 1: Independence Tests — '
+        'margin:0 0 8px 0;color:#1a1a1a;">Figure 1: Independence Tests: '
         'Chi-squared and Runs Test Results</p>'
         '<div class="table-container">' + html_table + '</div>'
         '</body></html>'
@@ -453,7 +453,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         name='ATP',
         marker=dict(size=12, color='#4a90d9',
                     line=dict(width=1.5, color='white')),
-        hovertemplate='<b>ATP — %{x}</b><br>CATE: %{y:.4f}<extra></extra>'
+        hovertemplate='<b>ATP: %{x}</b><br>CATE: %{y:.4f}<extra></extra>'
     ))
 
     fig.add_trace(go.Scatter(
@@ -465,7 +465,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
         name='WTA',
         marker=dict(size=12, color='#e8715a',
                     line=dict(width=1.5, color='white')),
-        hovertemplate='<b>WTA — %{x}</b><br>CATE: %{y:.4f}<extra></extra>'
+        hovertemplate='<b>WTA: %{x}</b><br>CATE: %{y:.4f}<extra></extra>'
     ))
 
     fig.add_hline(y=0, line_dash='dash', line_color='red',
@@ -597,7 +597,7 @@ def plot_model_table(
             ),
             name='ATP',
             showlegend=(i == 0),
-            hovertemplate=f"<b>ATP — {row['label']}</b><br>"
+            hovertemplate=f"<b>ATP: {row['label']}</b><br>"
                           f"Effect: {row['atp_coef']:.4f}<br>"
                           f"95% CI: [{row['atp_coef']-1.96*row['atp_se']:.4f}, "
                           f"{row['atp_coef']+1.96*row['atp_se']:.4f}]"
@@ -626,7 +626,7 @@ def plot_model_table(
             ),
             name='WTA',
             showlegend=(i == 0),
-            hovertemplate=f"<b>WTA — {row['label']}</b><br>"
+            hovertemplate=f"<b>WTA: {row['label']}</b><br>"
                           f"Effect: {row['wta_coef']:.4f}<br>"
                           f"95% CI: [{row['wta_coef']-1.96*row['wta_se']:.4f}, "
                           f"{row['wta_coef']+1.96*row['wta_se']:.4f}]"
@@ -713,7 +713,7 @@ def plot_feature_importance(atp_imp: pd.DataFrame,
         name='ATP',
         orientation='h',
         marker=dict(color='#4a90d9', opacity=0.85),
-        hovertemplate='<b>ATP — %{y}</b><br>Importance: %{x:.4f}<extra></extra>'
+        hovertemplate='<b>ATP: %{y}</b><br>Importance: %{x:.4f}<extra></extra>'
     ))
 
     fig.add_trace(go.Bar(
@@ -722,7 +722,7 @@ def plot_feature_importance(atp_imp: pd.DataFrame,
         name='WTA',
         orientation='h',
         marker=dict(color='#e8715a', opacity=0.85),
-        hovertemplate='<b>WTA — %{y}</b><br>Importance: %{x:.4f}<extra></extra>'
+        hovertemplate='<b>WTA: %{y}</b><br>Importance: %{x:.4f}<extra></extra>'
     ))
 
     fig.update_layout(
