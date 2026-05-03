@@ -87,7 +87,7 @@ header#title-block-header,
   grid-template-columns: var(--toc-width) minmax(0, 1fr) !important;
   column-gap: 80px !important;
   width: 100% !important;
-  max-width: var(--col-wide) !important;
+  max-width: 100% !important;
   margin: 0 auto !important;
   padding: 0 24px !important;
   align-items: start !important;
