@@ -12,6 +12,10 @@ html, body {
   padding: 0 !important;
 }
 
+html {
+  scroll-behavior: auto !important;
+}
+
 /* ─── Tokens ────────────────────────────────────────────── */
 :root {
   --bg: #ffffff;
@@ -681,7 +685,7 @@ main.content iframe {
   max-width: 880px;
   margin: 0 auto;
   padding: 24px;
-  background: #f2f7f2;
+  background: #ffffff;
 }
 
 .reveal-chart svg {
