@@ -105,7 +105,7 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 | 3 | output3_tboe_scatter.html | Tiebreak over-expectation by player |
 | 4 | output4_cate_plot.html | Heterogeneous causal effects across player rankings |
 | 5 | output5_model_table.html | Logistic regression and Causal Forest ATE estimates |
-| 6 | output6_reveal_chart.html | Static Plotly reveal chart — BP vs tiebreak ATE split |
+| 6 | output6_reveal_chart.html | Static Plotly reveal chart: BP vs tiebreak ATE split |
 | 7 | output7_feature_importance.html | Causal Forest feature importance, ATP and WTA |
 | — | ate_results.csv | Python-generated ATE values |
 | — | feature_importance.csv | Python-generated feature importance values |
