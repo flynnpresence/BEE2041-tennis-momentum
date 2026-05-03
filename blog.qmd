@@ -107,7 +107,7 @@ The results are the first blow to the momentum theory. In the ATP, 10.4% of play
 
 But I cannot stop here. As Miller and Sanjurjo (2018) mathematically proved, traditional methods like the runs test are notoriously underpowered, meaning they will often miss real effects that genuinely exist, and are systematically biased against finding momentum in short sequences.
 
-The chart below tracks the cumulative momentum score across the longest WTA match in the dataset. The line rises when the player wins above her average rate and falls when she drops below. Genuine momentum would look like a staircase, not a weather chart.
+Figure 2 tracks the cumulative momentum score across the longest WTA match in the dataset. The line rises when the player wins above her average rate and falls when she drops below. Genuine momentum would look like a staircase, not a weather chart.
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
@@ -147,7 +147,7 @@ The model holds four variables constant to isolate the pressure point effect: pl
 </div>
 ```
 
-The first chart shows the estimated causal effect broken down by player ranking band. Across all four bands in both tours, the effect sits below zero. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.
+Figure 4 shows the estimated causal effect broken down by player ranking band. Across all four bands in both tours, the effect sits below zero. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
@@ -155,7 +155,7 @@ The first chart shows the estimated causal effect broken down by player ranking 
 </div>
 ```
 
-The second chart breaks this down by variable. Two findings stand out. First, the Break Point Win row sits left of zero in both tours, while the Tiebreak Win row sits right of zero, previewing the finding explored in the next section. Second, rolling win percentage behaves in completely opposite directions between tours: negative for ATP and positive for WTA, though the WTA error bar is wide, making the estimate imprecise. This suggests recent form plays a meaningfully different role in women's tennis than in men's, a tour-specific pattern that would have been invisible if the two datasets had been merged. Player rank and the other control rows sit close to zero across both tours, suggesting baseline skill level alone does not determine who wins the next point.
+Figure 5 breaks this down by variable. Two findings stand out. First, the Break Point Win row sits left of zero in both tours, while the Tiebreak Win row sits right of zero, previewing the finding explored in the next section. Second, rolling win percentage behaves in completely opposite directions between tours: negative for ATP and positive for WTA, though the WTA error bar is wide, making the estimate imprecise. This suggests recent form plays a meaningfully different role in women's tennis than in men's, a tour-specific pattern that would have been invisible if the two datasets had been merged. Player rank and the other control rows sit close to zero across both tours, suggesting baseline skill level alone does not determine who wins the next point.
 
 The combined causal effect is negative for both tours (ATP: -0.0325, WTA: -0.0363). The combined WTA estimate is more negative than the break point estimate alone. This reflects Simpson's Paradox: pooling break points and tiebreaks changes the composition of the treatment group and can reverse the aggregate pattern relative to the subgroup results.
 
@@ -177,13 +177,13 @@ If I stopped here, the hot hand would look like a fallacy. But this combined num
 ![The combined null effect breaks into two opposite effects when break points and tiebreaks are separated.](outputs/output5_model_table.png)
 :::
 
-As the chart shows, converting a break point is associated with a reduced probability of winning the next point in both tours. Break points appear to generate a clear, measurable drag. Tiebreaks tell the opposite story. The ATP estimate (+0.0564) is the chart's dominant feature, comparable in magnitude to the break point hangover and opposite in sign. The WTA effect (+0.0209) is consistent in direction, statistically significant (p=0.0006, 95% CI: 0.009 to 0.033), and smaller in magnitude, reflecting the limited 197-observation sample.
+As Figure 6 shows, converting a break point is associated with a reduced probability of winning the next point in both tours. Break points appear to generate a clear, measurable drag. Tiebreaks tell the opposite story. The ATP estimate (+0.0564) is the chart's dominant feature, comparable in magnitude to the break point hangover and opposite in sign. The WTA effect (+0.0209) is consistent in direction, statistically significant (p=0.0006, 95% CI: 0.009 to 0.033), and smaller in magnitude, reflecting the limited 197-observation sample.
 
 This explains why the combined number is negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.5% in tiebreaks. The hangover effect happens more often, so it dominates the aggregate. When all high-leverage moments are treated as identical, the tiebreak momentum signal gets buried.
 
 ## If Not Momentum, Then What?
 
-Outside of tiebreaks, if momentum does not drive point outcomes, what does? The chart below ranks the four variables by how much each one drives variation in the causal effect.
+Outside of tiebreaks, if momentum does not drive point outcomes, what does? Figure 7 ranks the four variables by how much each one drives variation in the causal effect.
 
 ```{=html}
 <div style="border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin:1.5rem 0;">
