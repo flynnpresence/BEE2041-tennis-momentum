@@ -116,10 +116,10 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 
 ## Key References
 
-- Gilovich, T., Vallone, R., & Tversky, A. (1985). The hot hand in basketball: On the misperception of random sequences. *Cognitive Psychology*, 17(3), 295–314.
-- Miller, J. B., & Sanjurjo, A. (2018). Surprised by the hot hand fallacy? A truth in the law of small numbers. *Econometrica*, 86(6), 2019–2047.
 - Du, C., Zhang, C., & Zhou, L. (2025). A novel methodological framework for analyzing the momentum effect in tennis singles. *arXiv:2509.01243*.
+- Gilovich, T., Vallone, R., & Tversky, A. (1985). The hot hand in basketball: On the misperception of random sequences. *Cognitive Psychology*, 17(3), 295–314.
 - Kovalchik, S. (2016). Searching for the GOAT of tennis win prediction. *Journal of Quantitative Analysis in Sports*, 12(3), 127–138.
+- Miller, J. B., & Sanjurjo, A. (2018). Surprised by the hot hand fallacy? A truth in the law of small numbers. *Econometrica*, 86(6), 2019–2047.
 - Sackmann, J. (n.d.). Tennis Match Charting Project. GitHub. https://github.com/JeffSackmann/tennis_MatchChartingProject
 
 ---
