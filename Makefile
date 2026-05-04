@@ -1,8 +1,8 @@
 # ══════════════════════════════════════════════════════════════════════
 # BEE2041 Tennis Momentum Pipeline
 # Usage:
-#   make all   — builds entire project, skips unchanged steps
-#   make reset — wipes all generated files for a clean rebuild
+#   make all - builds entire project, skips unchanged steps
+#   make reset - wipes all generated files for a clean rebuild
 # ══════════════════════════════════════════════════════════════════════
 
 PYTHON = python3
@@ -36,7 +36,7 @@ blog_data.js: scripts/build_blog_data.py outputs/ate_results.csv
 	$(PYTHON) scripts/build_blog_data.py
 
 # ─── Step 6: Quarto render ───────────────────────────────────────────
-blog.html: blog.qmd blog_data.js
+blog.html: blog.qmd blog_data.js blog.js styles.css
 	quarto render blog.qmd --to html
 
 # ─── Reset ───────────────────────────────────────────────────────────
