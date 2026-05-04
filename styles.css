@@ -113,9 +113,10 @@ header#title-block-header,
   min-width: var(--toc-width) !important;
   max-width: var(--toc-width) !important;
   position: sticky !important;
-  top: 32px !important;
+  top: 40px !important;
   align-self: start !important;
-  padding-left: 12px !important;
+  padding-left: 0px !important;
+  margin-left: -24px !important;
 }
 
 #quarto-margin-sidebar {
