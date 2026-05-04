@@ -98,6 +98,11 @@ header#title-block-header,
   background-color: #f2f7f2 !important;
 }
 
+#quarto-content {
+  background-color: #f2f7f2 !important;
+  min-height: 100vh !important;
+}
+
 #quarto-sidebar-toc-left {
   grid-column: 1 !important;
   width: var(--toc-width) !important;
