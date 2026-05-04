@@ -11,6 +11,12 @@ html {
   scroll-behavior: auto !important;
 }
 
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #f2f7f2 !important;
+}
+
 /* ─── Tokens ────────────────────────────────────────────── */
 :root {
   --bg: #ffffff;
@@ -100,7 +106,7 @@ header#title-block-header,
   position: sticky !important;
   top: 32px !important;
   align-self: start !important;
-  padding-left: 16px !important;
+  padding-left: 12px !important;
 }
 
 #quarto-margin-sidebar {
