@@ -398,6 +398,9 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
 
     cates = cf.effect(X)
     ate   = float(cf.ate(X))
+    # econml 0.16.0: ate_inference().stderr_mean falls back to RMS of per-sample
+    # CATE SEs (not SE of mean ATE) when final stage is non-linear (forest).
+    # cates.std() / sqrt(n) is the correct SE of the sample mean by CLT.
     ate_se = cates.std() / np.sqrt(len(cates))
 
     print(f'    N = {len(data):,} | ATE = {ate:.4f} (SE = {ate_se:.4f})')
