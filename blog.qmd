@@ -174,7 +174,7 @@ If I stopped here, the hot hand would look like a fallacy. But this combined num
 </div>
 
 
-As Figure 6 shows, converting a break point is associated with a reduced probability of winning the next point in both tours. Break points appear to generate a clear, measurable drag. Tiebreaks tell the opposite story. The ATP estimate (+0.0564) is the dominant feature, comparable in magnitude to the break point hangover and opposite in sign. The WTA effect (+0.0209) is consistent in direction, statistically significant under approximate inference (p=0.0006, 95% CI: 0.009 to 0.033), and smaller in magnitude, reflecting the limited 197-observation sample.
+As Figure 6 shows, converting a break point is associated with a reduced probability of winning the next point in both tours. Break points appear to generate a clear, measurable drag. Tiebreaks tell the opposite story. The ATP estimate (+0.0564) is the dominant feature, comparable in magnitude to the break point hangover and opposite in sign. The WTA effect (+0.0209) is consistent in direction, statistically significant (p=0.0006, 95% CI: 0.009 to 0.033), and smaller in magnitude, reflecting the limited 197-observation sample.
 
 This explains why the combined number is negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.5% in tiebreaks. The hangover effect happens more often, so it dominates the aggregate. When all high-leverage moments are treated as identical, the tiebreak momentum signal gets buried.
 
