@@ -69,7 +69,7 @@ def load_and_filter_matches(filepath: str) -> pd.DataFrame:
 
 def load_points(filepath: str) -> pd.DataFrame:
     """Load point-by-point CSV and cast to extension types."""
-    # low_memory=False — same reason as load_and_filter_matches: prevents
+    # low_memory=False, same reason as load_and_filter_matches: prevents
     # mid-file dtype inference errors on large point-by-point CSVs.
     df = pd.read_csv(filepath, low_memory=False)
     df['match_id']  = df['match_id'].astype('string').str.strip()
@@ -136,7 +136,7 @@ def prep_rankings_gs(filepath: str, gs_names: list) -> pd.DataFrame:
     # A player can appear multiple times in the same tournament if the
     # results file includes qualifying rows. Sort by ranking and keep the
     # first (best) entry so the merge produces exactly one row per player
-    # per tournament — a requirement for validate='m:1' to pass.
+    # per tournament, a requirement for validate='m:1' to pass.
     rankings = rankings.sort_values('ranking')
     rankings = rankings.drop_duplicates(
         subset=['Tournament_Key', 'player_name'], keep='first'
@@ -148,11 +148,11 @@ def prep_rankings_fallback(filepath: str) -> pd.DataFrame:
     """
     Build season-wide median ranking lookup as fallback for qualifiers
     and wildcards missing from the Grand Slam subset.
-    One row per player — safe for m:1 merge on player name alone.
+    One row per player, safe for m:1 merge on player name alone.
     """
     df = pd.read_csv(filepath, low_memory=False)
 
-    # Same walkover/retirement filter as above — consistency matters here
+    # Same walkover/retirement filter as above: consistency matters here
     # because a player who retired mid-tournament may have a missing rank
     # entry that would otherwise contaminate the season median.
     df = df[~df['score'].astype(str).str.contains(
@@ -193,7 +193,7 @@ def process_tour(
     # rather than being pooled. Men's and women's tours differ in format
     # (best-of-five vs best-of-three), player depth, and tiebreak rules.
     # Mixing them would require tour as a control variable and risk
-    # suppressing tour-specific momentum patterns — exactly the kind of
+    # suppressing tour-specific momentum patterns, exactly the kind of
     # heterogeneity this analysis is designed to detect.
     print(f'\n--- Processing {tour_name} ---')
 
@@ -204,7 +204,7 @@ def process_tour(
     pts = load_points(os.path.join(RAW_DIR, points_file))
     print(f'  Loaded {len(pts):,} raw points')
 
-    # validate='m:1' asserts that match_id is unique in the matches table —
+    # validate='m:1' asserts that match_id is unique in the matches table:
     # many points map to one match. '1:1' would be wrong here (multiple
     # points share a match_id) and 'm:m' would allow duplicate matches,
     # silently inflating the dataset. The indicator=True argument keeps the
@@ -285,7 +285,7 @@ def process_tour(
     # not the current one. shift(-1) within each match group moves the
     # following row's Point_Won value back to the current row. After
     # shifting, the last point of each match has no successor and produces
-    # NaN — those rows are dropped because they cannot contribute a valid
+    # NaN: those rows are dropped because they cannot contribute a valid
     # outcome observation. Sorting by Set1/Gm1/Pt first ensures the shift
     # respects the actual chronological sequence of points within a match.
     merged = merged.sort_values(['match_id', 'Set1', 'Gm1', 'Pt'])
@@ -301,7 +301,7 @@ def process_tour(
     # Rankings are attached in two steps to maximise coverage without
     # sacrificing accuracy. The primary merge uses the GS-specific rankings
     # table, which gives each player's ranking at the time of that specific
-    # tournament — the most accurate measure of skill at match date.
+    # tournament, the most accurate measure of skill at match date.
     # However, qualifiers and some wildcards appear in the charting data but
     # not in the GS results file (they lost in qualifying and are absent from
     # the main draw results). For these players the fallback merge supplies a

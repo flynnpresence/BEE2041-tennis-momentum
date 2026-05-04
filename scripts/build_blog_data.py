@@ -2,7 +2,7 @@
 build_blog_data.py
 ------------------
 Reads model outputs (ate_results.csv, feature_importance.csv) and
-generates blog_data.js — a JavaScript constants file loaded via script
+generates blog_data.js, a JavaScript constants file loaded via script
 tag in blog.html, making ATE and feature importance values globally
 available to blog.js without any fetch() or CORS risk.
 

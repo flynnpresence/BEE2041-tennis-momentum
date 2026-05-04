@@ -21,7 +21,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, GroupKFold
 
 # Suppress known, safe warnings from econml and sklearn only
-# Global suppression avoided — specific known warnings caught locally
+# Global suppression avoided: specific known warnings caught locally
 warnings.filterwarnings('ignore', category=UserWarning, module='econml')
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 warnings.filterwarnings('ignore', category=FutureWarning, module='econml')
@@ -215,7 +215,7 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
 
     fig = go.Figure()
 
-    # ATP — left panel (x-axis 1, y-axis 1)
+    # ATP: left panel (x-axis 1, y-axis 1)
     fig.add_trace(go.Scatter(
         x=atp_tboe['rank'], y=atp_tboe['TBOE'],
         mode='markers', name='ATP',
@@ -225,7 +225,7 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
         xaxis='x1', yaxis='y1'
     ))
 
-    # WTA — right panel (x-axis 2, y-axis 2)
+    # WTA: right panel (x-axis 2, y-axis 2)
     fig.add_trace(go.Scatter(
         x=wta_tboe['rank'], y=wta_tboe['TBOE'],
         mode='markers', name='WTA',
@@ -297,7 +297,7 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     data['HL_Win'] = ((data['High_Leverage'] == 1) & (
         data['Point_Won'] == 1)).astype(float)
 
-    # Formula API — equivalent to sm.Logit but uses R-style patsy formula
+    # Formula API: equivalent to sm.Logit but uses R-style patsy formula
     formula = f"{OUTCOME} ~ " + " + ".join(CONTROLS) + " + HL_Win"
     model = smf.logit(formula=formula, data=data)
     result = model.fit(
@@ -319,7 +319,7 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     print(f'    N = {len(data):,} | Log-likelihood = {result.llf:.1f}')
 
     # 5-fold cross-validation on sklearn LogisticRegression
-    # Tests predictive stability — distinct from econometric robustness check
+    # Tests predictive stability, distinct from econometric robustness check
     sk_model = LogisticRegression(max_iter=1000, random_state=SEED)
     X_arr = data[CONTROLS + ['HL_Win']].astype(float).values
     y_arr = data[OUTCOME].astype(float).values
@@ -365,7 +365,7 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
         data['Treatment'] = ((data['High_Leverage'] == 1) & (
             data['Point_Won'] == 1)).astype(float)
 
-    # Stratified subsampling — preserve treatment balance
+    # Stratified subsampling: preserve treatment balance
     if len(data) > 15000:
         treated = data[data['Treatment'] == 1]
         control = data[data['Treatment'] == 0].sample(
@@ -418,7 +418,7 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
 # ── Output 4: CATE plot ───────────────────────────────────────────────────────
 def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
     """
-    Single grouped dot plot — ATP and WTA side by side per ranking band.
+    Single grouped dot plot, ATP and WTA side by side per ranking band.
     Cleaner than two subplots, avoids annotation overlap issues.
     """
     import plotly.graph_objects as go
@@ -516,7 +516,7 @@ def plot_model_table(
     atp_tb_ate, atp_tb_ate_se, wta_tb_ate, wta_tb_ate_se
 ) -> None:
     """
-    Clean Plotly forest plot — logistic regression coefficients
+    Clean Plotly forest plot: logistic regression coefficients
     plus causal forest ATE rows for BP and TB.
     """
     import plotly.graph_objects as go
@@ -537,7 +537,7 @@ def plot_model_table(
     atp_coef['Feature'] = atp_coef['Feature'].replace(label_map)
     wta_coef['Feature'] = wta_coef['Feature'].replace(label_map)
 
-    # Build rows — logistic regression coefficients
+    # Build rows: logistic regression coefficients
     features = atp_coef['Feature'].tolist()
 
     rows = []
@@ -569,7 +569,7 @@ def plot_model_table(
         'type': 'forest'
     })
 
-    # Y axis — reversed so top row appears first
+    # Y axis: reversed so top row appears first
     y_labels = [r['label'] for r in rows][::-1]
 
     fig = go.Figure()
@@ -685,7 +685,7 @@ def plot_model_table(
 def plot_feature_importance(atp_imp: pd.DataFrame,
                             wta_imp: pd.DataFrame) -> None:
     """
-    Interactive Plotly horizontal bar chart — feature importance.
+    Interactive Plotly horizontal bar chart: feature importance.
     Single chart with ATP and WTA side by side per feature.
     """
     import plotly.graph_objects as go
@@ -765,7 +765,7 @@ def plot_reveal_chart(
     atp_tb_ate, wta_tb_ate
 ) -> None:
     """
-    Interactive reveal chart — Plotly replacement for D3 reveal chart.
+    Interactive reveal chart, Plotly replacement for D3 reveal chart.
     Toggles between combined ATE view and split BP/TB view.
     """
     import plotly.graph_objects as go
@@ -790,7 +790,7 @@ def plot_reveal_chart(
 
     fig = go.Figure()
 
-    # Trace 0 — combined (visible by default)
+    # Trace 0: combined (visible by default)
     fig.add_trace(go.Bar(
         x=combined_x,
         y=combined_y,
@@ -804,7 +804,7 @@ def plot_reveal_chart(
         name='Combined'
     ))
 
-    # Trace 1 — split (hidden by default)
+    # Trace 1: split (hidden by default)
     fig.add_trace(go.Bar(
         x=split_x,
         y=split_y,
@@ -910,7 +910,7 @@ def main() -> None:
     atp_coef = run_logistic(atp, 'ATP')
     wta_coef = run_logistic(wta, 'WTA')
 
-    # Causal Forest — combined treatment, full controls
+    # Causal Forest: combined treatment, full controls
     print('\n--- Causal Forest ---')
     atp_cates, atp_ate, atp_ate_se, atp_imp, atp_X = run_causal_forest(
         atp, 'ATP')
@@ -968,7 +968,7 @@ def main() -> None:
     print('\n--- Output 6: Feature importance ---')
     plot_feature_importance(atp_imp, wta_imp)
 
-    # Export ATE results as CSV — provides a Python-generated data file
+    # Export ATE results as CSV: provides a Python-generated data file
     # backing the D3 reveal chart values displayed in the blog
     ate_summary = pd.DataFrame([
         {'Tour': 'ATP', 'Type': 'Combined',    'ATE': round(atp_ate, 4),    'SE': round(atp_ate_se, 4)},  # noqa: E501

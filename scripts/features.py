@@ -3,10 +3,10 @@ features.py
 -----------
 Loads cleaned point-by-point data for ATP and WTA.
 Engineers momentum and control features strictly forward-rolling.
-Runs per-player Chi-squared and runs tests (no pooling — aggregation bias risk).
+Runs per-player Chi-squared and runs tests (no pooling, aggregation bias risk).
 Outputs data/processed/processed_features.csv as the model checkpoint.
 
-All features computed within match groups — no look-ahead bias.
+All features computed within match groups: no look-ahead bias.
 """
 
 import os
@@ -42,9 +42,9 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.sort_values(['match_id', 'Set1', 'Gm1', 'Pt']).copy()
 
     # ── Streak_k4 ─────────────────────────────────────────────────────────────
-    # Streak_k4 — 1 if player won ALL of the last STREAK_K points.
+    # Streak_k4: 1 if player won ALL of the last STREAK_K points.
     # .min() on a binary series returns 1 only if every value is 1.
-    # .shift(1) ensures we use only past points — no look-ahead bias.
+    # .shift(1) ensures we use only past points, no look-ahead bias.
     df['Streak_k4'] = (
         df.groupby('match_id')['Point_Won']
         .transform(lambda x: x.shift(1).rolling(STREAK_K, min_periods=STREAK_K).min())
@@ -53,7 +53,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # ── Rolling_Win_Pct ───────────────────────────────────────────────────────
-    # Rolling_Win_Pct — proportion of last ROLLING_WIN points won.
+    # Rolling_Win_Pct: proportion of last ROLLING_WIN points won.
     # min_periods=1 avoids NaN at match start; fillna(0.5) applies
     # a neutral prior (50/50) for the very first point of each match.
     df['Rolling_Win_Pct'] = (
@@ -62,12 +62,12 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         .fillna(0.5)
     )
 
-    # ── CUSUM (fixed — expanding mean, no look-ahead) ─────────────────────────
+    # ── CUSUM (fixed: expanding mean, no look-ahead) ─────────────────────────
     def cusum_expanding(series: pd.Series) -> pd.Series:
         # CUSUM tracks cumulative deviation from the player's own
         # expanding mean win rate within the match. A rising CUSUM
         # means the player is winning points above their match average.
-        # expanding().mean() uses only past points — no look-ahead.
+        # expanding().mean() uses only past points, no look-ahead.
         shifted = series.shift(1).fillna(0)
         expanding_mean = shifted.expanding().mean()
         deviations = shifted - expanding_mean
@@ -78,7 +78,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         .transform(cusum_expanding)
     )
 
-    # ── BPOR & TBOE — Forward-Rolling Luck Proxies ───────────────────────────
+    # ── BPOR & TBOE: Forward-Rolling Luck Proxies ───────────────────────────
     # np.where avoids .map() boolean dtype issues in groupby context
     df['is_returning'] = (df['Svr'] != np.where(
         df['focal_is_p1'], 1, 2)).astype(int)
@@ -89,7 +89,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         'string').isin(['40-0', '40-15', '40-30', 'AD-40'])
     df['is_bp'] = (bp_p1_serving | bp_p2_serving).astype(int)
 
-    # Point-level tiebreak flag — consistent with clean.py, more reliable than TbSet
+    # Point-level tiebreak flag, consistent with clean.py, more reliable than TbSet
     _pts_split = df['Pts'].astype('string').str.split('-', expand=True)
     _tennis_vals = {'0', '15', '30', '40', 'AD'}
     df['_is_tb_point'] = (~(
@@ -105,7 +105,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
                       * match_df['Point_Won']).shift(1).expanding().sum()
         # 0.38 is the approximate ATP/WTA return point win rate used as a
         # Bayesian prior for players with no historical return data in this match.
-        # Derived from tour-wide averages — returners win ~38% of points served.
+        # Derived from tour-wide averages: returners win ~38% of points served.
         # Applied symmetrically to both terms so initial BPOR = 0 (neutral).
         ret_rate   = (ret_won / ret_played).fillna(0.38)  # Prior: tour avg return win rate
 
@@ -121,7 +121,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         tb_played  = match_df['_is_tb_point'].shift(1).expanding().sum()
         tb_won     = (match_df['_is_tb_point']
                       * match_df['Point_Won']).shift(1).expanding().sum()
-        # 0.5 prior for tiebreak rate — neutral assumption when no
+        # 0.5 prior for tiebreak rate: neutral assumption when no
         # tiebreak history exists yet in this match.
         tb_rate    = (tb_won / tb_played).fillna(0.5)
 
@@ -196,7 +196,7 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
 def run_per_player_tests(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     """
     Runs per-player Chi-squared independence test and Wald-Wolfowitz runs test.
-    Do not pool players — aggregation bias risk.
+    Do not pool players: aggregation bias risk.
 
     Returns a summary DataFrame with one row per player.
     """
@@ -307,7 +307,7 @@ def main() -> None:
         PROC_DIR, 'wta_cleaned_points.csv'), low_memory=False)
     print(f'  Loaded {len(wta):,} rows')
 
-    # Engineer features separately — no cross-tour contamination
+    # Engineer features separately: no cross-tour contamination
     print('\nEngineering ATP features...')
     atp = engineer_features(atp)
     atp = select_features(atp)
@@ -320,7 +320,7 @@ def main() -> None:
     wta['Tour'] = 'WTA'
     print(f'  WTA feature rows: {len(wta):,}')
 
-    # Per-player statistical tests — run separately per tour, no pooling
+    # Per-player statistical tests: run separately per tour, no pooling
     atp_tests = run_per_player_tests(atp, 'ATP')
     wta_tests = run_per_player_tests(wta, 'WTA')
     all_tests = pd.concat([atp_tests, wta_tests], ignore_index=True)

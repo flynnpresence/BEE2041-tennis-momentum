@@ -3,7 +3,7 @@ download.py
 Downloads raw data from Jeff Sackmann's GitHub repositories.
 Saves files to data/raw/ without any modification.
 
-Raw data is sacred — no filtering or cleaning occurs here.
+Raw data is sacred: no filtering or cleaning occurs here.
 All filtering and cleaning happens in clean.py.
 
 Compliance note: raw.githubusercontent.com has no robots.txt,
@@ -50,7 +50,7 @@ def download(filename: str, url: str) -> None:
     Download a single CSV from url and save to data/raw/ unmodified.
 
     Retries up to 3 times with a 2-second delay between attempts.
-    Writes raw binary content directly — pandas is bypassed entirely
+    Writes raw binary content directly, bypassing pandas entirely
     to guarantee files are saved bit-for-bit identically to the source.
 
     Args:
