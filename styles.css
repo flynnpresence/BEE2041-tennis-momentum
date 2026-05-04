@@ -17,6 +17,10 @@ html, body {
   background-color: #f2f7f2 !important;
 }
 
+body.quarto-light {
+  background-color: #f2f7f2 !important;
+}
+
 /* ─── Tokens ────────────────────────────────────────────── */
 :root {
   --bg: #ffffff;
