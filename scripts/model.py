@@ -557,13 +557,13 @@ def plot_model_table(
 
     # Add causal forest rows
     rows.append({
-        'label': 'Break Point Win (ATP 13.5% / WTA 13.5%)',
+        'label': 'Break Point Win',
         'atp_coef': atp_bp_ate, 'atp_se': atp_bp_ate_se,
         'wta_coef': wta_bp_ate, 'wta_se': wta_bp_ate_se,
         'type': 'forest'
     })
     rows.append({
-        'label': 'Tiebreak Win (ATP 3.5% / WTA 2.3%)',
+        'label': 'Tiebreak Win',
         'atp_coef': atp_tb_ate, 'atp_se': atp_tb_ate_se,
         'wta_coef': wta_tb_ate, 'wta_se': wta_tb_ate_se,
         'type': 'forest'
@@ -917,7 +917,7 @@ def main() -> None:
     wta_cates, wta_ate, wta_ate_se, wta_imp, wta_X = run_causal_forest(
         wta, 'WTA')
 
-    # Fix 4: BP vs TB breakdown
+
     _, atp_bp_ate, atp_bp_ate_se, _, _ = run_causal_forest(
         atp, 'ATP', treatment_label='bp')
     _, wta_bp_ate, wta_bp_ate_se, _, _ = run_causal_forest(
@@ -939,7 +939,7 @@ def main() -> None:
         atp_tb_ate, wta_tb_ate
     )
 
-    # Fix 5: Robustness — reduced controls (ranking only)
+
     _, atp_ate_r, _, _, _ = run_causal_forest(
         atp, 'ATP', controls=['Focal_Ranking'])
     _, wta_ate_r, _, _, _ = run_causal_forest(
