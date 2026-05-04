@@ -94,7 +94,7 @@ header#title-block-header,
   width: 100% !important;
   max-width: var(--col-wide) !important;
   margin: 0 auto !important;
-  padding: 0 24px !important;
+  padding: 0 24px 0 48px !important;
   align-items: start !important;
 }
 
