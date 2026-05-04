@@ -382,7 +382,6 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
     Y = data[OUTCOME].astype(float).values
     X = data[controls].astype(float).values
 
-    # Fix 6: Treatment overlap check
     print(f'    Treatment rate: {T.mean()*100:.1f}%')
     print(f'    Treated N: {int(T.sum()):,} | Control N: {int((1-T).sum()):,}')
 
