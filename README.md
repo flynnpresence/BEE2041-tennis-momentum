@@ -10,7 +10,7 @@ BEE2041 Data Science in Economics — University of Exeter
 
 This project tests whether point-by-point momentum exists in professional tennis using all four 2023 Grand Slams across both ATP and WTA tours. It applies logistic regression and a Causal Forest (econml) to estimate whether winning a high-leverage point causally increases the probability of winning the next point.
 
-**Finding:** Break points generate a hangover effect (ATP: -0.0601, WTA: -0.0291). Tiebreaks generate genuine positive momentum (ATP: +0.0564, WTA: +0.0209). The two effects cancel in aggregate, explaining why prior studies reached conflicting conclusions.
+**Finding:** Break points generate a hangover effect (ATP: -0.0601, WTA: -0.0291). Tiebreaks generate genuine positive momentum (ATP: +0.0564, WTA: +0.0209). The two effects partially offset in aggregate, explaining why prior studies reached conflicting conclusions.
 
 ---
 
@@ -22,7 +22,7 @@ To address conflicting conclusions in existing literature (Gilovich 1985 vs. Mil
 - **Forward-Rolling Priors:** Luck proxies use neutral tour-wide Bayesian priors (0.38 for return points; 0.5 for tiebreaks) to avoid cold-start bias at match beginnings.
 - **Deconfounding Baseline Skill:** Consistent with Kovalchik (2016), official rankings are attached via a two-step validated merge (tournament-specific then season-median fallback) to isolate momentum from player quality.
 - **Clustered Standard Errors:** Logistic models use match-level clustering to account for intra-match point dependency.
-- **Causal Forest (DML):** Employs econml to estimate the Average Treatment Effect while controlling for rolling win percentage, momentum scores, and streaks, isolating the "success breeds success" mechanic.
+- **Causal Forest (Double Machine Learning, DML):** Employs econml to estimate the Average Treatment Effect while controlling for rolling win percentage, momentum scores, and streaks, isolating the "success breeds success" mechanic.
 
 ---
 
@@ -35,11 +35,11 @@ make all
 
 This runs the full pipeline in sequence: download → clean → features → model → build_blog_data → render.
 
-Requires Python 3.10+ (tested on 3.13.0), pip, and [Quarto](https://quarto.org) 1.9+ (tested on 1.9.37) installed on your system. Note: pandas 3.0.1 requires Python ≥ 3.10.
+Requires Python 3.10+ (tested on 3.13.0), pip, and [Quarto](https://quarto.org) 1.9+ (tested on 1.9.37) installed on your system. Note: pandas 3.0.1 requires Python ≥ 3.10. The download step requires an internet connection to fetch raw data from GitHub.
 
 Run `make reset` to wipe all generated files and start fresh.
 
-Note: Raw data is read from `data/raw/` and never modified. All analysis-ready outputs are written to `data/processed/`, following the principle that raw data is sacred.
+Note: Raw data is read from `data/raw/` and never modified. All cleaned and feature-engineered data is written to `data/processed/`, following the principle that raw data is sacred.
 
 Note: The Makefile uses `outputs/ate_results.csv` as the sentinel for the model step. If individual chart files are deleted while this CSV exists, run `make reset && make all` to force a full rebuild.
 
@@ -79,7 +79,7 @@ See `requirements.txt`. Key packages:
 - statsmodels
 - scikit-learn
 - econml (Causal Forest)
-- plotly
+- matplotlib, plotly
 - requests
 
 ---
