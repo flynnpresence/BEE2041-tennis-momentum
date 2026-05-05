@@ -224,12 +224,12 @@ Split by Pressure Type
 </section>
 <section id="if-not-momentum-then-what" class="level2">
 <h2 class="anchored" data-anchor-id="if-not-momentum-then-what">If Not Momentum, Then What?</h2>
-<p>Outside of tiebreaks, if momentum does not drive point outcomes, what does? Figure 7 ranks the four variables by how much each one drives variation in the causal effect.</p>
+<p>Outside of tiebreaks, if a short-term momentum boost does not drive point outcomes, what does? Figure 7 ranks the four control variables by their contribution to the model’s estimates.</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>The cumulative momentum score dominates everything else. In the ATP, it accounts for 0.50 of the variance in the treatment effect, significantly ahead of player rank at 0.32 and rolling win percentage at 0.16. In the WTA, the pattern holds: momentum score at 0.52, player rank at 0.28, rolling win percentage at 0.19.</p>
-<p>The most striking feature of Figure 7 is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores 0.024 in the ATP and 0.010 in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the cumulative trajectory is accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
+<p>The cumulative match tracker (the CUSUM metric we built earlier) dominates everything else. In the ATP, this accumulated match drift accounts for 50% of that variation, significantly ahead of player rank (32%) and rolling win percentage (16%). In the WTA, the pattern holds: match drift at 52%, player rank at 28%, and rolling win percentage at 19%.</p>
+<p>The most striking feature of Figure 7 is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores just 2.4% in the ATP and 1.0% in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the overarching match drift is accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
 <p>What shapes the momentum effect most is accumulated match drift, not short-term bursts of form.</p>
 </section>
 <section id="the-uncomfortable-conclusion" class="level2">
