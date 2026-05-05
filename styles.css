@@ -11,16 +11,6 @@ html {
   scroll-behavior: auto !important;
 }
 
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  background-color: #f2f7f2 !important;
-}
-
-body.quarto-light {
-  background-color: #f2f7f2 !important;
-}
-
 /* ─── Tokens ────────────────────────────────────────────── */
 :root {
   --bg: #ffffff;
@@ -59,6 +49,8 @@ body.quarto-light {
 /* ─── Base ──────────────────────────────────────────────── */
 html,
 body {
+  margin: 0 !important;
+  padding: 0 !important;
   background: var(--bg) !important;
   color: var(--text) !important;
   font-family: var(--serif) !important;
@@ -96,9 +88,6 @@ header#title-block-header,
   margin: 0 auto !important;
   padding: 0 24px 0 48px !important;
   align-items: start !important;
-}
-
-#quarto-content.page-columns {
   background-color: #f2f7f2 !important;
 }
 
@@ -651,7 +640,7 @@ main.content > p > img {
   height: auto;
   margin: 0 auto;
   padding: 20px;
-  background: #ffffff;
+  background: var(--bg);
   border: 1px solid var(--rule);
   border-radius: 0;
   box-shadow: none;
@@ -676,7 +665,7 @@ main.content iframe {
   max-width: var(--col-figure);
   margin: 64px auto !important;
   padding: 20px;
-  background: #ffffff;
+  background: var(--bg);
   border: 1px solid var(--rule) !important;
   border-radius: 0 !important;
   box-shadow: none !important;
@@ -685,10 +674,9 @@ main.content iframe {
 /* ─── Reveal section ────────────────────────────────────── */
 .reveal-section {
   max-width: var(--col-figure) !important;
-  margin: 64px auto !important;
-  margin-top: 32px !important;
+  margin: 32px auto 64px !important;
   padding: 20px !important;
-  background: #ffffff !important;
+  background: var(--bg) !important;
 }
 
 .reveal-chart {
@@ -739,34 +727,6 @@ main.content iframe {
   color: var(--bg);
   background: var(--accent);
   border-color: var(--accent);
-}
-
-/* ─── Feature chart ─────────────────────────────────────── */
-.feature-chart {
-  max-width: var(--col-figure) !important;
-  margin: 64px auto !important;
-  padding: 36px 28px !important;
-  background: var(--bg) !important;
-  border: 1px solid var(--rule) !important;
-}
-
-.feature-chart svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  font-family: var(--sans);
-}
-
-.chart-frame-label {
-  margin-bottom: 20px !important;
-  padding-bottom: 14px !important;
-  font-family: var(--mono) !important;
-  font-size: 10.5px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.14em !important;
-  text-transform: uppercase !important;
-  color: var(--text-muted) !important;
-  border-bottom: 1px solid var(--rule) !important;
 }
 
 /* ─── Momentum table (output1) ─────────────────────────── */
@@ -940,9 +900,8 @@ button:focus-visible {
 @media print {
   .hero-banner,
   .stats-grid,
-  .reveal-section,
-  .feature-chart {
-    background: #ffffff !important;
+  .reveal-section {
+    background: var(--bg) !important;
   }
 
   .hero-banner iframe,
