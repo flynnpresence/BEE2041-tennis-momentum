@@ -409,9 +409,9 @@ def process_tour(
     ).astype('Int64')
 
     print(
-        f'  Rankings missing — Focal: {merged["Focal_Ranking"].isna().sum()}')
+        f'  Rankings missing: Focal: {merged["Focal_Ranking"].isna().sum()}')
     print(
-        f'  Rankings missing — Opponent: {merged["Opponent_Ranking"].isna().sum()}')
+        f'  Rankings missing: Opponent: {merged["Opponent_Ranking"].isna().sum()}')
     print(f'  Final row count: {len(merged):,}')
 
     return merged

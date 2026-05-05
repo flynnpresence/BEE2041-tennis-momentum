@@ -300,7 +300,7 @@ def check_vif(df: pd.DataFrame, tour_name: str) -> None:
     # Add constant column so each VIF regression is properly specified
     X_with_const = np.column_stack([np.ones(len(X)), X])
 
-    print(f'\n  VIF check — {tour_name}')
+    print(f'\n  VIF check: {tour_name}')
     for i, col in enumerate(predictors):
         vif = variance_inflation_factor(X_with_const, i + 1)
         print(f'    {col}: {vif:.3f}')
@@ -308,7 +308,7 @@ def check_vif(df: pd.DataFrame, tour_name: str) -> None:
 
 # ── Logistic Regression ───────────────────────────────────────────────────────
 def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
-    print(f'\n  Logistic regression — {tour_name}')
+    print(f'\n  Logistic regression: {tour_name}')
     keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id']
     nan_counts = df[keep].isna().sum()
     if nan_counts.sum() > 0:
@@ -361,7 +361,7 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
                       controls: list = None) -> tuple:
     if controls is None:
         controls = CONTROLS
-    print(f'\n  Causal Forest — {tour_name} [{treatment_label}]')
+    print(f'\n  Causal Forest: {tour_name} [{treatment_label}]')
 
     extra_cols = ['Point_Won']
     if treatment_label == 'bp':
@@ -953,9 +953,9 @@ def main() -> None:
         wta, 'WTA', treatment_label='tb')
     print(f'\n  ATE by leverage type:')
     print(
-        f'    ATP — Break Point: {atp_bp_ate:.4f} | Tiebreak: {atp_tb_ate:.4f}')
+        f'    ATP: Break Point: {atp_bp_ate:.4f} | Tiebreak: {atp_tb_ate:.4f}')
     print(
-        f'    WTA — Break Point: {wta_bp_ate:.4f} | Tiebreak: {wta_tb_ate:.4f}')
+        f'    WTA: Break Point: {wta_bp_ate:.4f} | Tiebreak: {wta_tb_ate:.4f}')
 
     print('\n--- Reveal chart ---')
     plot_reveal_chart(
@@ -970,8 +970,8 @@ def main() -> None:
     _, wta_ate_r, _, _, _ = run_causal_forest(
         wta, 'WTA', controls=['Focal_Ranking'])
     print(f'\n  Robustness (ranking-only controls):')
-    print(f'    ATP — Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
-    print(f'    WTA — Full: {wta_ate:.4f} | Reduced: {wta_ate_r:.4f}')
+    print(f'    ATP: Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
+    print(f'    WTA: Full: {wta_ate:.4f} | Reduced: {wta_ate_r:.4f}')
 
     # Output 4
     print('\n--- Output 4: CATE plot ---')

@@ -13,7 +13,7 @@
     initStatCounters();
 
     if (typeof d3 === "undefined") {
-      console.warn("[blog.js] D3 not loaded — D3 charts disabled.");
+      console.warn("[blog.js] D3 not loaded: D3 charts disabled.");
       return;
     }
 

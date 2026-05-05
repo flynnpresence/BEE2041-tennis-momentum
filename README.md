@@ -2,7 +2,7 @@
 
 Live blog: https://flynnpresence.github.io/BEE2041-tennis-momentum/blog.html
 
-BEE2041 Data Science in Economics — University of Exeter
+BEE2041 Data Science in Economics, University of Exeter
 
 ---
 
@@ -50,7 +50,7 @@ Note: The Makefile uses `outputs/ate_results.csv` as the sentinel for the model 
 ```
 BEE2041-tennis-momentum/
 ├── data/
-│   ├── raw/            # Raw data — never modified
+│   ├── raw/            # Raw data: never modified
 │   └── processed/      # Cleaned and feature-engineered data
 ├── scripts/
 │   ├── download.py     # Downloads raw data from Jeff Sackmann's GitHub
@@ -86,9 +86,9 @@ See `requirements.txt`. Key packages:
 
 ## Data Sources
 
-- **Jeff Sackmann Match Charting Project** — point-by-point data
+- **Jeff Sackmann Match Charting Project**: point-by-point data
   https://github.com/JeffSackmann/tennis_MatchChartingProject
-- **Jeff Sackmann ATP/WTA results** — official rankings
+- **Jeff Sackmann ATP/WTA results**: official rankings
   https://github.com/JeffSackmann/tennis_atp
   https://github.com/JeffSackmann/tennis_wta
 
@@ -109,8 +109,8 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 | 5 | output5_model_table.html | Logistic regression and Causal Forest ATE estimates |
 | 6 | output6_reveal_chart.html | Standalone Plotly reveal chart (the interactive version embedded in the blog is rendered by D3 via blog.js) |
 | 7 | output7_feature_importance.html | Causal Forest feature importance, ATP and WTA |
-| — | ate_results.csv | Python-generated ATE values |
-| — | feature_importance.csv | Python-generated feature importance values |
+| - | ate_results.csv | Python-generated ATE values |
+| - | feature_importance.csv | Python-generated feature importance values |
 
 ---
 
@@ -124,4 +124,4 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 
 ---
 
-*Module: BEE2041 Data Science in Economics — University of Exeter*
+*Module: BEE2041 Data Science in Economics, University of Exeter*
