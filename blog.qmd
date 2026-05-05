@@ -176,9 +176,11 @@ If I stopped here, the hot hand would look like a complete fallacy. But this com
 </div>
 
 
-As Figure 6 shows, converting a break point is associated with a reduced probability of winning the next point in both tours. Break points appear to generate a clear, measurable drag. Tiebreaks tell the opposite story. The ATP estimate (+0.0564) is the dominant feature, comparable in magnitude to the break point hangover and opposite in sign. The WTA effect (+0.0209) is consistent in direction, statistically significant under approximate inference (p=0.0006, 95% CI: 0.009 to 0.033), and smaller in magnitude, reflecting the limited 197-observation sample.
+As Figure 6 shows, converting a break point actually causes a drop in the probability of winning the next point across both tours. Break points generate a clear, measurable drag. Think of it as an emotional hangover: perhaps the relief of winning a crucial point briefly lowers focus or intensity for the point that follows.
 
-This explains why the combined number is negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.5% in tiebreaks. The hangover effect happens more often, so it dominates the aggregate. When all high-leverage moments are treated as identical, the tiebreak momentum signal gets buried.
+Tiebreaks tell the exact opposite story. In the ATP, the momentum surge from winning a tiebreak point (+0.0564) is the dominant feature of the chart, comparable in magnitude to the break point hangover. The WTA effect (+0.0209) confirms this direction. While the WTA magnitude is smaller, reflecting a more limited sample of 197 observations, the mathematical signal remains highly significant (p=0.0006). In a tiebreak, winning a point genuinely makes you more likely to win the next one, above and beyond your normal match trajectory.
+
+This paradox perfectly explains why the combined momentum number in the previous section was negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.5% for tiebreaks. Because the hangover effect happens so much more frequently, it dominates the aggregate data. When we treat all high-leverage moments as identical, the very real tiebreak momentum signal gets completely buried.
 
 ## If Not Momentum, Then What?
 
