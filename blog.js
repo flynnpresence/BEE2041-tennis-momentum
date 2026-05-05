@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   blog.js — Interactive charts + TOC polish + scroll animations
+   blog.js: Interactive charts, TOC polish, scroll animations
    The Wrong Kind of Momentum
    ═══════════════════════════════════════════════════════════════ */
 
@@ -140,7 +140,7 @@
 
     const duration = 1600;
     const startTime = performance.now();
-    const formatter = target >= 1000 ? d3.format(",") : (n) => String(n);
+    const formatter = target >= 1000 ? (n) => n.toLocaleString() : (n) => String(n);
 
     function tick(now) {
       const elapsed = now - startTime;
@@ -418,7 +418,7 @@
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (!entry.isIntersecting || entry.intersectionRatio <= 0.5 || autoSwitched) return;
+            if (!entry.isIntersecting || autoSwitched) return;
 
             autoSwitched = true;
 
@@ -434,7 +434,7 @@
             }, 900);
           });
         },
-        { threshold: 0.25 }
+        { threshold: 0.5 }
       );
 
       observer.observe(section);
