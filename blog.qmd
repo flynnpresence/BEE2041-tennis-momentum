@@ -107,7 +107,7 @@ The results are the first blow to the momentum theory. In the ATP, 10.4% of play
 
 But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences.
 
-Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match. Think of this as a running tracker of form: the line rises when the player wins above her baseline rate, and falls when she drops below it. Genuine momentum would look like a staircase, not a weather chart.
+Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match. Think of this as a running tally of overperformance. Every point is compared to the player's match average: when they win points at a higher rate than usual, the line climbs. When they go cold, the line drops. Genuine momentum would look like a staircase, not a weather chart.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">

@@ -170,7 +170,7 @@ Grand Slams · 2 Tours
 </div>
 <p>The results are the first blow to the momentum theory. In the ATP, 10.4% of players showed evidence of non-random sequences on the Chi-squared test, and 13.0% on the runs test. In the WTA, the figures are lower still: 6.4% and 9.0%. After applying a Benjamini-Hochberg correction to control the false discovery rate (the proportion of flagged results that are actually false alarms) across all players, zero remain significant on the Chi-squared test in either tour, and only one per tour survives on the runs test. The uncorrected figures barely exceeded the 5% random baseline; once adjusted, evidence for individual momentum vanishes.</p>
 <p>But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences.</p>
-<p>Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match. Think of this as a running tracker of form: the line rises when the player wins above her baseline rate, and falls when she drops below it. Genuine momentum would look like a staircase, not a weather chart.</p>
+<p>Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match. Think of this as a running tally of overperformance. Every point is compared to the player’s match average: when they win points at a higher rate than usual, the line climbs. When they go cold, the line drops. Genuine momentum would look like a staircase, not a weather chart.</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output2_cusum_wta.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
