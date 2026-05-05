@@ -192,7 +192,7 @@ Outside of tiebreaks, if a short-term momentum boost does not drive point outcom
 </div>
 ```
 
-The cumulative match tracker (the CUSUM metric we built earlier) dominates everything else. In the ATP, this accumulated match drift accounts for 50% of the total, significantly ahead of player rank (32%) and rolling win percentage (16%). In the WTA, the pattern holds: match drift at 52%, player rank at 28%, and rolling win percentage at 19%.
+The cumulative match tracker (the CUSUM metric introduced earlier) dominates everything else. In the ATP, this accumulated match drift accounts for 50% of the total, significantly ahead of player rank (32%) and rolling win percentage (16%). In the WTA, the pattern holds: match drift at 52%, player rank at 28%, and rolling win percentage at 19%.
 
 The most striking feature of Figure 7 is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores just 2.4% in the ATP and 1.0% in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the overarching match drift is accounted for. The hot hand, in its most literal form, has no predictive power here.
 
