@@ -119,7 +119,7 @@ Figure 2 shows a sustained above-average run that eventually collapses. The line
 
 ## What About the Biggest Moments?
 
-For every player, I calculated their Tiebreak Over-Expectation (TBOE): actual tiebreak win rate minus predicted win rate based on ranking and recent form. If certain players consistently raise their game, I would expect outliers pulling sharply away from zero.
+For every player, I calculated their Tiebreak Over-Expectation (TBOE), which tracks whether a player wins tiebreak points above or below their running match average, averaged across all data points as an approximate measure of tiebreak tendency. If certain players consistently raise their game, I would expect outliers pulling sharply away from zero.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
@@ -141,7 +141,7 @@ A high-leverage win is a point at a break point or tiebreak score won by the foc
 
 Four variables are held constant: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and cumulative momentum score. Window lengths of 10 and 4 balance responsiveness with stability; sensitivity was not formally tested.
 
-To manage computation, the Causal Forest subsamples to 15,000 observations per run using stratified sampling; ATP is subsampled from 35,635 points while WTA fits within the limit. CUSUM absorbs accumulated match-level drift; the treatment effect is estimated as the residual impact of winning a pressure point after this drift is removed. CUSUM is therefore treated as a control for match drift, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond the existing trajectory. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial break point expectations. Standard errors are clustered by match to account for intra-match dependence. One focal player is randomly selected per match to avoid double-counting zero-sum points. A VIF (Variance Inflation Factor — a measure of whether control variables distort each other's estimated coefficients) check confirmed no multicollinearity (all scores below 1.2).
+To manage computation, the Causal Forest subsamples to 15,000 observations per run using stratified sampling; ATP is subsampled from 35,635 points while WTA fits within the limit. CUSUM absorbs accumulated match-level drift; the treatment effect is estimated as the residual impact of winning a pressure point after this drift is removed. CUSUM is therefore treated as a control for match drift, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond the existing trajectory. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial break point expectations. Standard errors are clustered by match to account for intra-match dependence. One focal player is randomly selected per match to avoid double-counting zero-sum points. A VIF (Variance Inflation Factor — a measure of whether control variables distort each other's estimated coefficients) check confirmed no multicollinearity (all scores well within acceptable bounds, max 1.23).
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">

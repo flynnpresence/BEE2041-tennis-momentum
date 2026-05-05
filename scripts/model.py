@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression
@@ -284,6 +285,25 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
     out_path = os.path.join(OUT_DIR, 'output3_tboe_scatter.html')
     fig.write_html(out_path, include_plotlyjs='cdn', full_html=False)
     print('  Saved output3_tboe_scatter.html')
+
+
+# ── VIF Check ────────────────────────────────────────────────────────────────
+def check_vif(df: pd.DataFrame, tour_name: str) -> None:
+    """Computes VIF on logistic regression predictors to verify no multicollinearity."""
+    keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id']
+    data = df[keep].dropna().copy()
+    data['HL_Win'] = ((data['High_Leverage'] == 1) & (
+        data['Point_Won'] == 1)).astype(float)
+
+    predictors = CONTROLS + ['HL_Win']
+    X = data[predictors].astype(float).values
+    # Add constant column so each VIF regression is properly specified
+    X_with_const = np.column_stack([np.ones(len(X)), X])
+
+    print(f'\n  VIF check — {tour_name}')
+    for i, col in enumerate(predictors):
+        vif = variance_inflation_factor(X_with_const, i + 1)
+        print(f'    {col}: {vif:.3f}')
 
 
 # ── Logistic Regression ───────────────────────────────────────────────────────
@@ -904,6 +924,11 @@ def main() -> None:
     # Output 3
     print('\n--- Output 3: TBOE scatter ---')
     plot_tboe(atp, wta)
+
+    # VIF check on logistic regression predictors
+    print('\n--- VIF Check ---')
+    check_vif(atp, 'ATP')
+    check_vif(wta, 'WTA')
 
     # Logistic regression
     print('\n--- Logistic Regression ---')
