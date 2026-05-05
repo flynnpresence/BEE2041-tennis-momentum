@@ -141,7 +141,7 @@ A high-leverage win is a break point or tiebreak point won by the player we are 
 
 Four variables are held constant: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and the CUSUM match tracker we built earlier. Window lengths of 10 and 4 balance responsiveness with stability; sensitivity was not formally tested.
 
-To manage computation, the causal forest subsamples to 15,000 observations per run using stratified sampling; the ATP is subsampled from 35,635 points while the WTA fits entirely within the limit. CUSUM absorbs accumulated match-level drift. It is treated as a control for match trajectory, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond the existing momentum of the match. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial expectations. Standard errors are clustered by match to account for intra-match dependence, and one player is randomly selected per match to avoid double-counting zero-sum points. A Variance Inflation Factor (VIF) check, which ensures our control variables aren't overlapping and confusing the model, confirmed everything is mathematically stable (maximum score 1.23, well within safe bounds).
+To manage computation, the causal forest subsamples to 15,000 observations per run using stratified sampling; the ATP is subsampled from 35,635 points while the WTA fits entirely within the limit. CUSUM absorbs accumulated match-level drift. It is treated as a control for match drift, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond existing match drift. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial expectations. Standard errors are clustered by match to account for intra-match dependence, and one player is randomly selected per match to avoid double-counting zero-sum points. A Variance Inflation Factor (VIF) check, which ensures our control variables aren't overlapping and confusing the model, confirmed everything is mathematically stable (maximum score 1.23, well within safe bounds).
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
@@ -192,11 +192,11 @@ Outside of tiebreaks, if a short-term momentum boost does not drive point outcom
 </div>
 ```
 
-The cumulative match tracker (the CUSUM metric we built earlier) dominates everything else. In the ATP, this accumulated match drift accounts for 50% of that variation, significantly ahead of player rank (32%) and rolling win percentage (16%). In the WTA, the pattern holds: match drift at 52%, player rank at 28%, and rolling win percentage at 19%.
+The cumulative match tracker (the CUSUM metric we built earlier) dominates everything else. In the ATP, this accumulated match drift accounts for 50% of the total, significantly ahead of player rank (32%) and rolling win percentage (16%). In the WTA, the pattern holds: match drift at 52%, player rank at 28%, and rolling win percentage at 19%.
 
 The most striking feature of Figure 7 is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores just 2.4% in the ATP and 1.0% in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the overarching match drift is accounted for. The hot hand, in its most literal form, has no predictive power here.
 
-What shapes the momentum effect most is accumulated match drift, not short-term bursts of form.
+What shapes the outcome of these high-leverage moments most is accumulated match drift, not short-term bursts of form.
 
 ## The Uncomfortable Conclusion
 
@@ -216,7 +216,7 @@ The next time a commentator says Alcaraz has the momentum after converting a bre
 
 **Data** · Jeff Sackmann Match Charting Project and ATP/WTA official results (2023).
 
-**Methodology** · Logistic regression and heterogeneous-effects Causal Forest (estimating how effects vary across player types) via econml, controlling for player ranking, rolling win percentage, winning streak length, and cumulative momentum score. Full replication pipeline available on [GitHub](https://github.com/flynnpresence/BEE2041-tennis-momentum).
+**Methodology** · Logistic regression and heterogeneous-effects Causal Forest (estimating how effects vary across player types) via econml, controlling for player ranking, rolling win percentage, winning streak length, and CUSUM. Full replication pipeline available on [GitHub](https://github.com/flynnpresence/BEE2041-tennis-momentum).
 
 **Module** · BEE2041 Data Science in Economics · University of Exeter.
 
