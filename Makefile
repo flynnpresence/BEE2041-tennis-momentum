@@ -45,4 +45,4 @@ reset:
 	      outputs/*.png blog_data.js blog.html
 	rm -rf data/raw/*
 	touch data/raw/.gitkeep data/processed/.gitkeep
-	@echo "Pipeline reset — run make all to rebuild"
+	@echo "Pipeline reset: run make all to rebuild"

@@ -4,7 +4,7 @@ __pycache__/
 venv/
 .venv/
 
-# Data files — ignore contents but keep folder structure
+# Data files: ignore contents but keep folder structure
 data/raw/*
 data/processed/*
 !data/raw/.gitkeep
