@@ -204,9 +204,9 @@ Within this sample, momentum is not universal: it operates in opposite direction
 
 This finding is mathematically robust. Whether I control only for player ranking or include the full set of form variables, the results barely twitch. The split between break points and tiebreaks is consistent across both tours and remains entirely stable under the simpler model.
 
-In fact, the break point "hangover" is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural 64% win-probability advantage. The negative hangover effect persists despite this massive tailwind, suggesting a causal drag strong enough to outweigh the mathematical advantage of the serve.
+In fact, the break point "hangover" is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural 64% win-probability advantage. The negative hangover effect persists despite this massive tailwind, suggesting a causal drag strong enough to outweigh the structural advantage of the serve.
 
-This analysis has real boundaries. Estimating conditional effects jointly mitigates the risk of p-hacking, but volunteer-charted datasets naturally skew toward elite, televised matches, and this data cannot measure unobserved physiological factors like fatigue. This model only tests immediate point-to-point effects; whether momentum compounds across longer sequences remains an open question for future research.
+This analysis has real boundaries. Estimating all effects within a single model mitigates the risk of p-hacking, but volunteer-charted datasets naturally skew toward elite, televised matches, and this data cannot measure unobserved physiological factors like fatigue. This model only tests immediate point-to-point effects; whether momentum compounds across longer sequences remains an open question for future research.
 
 Ultimately, the picture is clearer than ever at this scale. In tennis, researchers have long debated whether the hot hand exists. The evidence suggests they may have simply been asking too broad a question. Momentum appears to exist in tiebreaks. It runs in reverse at break points. And because break points happen roughly four times more often than tiebreaks at Grand Slams, the positive effect is easily obscured in pooled data.
 
