@@ -95,7 +95,7 @@ I kept the tours separate, since pooling would have obscured the comparison that
 
 Does winning a point make the next one more likely to go your way?
 
-I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether point outcomes are independent; the runs test whether wins and losses cluster beyond chance. I tested 77 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.
+I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether winning a point is completely independent of the previous point; the runs test asks whether players go on hot streaks more often than you'd expect from a coin flip. I tested 77 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
@@ -107,7 +107,7 @@ The results are the first blow to the momentum theory. In the ATP, 10.4% of play
 
 But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences.
 
-Figure 2 tracks the cumulative momentum score across the longest WTA match. The line rises when the player wins above her average rate and falls when she drops below. Genuine momentum would look like a staircase, not a weather chart.
+Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match. Think of this as a running tracker of form: the line rises when the player wins above her baseline rate, and falls when she drops below it. Genuine momentum would look like a staircase, not a weather chart.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
