@@ -9,6 +9,21 @@
 
 html {
   scroll-behavior: auto !important;
+  background-color: #f2f7f2 !important;
+}
+
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #f2f7f2 !important;
+}
+
+body, #quarto-body {
+  background-color: #f2f7f2 !important;
+}
+
+body.quarto-light {
+  background-color: #f2f7f2 !important;
 }
 
 /* ─── Tokens ────────────────────────────────────────────── */
@@ -51,7 +66,7 @@ html,
 body {
   margin: 0 !important;
   padding: 0 !important;
-  background: var(--bg) !important;
+  background: #f2f7f2 !important;
   color: var(--text) !important;
   font-family: var(--serif) !important;
   font-size: 19px !important;
