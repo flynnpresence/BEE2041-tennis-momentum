@@ -1,7 +1,7 @@
 Tour,Type,ATE,SE
-ATP,Combined,-0.0317,0.0009
-WTA,Combined,-0.0234,0.0013
+ATP,Combined,-0.0342,0.0009
+WTA,Combined,-0.0182,0.0014
 ATP,Break Point,-0.0474,0.001
 WTA,Break Point,-0.0171,0.0014
-ATP,Tiebreak,0.0102,0.0019
-WTA,Tiebreak,0.0521,0.0085
+ATP,Tiebreak,0.0278,0.0017
+WTA,Tiebreak,-0.0933,0.0065

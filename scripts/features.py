@@ -89,16 +89,13 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         'string').isin(['40-0', '40-15', '40-30', 'AD-40'])
     df['is_bp'] = (bp_p1_serving | bp_p2_serving).astype(int)
 
-    # Point-level tiebreak flag, consistent with clean.py, more reliable than TbSet
-    _pts_split = df['Pts'].astype('string').str.split('-', expand=True)
-    _tennis_vals = {'0', '15', '30', '40', 'AD'}
-    df['_is_tb_point'] = (~(
-        _pts_split[0].isin(_tennis_vals) & _pts_split[1].isin(_tennis_vals)
-    )).astype(int)
+    # Use High_Leverage_TB from clean.py directly. TbSet is a set-format flag
+    # (True for all 2023 GS rows) and cannot identify individual tiebreak points.
+    # Score-based recomputation here would reproduce the same "0-0" miss bug.
+    df['_is_tb_point'] = df['High_Leverage_TB']
 
     def calculate_luck_proxies(match_df: pd.DataFrame) -> pd.DataFrame:
         """Calculate BPOR and TBOE using historical (shifted) expanding sums."""
-        match_id = match_df['match_id'].iloc[0]
         # BPOR: historical break point win rate minus historical return point win rate
         ret_played = match_df['is_returning'].shift(1).expanding().sum()
         ret_won    = (match_df['is_returning']
@@ -117,7 +114,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
         match_df['BPOR'] = bp_rate - ret_rate
 
-        # TBOE: uses point-level flag, not TbSet (set-level and unreliable)
+        # TBOE: uses _is_tb_point (= High_Leverage_TB from clean.py)
         tb_played  = match_df['_is_tb_point'].shift(1).expanding().sum()
         tb_won     = (match_df['_is_tb_point']
                       * match_df['Point_Won']).shift(1).expanding().sum()
@@ -129,7 +126,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         # Positive TBOE means the player outperforms in tiebreaks
         # relative to their overall form.
         match_df['TBOE'] = tb_rate - match_df['Rolling_Win_Pct']
-        match_df['match_id'] = match_id
 
         return match_df
 

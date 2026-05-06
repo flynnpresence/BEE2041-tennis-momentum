@@ -388,10 +388,8 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
     # Stratified subsampling: preserve treatment balance
     if len(data) > 15000:
         treated = data[data['Treatment'] == 1]
-        control = data[data['Treatment'] == 0].sample(
-            min(len(data) - len(treated), 15000 - len(treated)),
-            random_state=SEED
-        )
+        n_control = min(len(data) - len(treated), max(0, 15000 - len(treated)))
+        control = data[data['Treatment'] == 0].sample(n_control, random_state=SEED)
         data = pd.concat([treated, control])
         print(
             f'    Stratified sample: {len(treated):,} treated,'
@@ -443,7 +441,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
     """
     import plotly.graph_objects as go
 
-    bins   = [0, 50, 100, 200, 1000]
+    bins   = [1, 51, 101, 201, 1001]
     labels = ['Top 50', '51–100', '101–200', '200+']
 
     def bin_cates(cates, X):
@@ -531,7 +529,7 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 
 # ── Output 5: Coefficient plot ────────────────────────────────────────────────
 def plot_model_table(
-    atp_coef, wta_coef, atp_ate, atp_ate_se, wta_ate, wta_ate_se,
+    atp_coef, wta_coef,
     atp_bp_ate, atp_bp_ate_se, wta_bp_ate, wta_bp_ate_se,
     atp_tb_ate, atp_tb_ate_se, wta_tb_ate, wta_tb_ate_se
 ) -> None:
@@ -981,8 +979,6 @@ def main() -> None:
     print('\n--- Output 5: Model table ---')
     plot_model_table(
         atp_coef, wta_coef,
-        atp_ate, atp_ate_se,
-        wta_ate, wta_ate_se,
         atp_bp_ate, atp_bp_ate_se,
         wta_bp_ate, wta_bp_ate_se,
         atp_tb_ate, atp_tb_ate_se,

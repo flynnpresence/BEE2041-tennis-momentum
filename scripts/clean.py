@@ -234,13 +234,13 @@ def process_tour(
         'string').isin(['40-0', '40-15', '40-30', 'AD-40'])
     is_bp = bp_p1_serving | bp_p2_serving
 
-    # Tiebreak POINTS: score values are NOT standard tennis values {0,15,30,40,AD}
-    # Regular game scores use exactly those values; tiebreak uses sequential counting
-    pts_split = merged['Pts'].astype('string').str.split('-', expand=True)
-    tennis_vals = {'0', '15', '30', '40', 'AD'}
-    left_is_tennis  = pts_split[0].isin(tennis_vals)
-    right_is_tennis = pts_split[1].isin(tennis_vals)
-    is_tb_point = ~(left_is_tennis & right_is_tennis)
+    # Tiebreak POINTS: all points where Gm1=6 and Gm2=6 are tiebreak points.
+    # Score-based detection misses the first point of every tiebreak because "0-0"
+    # is in standard tennis values {0,15,30,40,AD}. Gm1/Gm2 cap at 6 in this
+    # dataset (all 2023 Grand Slams use tiebreaks; no advantage sets exist).
+    # TbSet is a set-format flag (True for all rows) and cannot distinguish
+    # individual tiebreak points from regular game points.
+    is_tb_point = (merged['Gm1'] == 6) & (merged['Gm2'] == 6)
 
     merged['High_Leverage'] = (is_bp | is_tb_point).astype(int)
     merged['High_Leverage_BP'] = is_bp.astype(int)
