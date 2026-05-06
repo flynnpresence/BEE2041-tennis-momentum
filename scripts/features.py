@@ -39,7 +39,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         BPOR            : Rolling historical BP win rate minus return point win rate
         TBOE            : Rolling historical TB win rate minus rolling win %
     """
-    df = df.sort_values(['match_id', 'Set1', 'Gm1', 'Pt']).copy()
+    df = df.sort_values(['match_id', 'Set1', 'Set2', 'Gm1', 'Gm2', 'Pt']).copy()
 
     # ── Streak_k4 ─────────────────────────────────────────────────────────────
     # Streak_k4: 1 if player won ALL of the last STREAK_K points.
