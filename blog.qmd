@@ -87,7 +87,7 @@ The raw data comes from Jeff Sackmann's Match Charting Project, a volunteer-comp
 
 The dataset covers 35,635 ATP points (155 matches) and 16,679 WTA points (120 matches), reflecting the men's best-of-five format.
 
-Data was standardised by matching player records and excluding retirements and qualifying rounds. Official ATP and WTA rankings measure baseline skill, consistent with Kovalchik (2016). Rankings were chosen over Elo (a dynamic skill-rating system that updates after every match) because a two-stage matching process, using tournament-specific rankings with season-average fallback, achieved full coverage across all 52,314 points.
+Data was standardised by matching player records and excluding retirements and qualifying rounds. Official ATP and WTA rankings measure baseline skill, consistent with Kovalchik (2016). Rankings were chosen over Elo (a dynamic skill-rating system that updates after every match) because a two-stage matching process, using tournament-specific rankings with season-median fallback, achieved full coverage across all 52,314 points.
 
 I kept the tours separate, since pooling would have obscured the comparison that matters most.
 
