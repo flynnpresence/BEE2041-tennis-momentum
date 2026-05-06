@@ -286,9 +286,14 @@ def process_tour(
     # following row's Point_Won value back to the current row. After
     # shifting, the last point of each match has no successor and produces
     # NaN: those rows are dropped because they cannot contribute a valid
-    # outcome observation. Sorting by Set1/Gm1/Pt first ensures the shift
-    # respects the actual chronological sequence of points within a match.
-    merged = merged.sort_values(['match_id', 'Set1', 'Gm1', 'Pt'])
+    # outcome observation. Sorting by Set1/Set2/Gm1/Gm2/Pt first ensures the
+    # shift respects the actual chronological sequence of points within a match.
+    # Set2 is required because Set1 stays flat whenever player 2 wins a set,
+    # making Set1 alone unable to distinguish e.g. set 1 from set 2 after p2
+    # wins set 1. Gm2 is required for the same reason within sets: Gm1 stays
+    # flat whenever player 2 wins a game, so without Gm2 points from different
+    # games at the same Gm1 value get interleaved.
+    merged = merged.sort_values(['match_id', 'Set1', 'Set2', 'Gm1', 'Gm2', 'Pt'])
     merged['Next_Point_Won'] = (
         merged.groupby('match_id')['Point_Won']
         .shift(-1)
