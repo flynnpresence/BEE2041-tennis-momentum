@@ -43,6 +43,6 @@ blog.html: blog.qmd blog_data.js blog.js styles.css
 reset:
 	rm -f data/processed/*.csv outputs/*.html outputs/*.csv \
 	      outputs/*.png blog_data.js blog.html
-	rm -rf data/raw/*
+	rm -rf data/raw/* blog_files/
 	touch data/raw/.gitkeep data/processed/.gitkeep
 	@echo "Pipeline reset: run make all to rebuild"
