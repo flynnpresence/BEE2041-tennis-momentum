@@ -15,10 +15,14 @@ shap==0.51.0
 
 # ─── Data Collection ─────────────────────────────────────────────────
 certifi>=2024.0.0
+charset-normalizer==3.4.7
+idna==3.13
 requests==2.33.1
+urllib3==2.6.3
 
 # ─── Visualisation ───────────────────────────────────────────────────
 matplotlib==3.10.0
+narwhals==2.20.0
 plotly==6.7.0
 
 # ─── Pipeline Dependencies ───────────────────────────────────────────
