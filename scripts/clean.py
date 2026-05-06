@@ -256,12 +256,11 @@ def process_tour(
     # Score-based detection misses the first point of every tiebreak because "0-0"
     # is in standard tennis values {0,15,30,40,AD}. TbSet is a set-format flag
     # (True for all rows) and cannot distinguish individual tiebreak points from
-    # regular game points. Roland Garros plays advantage final sets (no tiebreak
-    # at 6-6 games); this detection would misclassify regular game points at
-    # 6-6 if any such match existed in the 2023 charting data — empirically
-    # verified none did. Australian Open 2023 uses a 10-point super-tiebreak at
-    # 6-6 in the final set; these are correctly captured but pooled with standard
-    # 7-point tiebreaks without distinction.
+    # regular game points. All four 2023 Grand Slams use tiebreaks in the final
+    # set; advantage final sets (where Gm1==6 & Gm2==6 could represent a regular
+    # game rather than a tiebreak) no longer exist in this dataset. Australian
+    # Open 2023 uses a 10-point super-tiebreak at 6-6 in the final set; these
+    # are correctly captured but pooled with standard 7-point tiebreaks.
     is_tb_point = (merged['Gm1'] == 6) & (merged['Gm2'] == 6)
 
     merged['High_Leverage'] = (is_bp | is_tb_point).astype(int)
