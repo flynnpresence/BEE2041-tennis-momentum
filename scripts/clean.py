@@ -64,6 +64,18 @@ def load_and_filter_matches(filepath: str) -> pd.DataFrame:
     # distinct competitive contexts and bias any ranking-based controls.
     df = df[~df['Round'].str.match(r'^Q\d', na=False)]
 
+    # Exclude doubles: the type segment of match_id (second hyphen-separated
+    # field) is 'M' for men's singles and 'W' for women's singles; doubles
+    # use 'MD', 'WD', or 'XD'. Defensive guard — charting files are
+    # singles-only in practice.
+    df = df[df['match_id'].str.split('-').str[1].isin(['M', 'W'])]
+
+    # NOTE: Retirement and walkover filtering is not possible at this stage.
+    # The charting matches file has no score column, so incomplete matches
+    # cannot be identified here. Points played by a physically deteriorating
+    # player are included; this is a known limitation that may bias momentum
+    # estimates for the retiring player.
+
     return df
 
 
@@ -225,6 +237,12 @@ def process_tour(
     assert 'High_Leverage' not in merged.columns, (
         "High_Leverage already exists before engineering"
     )
+    assert merged['Svr'].isin([1, 2]).all(), (
+        f"Svr contains values outside {{1, 2}} for {tour_name}"
+    )
+    assert merged['PtWinner'].isin([1, 2]).all(), (
+        f"PtWinner contains values outside {{1, 2}} for {tour_name}"
+    )
 
     # ── 1. Engineer High_Leverage Treatment Flag ──────────────────────────────
     # Break points: detected from Pts score string
@@ -236,10 +254,14 @@ def process_tour(
 
     # Tiebreak POINTS: all points where Gm1=6 and Gm2=6 are tiebreak points.
     # Score-based detection misses the first point of every tiebreak because "0-0"
-    # is in standard tennis values {0,15,30,40,AD}. Gm1/Gm2 cap at 6 in this
-    # dataset (all 2023 Grand Slams use tiebreaks; no advantage sets exist).
-    # TbSet is a set-format flag (True for all rows) and cannot distinguish
-    # individual tiebreak points from regular game points.
+    # is in standard tennis values {0,15,30,40,AD}. TbSet is a set-format flag
+    # (True for all rows) and cannot distinguish individual tiebreak points from
+    # regular game points. Roland Garros plays advantage final sets (no tiebreak
+    # at 6-6 games); this detection would misclassify regular game points at
+    # 6-6 if any such match existed in the 2023 charting data — empirically
+    # verified none did. Australian Open 2023 uses a 10-point super-tiebreak at
+    # 6-6 in the final set; these are correctly captured but pooled with standard
+    # 7-point tiebreaks without distinction.
     is_tb_point = (merged['Gm1'] == 6) & (merged['Gm2'] == 6)
 
     merged['High_Leverage'] = (is_bp | is_tb_point).astype(int)
@@ -280,6 +302,12 @@ def process_tour(
         merged['PtWinner'] == 2
     ).astype(int)
 
+    merged['Focal_Is_Server'] = np.where(
+        merged['focal_is_p1'],
+        merged['Svr'] == 1,
+        merged['Svr'] == 2
+    ).astype(int)
+
     # ── 3. Create Next_Point_Won Outcome Variable ─────────────────────────────
     # The outcome variable is whether the focal player wins the *next* point,
     # not the current one. shift(-1) within each match group moves the
@@ -293,6 +321,9 @@ def process_tour(
     # wins set 1. Gm2 is required for the same reason within sets: Gm1 stays
     # flat whenever player 2 wins a game, so without Gm2 points from different
     # games at the same Gm1 value get interleaved.
+    assert not merged.duplicated(
+        subset=['match_id', 'Set1', 'Set2', 'Gm1', 'Gm2', 'Pt']
+    ).any(), f"Duplicate points found in merged data for {tour_name}"
     merged = merged.sort_values(['match_id', 'Set1', 'Set2', 'Gm1', 'Gm2', 'Pt'])
     merged['Next_Point_Won'] = (
         merged.groupby('match_id')['Point_Won']
