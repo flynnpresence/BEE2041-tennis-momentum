@@ -202,7 +202,7 @@ What shapes the outcome of these high-leverage moments most is accumulated match
 
 Within this sample, momentum is not universal: it operates in opposite directions depending on context. Winning a break point is estimated to reduce the probability of winning the next point by around 5 percentage points in the ATP and 2 in the WTA. Winning a tiebreak point increases it. The break point effect is a hangover, the exact opposite of what commentators assume. The tiebreak effect is consistent with positive momentum (the kind of carryover crowds imagine), but it only exists in that specific context. Because these two effects pull in opposite directions, they cancel each other out in aggregate analyses that treat all pressure moments as identical.
 
-This finding is mathematically robust. Whether I control only for player ranking or include the full set of form variables, the results barely twitch. The split between break points and tiebreaks is consistent across both tours and remains entirely stable under the simpler model.
+This finding is mathematically robust. Whether I control only for player ranking or include the full set of form variables, the results remain in the same direction and similar magnitude. The split between break points and tiebreaks is consistent across both tours and remains entirely stable under the simpler model.
 
 In fact, the break point "hangover" is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural serving advantage. The negative hangover effect persists despite this tailwind, suggesting a causal drag strong enough to outweigh the structural advantage of the serve.
 
