@@ -4,33 +4,33 @@ const ATE = {
   "combined": [
     {
       "tour": "ATP",
-      "value": -0.0325
+      "value": -0.0317
     },
     {
       "tour": "WTA",
-      "value": -0.0363
+      "value": -0.0234
     }
   ],
   "split": [
     {
       "tour": "ATP",
       "type": "Break Point",
-      "value": -0.0601
+      "value": -0.0474
     },
     {
       "tour": "WTA",
       "type": "Break Point",
-      "value": -0.0291
+      "value": -0.0171
     },
     {
       "tour": "ATP",
       "type": "Tiebreak",
-      "value": 0.0564
+      "value": 0.0102
     },
     {
       "tour": "WTA",
       "type": "Tiebreak",
-      "value": 0.0209
+      "value": 0.0521
     }
   ]
 };

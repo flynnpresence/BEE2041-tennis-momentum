@@ -38,7 +38,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="blog_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="blog_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="blog_files/libs/bootstrap/bootstrap-1a9011c99ff3470dca5095ea45ed0705.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<meta name="description" content="An analysis of 52,314 points across all four 2023 Grand Slams reveals why momentum is context-dependent: break points generate a hangover effect while tiebreaks create genuine positive momentum.">
+<meta name="description" content="An analysis of 56,253 points across all four 2023 Grand Slams reveals why momentum is context-dependent: break points generate a hangover effect while tiebreaks create genuine positive momentum.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 
@@ -119,29 +119,29 @@ ul.task-list li input[type="checkbox"] {
 <p>He went on to win. The narrative wrote itself.</p>
 <p>But did winning under that kind of pressure make the next points more likely to go his way? Or did fifteen thousand people in the stands fall for one of sport’s oldest statistical traps?</p>
 <p>Gilovich et al.&nbsp;(1985) famously dismissed the “hot hand” (the feeling that one success magically increases the odds of the next) as a “cognitive illusion.” However, Miller and Sanjurjo (2018) proved this analysis contained a streak selection bias that systematically underestimated genuine persistence. In tennis, recent Cumulative Sum (CUSUM)-based studies (tracking cumulative performance deviations) like Du et al.&nbsp;(2025) find traces of momentum, but rely on thin 31-match samples measuring correlation, not cause.</p>
-<p>This project scales the test. I analysed 52,314 points across all four 2023 Grand Slams and both tours, seven times the size of the most recent study. The results suggest momentum in tennis is context-dependent: the type of pressure determines whether winning a big point helps you or hurts you.</p>
+<p>This project scales the test. I analysed 56,253 points across all four 2023 Grand Slams and both tours, seven times the size of the most recent study. The results suggest momentum in tennis is context-dependent: the type of pressure determines whether winning a big point helps you or hurts you.</p>
 <section id="the-data-every-point-every-grand-slam" class="level2">
 <h2 class="anchored" data-anchor-id="the-data-every-point-every-grand-slam">The Data: Every Point, Every Grand Slam</h2>
 <div class="stats-grid">
 <div class="stat">
-<div class="stat__value" data-count="52314">
-52,314
+<div class="stat__value" data-count="56253">
+56,253
 </div>
 <div class="stat__label">
 Points Analysed
 </div>
 </div>
 <div class="stat">
-<div class="stat__value" data-count="275">
-275
+<div class="stat__value" data-count="297">
+297
 </div>
 <div class="stat__label">
 Grand Slam Matches
 </div>
 </div>
 <div class="stat">
-<div class="stat__value" data-count="155">
-155
+<div class="stat__value" data-count="156">
+156
 </div>
 <div class="stat__label">
 Professional Players
@@ -156,19 +156,19 @@ Grand Slams · 2 Tours
 </div>
 </div>
 </div>
-<p>The raw data comes from Jeff Sackmann’s Match Charting Project, a volunteer-compiled database where tennis analysts manually record every point and exact score state. Marginal human input error is possible, though 52,314 observations substantially mitigate its impact. The same dataset has been used in prior momentum research, including Du et al.&nbsp;(2025); the contribution here is scale and the break point vs tiebreak distinction. This allowed precise identification of high-pressure situations: break points (where the returner is one point from winning the game) and tiebreaks (where a set hangs in the balance). I defined these as high-leverage moments: break points (13.5%) and tiebreak points (3.1%). Across the ATP (men’s) tour, 17% of points were high-leverage; across the WTA (women’s) tour, 16%.</p>
-<p>The dataset covers 35,635 ATP points (155 matches) and 16,679 WTA points (120 matches), reflecting the men’s best-of-five format.</p>
-<p>Data was standardised by matching player records and excluding retirements and qualifying rounds. Official ATP and WTA rankings measure baseline skill, consistent with Kovalchik (2016). Rankings were chosen over Elo (a dynamic skill-rating system that updates after every match) because a two-stage matching process, using tournament-specific rankings with season-median fallback, achieved full coverage across all 52,314 points.</p>
+<p>The raw data comes from Jeff Sackmann’s Match Charting Project, a volunteer-compiled database where tennis analysts manually record every point and exact score state. Marginal human input error is possible, though 56,253 observations substantially mitigate its impact. The same dataset has been used in prior momentum research, including Du et al.&nbsp;(2025); the contribution here is scale and the break point vs tiebreak distinction. This allowed precise identification of high-pressure situations: break points (where the returner is one point from winning the game) and tiebreaks (where a set hangs in the balance). I defined these as high-leverage moments: break points (13.5%) and tiebreak points (3.1%). Across the ATP (men’s) tour, 17% of points were high-leverage; across the WTA (women’s) tour, 16%.</p>
+<p>The dataset covers 38,488 ATP points (169 matches) and 17,765 WTA points (128 matches), reflecting the men’s best-of-five format.</p>
+<p>Data was standardised by matching player records and excluding retirements and qualifying rounds. Official ATP and WTA rankings measure baseline skill, consistent with Kovalchik (2016). Rankings were chosen over Elo (a dynamic skill-rating system that updates after every match) because a two-stage matching process, using tournament-specific rankings with season-median fallback, achieved full coverage across all 56,253 points.</p>
 <p>I kept the tours separate, since pooling would have obscured the comparison that matters most.</p>
 </section>
 <section id="does-momentum-even-show-up-in-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="does-momentum-even-show-up-in-the-data">Does Momentum Even Show Up in the Data?</h2>
 <p>Does winning a point make the next one more likely to go your way?</p>
-<p>I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether winning a point is completely independent of the previous point; the runs test asks whether players go on hot streaks more often than you’d expect from a coin flip. I tested 77 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.</p>
+<p>I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether winning a point is completely independent of the previous point; the runs test asks whether players go on hot streaks more often than you’d expect from a coin flip. I tested 78 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output1_chi2_table.html" width="100%" height="180" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>The results are the first blow to the momentum theory. In the ATP, 10.4% of players showed evidence of non-random sequences on the Chi-squared test, and 13.0% on the runs test. In the WTA, the figures are lower still: 6.4% and 9.0%. After applying a Benjamini-Hochberg correction to control the false discovery rate (the proportion of flagged results that are actually false alarms) across all players, zero remain significant on the Chi-squared test in either tour, and only one per tour survives on the runs test. The uncorrected figures barely exceeded the 5% random baseline; once adjusted, evidence for individual momentum vanishes.</p>
+<p>The results are the first blow to the momentum theory. In the ATP, 14.1% of players showed evidence of non-random sequences on the Chi-squared test, and 16.7% on the runs test. In the WTA, the figures are lower still: 5.1% and 6.4%. After applying a Benjamini-Hochberg correction to control the false discovery rate (the proportion of flagged results that are actually false alarms) across all players, just two ATP players survive correction on either test, while none do in the WTA. The uncorrected figures barely exceeded the 5% random baseline; once adjusted, evidence for individual momentum largely disappears.</p>
 <p>But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences.</p>
 <p>Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match. Think of this as a running tally of overperformance. Every point is compared to the player’s match average: when they win points at a higher rate than usual, the line climbs. When they go cold, the line drops. Genuine momentum would look like a staircase, not a weather chart.</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
@@ -182,7 +182,7 @@ Grand Slams · 2 Tours
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output3_tboe_scatter.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 23 ATP players and 6 WTA players qualify. In the ATP, the distribution runs gradually from Milos Raonic at -0.11 to Holger Rune at +0.07, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 6 players qualify, and Martina Trevisan at +0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.</p>
+<p>Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 26 ATP players and 6 WTA players qualify. In the ATP, the distribution runs from Daniel Altmaier at -0.23 to Dennis Novak at +0.17, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 6 players qualify, and Yulia Putintseva at -0.31 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.</p>
 <p>TBOE captures an approximate within-match tiebreak tendency; it cannot reveal whether winning a specific pressure point causes the next one to go the same way.</p>
 </section>
 <section id="correlation-or-causation" class="level2">
@@ -191,7 +191,7 @@ Grand Slams · 2 Tours
 <p>I use a causal forest (an advanced machine learning model) to estimate whether winning a pressure point causes a higher probability of winning the next. Unlike standard methods that assume a one-size-fits-all rule, a causal forest estimates how momentum affects different subgroups of players without overfitting. The model relies on one crucial assumption: once we adjust for player skill, recent form, and match trajectory, there are no “hidden factors” secretly driving both the big pressure point and the point immediately after.</p>
 <p>A high-leverage win is a break point or tiebreak point won by the player we are tracking, consistent with Gilovich et al.&nbsp;(1985) and Miller and Sanjurjo (2018), who define momentum as success breeding success. Restricting the control group to lost pressure points was rejected because, in tiebreaks, the alternating serve structure can mechanically disadvantage the point winner on the next point. The baseline therefore comprises all other match points.</p>
 <p>Four variables are held constant: player ranking, rolling win percentage over the last ten points, winning streak length over the last four points, and the CUSUM match tracker introduced earlier. Window lengths of 10 and 4 balance responsiveness with stability; sensitivity was not formally tested.</p>
-<p>To manage computation, the causal forest subsamples to 15,000 observations per run using stratified sampling; the ATP is subsampled from 35,635 points while the WTA fits entirely within the limit. CUSUM absorbs accumulated match-level drift. It is treated as a control for match drift, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond existing match drift. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial expectations. Standard errors are clustered by match to account for intra-match dependence, and one player is randomly selected per match to avoid double-counting zero-sum points. A Variance Inflation Factor (VIF) check, which ensures our control variables aren’t overlapping and confusing the model, confirmed everything is mathematically stable (maximum score 1.23, well within safe bounds).</p>
+<p>To manage computation, the causal forest subsamples to 15,000 observations per run using stratified sampling; the ATP is subsampled from 38,488 points while the WTA fits entirely within the limit. CUSUM absorbs accumulated match-level drift. It is treated as a control for match drift, not momentum itself, so the treatment effect captures the incremental impact of winning a pressure point beyond existing match drift. A Bayesian prior (a starting estimate that updates as evidence accumulates) of 0.38 (the tour-wide return win rate) anchors initial expectations. Standard errors are clustered by match to account for intra-match dependence, and one player is randomly selected per match to avoid double-counting zero-sum points. A Variance Inflation Factor (VIF) check, which ensures our control variables aren’t overlapping and confusing the model, confirmed everything is mathematically stable (maximum score 1.22, well within safe bounds).</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output4_cate_plot.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
@@ -200,7 +200,7 @@ Grand Slams · 2 Tours
 <iframe src="outputs/output5_model_table.html" width="100%" height="540" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>Figure 5 breaks this down by variable. Two findings stand out. First, the break point win row sits left of zero in both tours, while the tiebreak win row sits right of zero. Second, rolling win percentage runs in opposite directions between tours: negative for the ATP and positive for the WTA, though the WTA error bar is wide, making the estimate imprecise. This suggests recent form plays a different role across tours, a nuance that would be invisible if the datasets had been merged. Player rank and the other control rows sit close to zero across both tours, suggesting baseline skill alone does not determine who wins the next point.</p>
-<p>The combined causal effect is negative for both tours (ATP: -0.0325, WTA: -0.0363). The combined WTA estimate is actually more negative than the break point estimate alone. This is a classic case of Simpson’s Paradox, a statistical trap where combining different groups of data reverses or hides the true trends found inside them. Because these analyses pool break points and tiebreaks together, they create a misleading aggregate that ignores how different these two pressures actually are.</p>
+<p>The combined causal effect is negative for both tours (ATP: -0.0317, WTA: -0.0234). The combined WTA estimate is actually more negative than the break point estimate alone. This is a classic case of Simpson’s Paradox, a statistical trap where combining different groups of data reverses or hides the true trends found inside them. Because these analyses pool break points and tiebreaks together, they create a misleading aggregate that ignores how different these two pressures actually are.</p>
 <p>If I stopped here, the hot hand would look like a complete fallacy. But this combined number treats all high-leverage moments as identical. What happens if I split the two types of pressure apart?</p>
 </section>
 <section id="the-finding-that-changes-everything" class="level2">
@@ -219,8 +219,8 @@ Split by Pressure Type
 </button>
 </div>
 <p>As Figure 6 shows, converting a break point actually causes a drop in the probability of winning the next point across both tours. Break points generate a clear, measurable drag. Think of it as an emotional hangover: perhaps the relief of winning a crucial point briefly lowers focus or intensity for the point that follows.</p>
-<p>Tiebreaks tell the exact opposite story. In the ATP, the momentum surge from winning a tiebreak point (+0.0564) is the dominant feature of the chart, comparable in magnitude to the break point hangover. The WTA effect (+0.0209) confirms this direction. While the WTA magnitude is smaller, reflecting a more limited sample of 197 observations, the mathematical signal remains highly significant (p=0.0006). In a tiebreak, winning a point genuinely makes you more likely to win the next one, above and beyond your normal match trajectory.</p>
-<p>This paradox perfectly explains why the combined momentum number in the previous section was negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.5% for tiebreaks. Because the hangover effect happens so much more frequently, it dominates the aggregate data. When we treat all high-leverage moments as identical, the very real tiebreak momentum signal gets completely buried.</p>
+<p>Tiebreaks tell the exact opposite story. In the WTA, the momentum surge from winning a tiebreak point (+0.0521) is the dominant feature of the chart. The ATP tiebreak effect (+0.0102) confirms this positive direction, though the magnitude is smaller. Across both tours, winning a tiebreak point genuinely makes you more likely to win the next one, above and beyond your normal match trajectory.</p>
+<p>This paradox perfectly explains why the combined momentum number in the previous section was negative. Break points are far more common than tiebreaks: 13.5% of all ATP points are break points, compared to just 3.4% for tiebreaks. Because the hangover effect happens so much more frequently, it dominates the aggregate data. When we treat all high-leverage moments as identical, the very real tiebreak momentum signal gets completely buried.</p>
 </section>
 <section id="if-not-momentum-then-what" class="level2">
 <h2 class="anchored" data-anchor-id="if-not-momentum-then-what">If Not Momentum, Then What?</h2>
@@ -228,13 +228,13 @@ Split by Pressure Type
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>The cumulative match tracker (the CUSUM metric introduced earlier) dominates everything else. In the ATP, this accumulated match drift accounts for 50% of the total, significantly ahead of player rank (32%) and rolling win percentage (16%). In the WTA, the pattern holds: match drift at 52%, player rank at 28%, and rolling win percentage at 19%.</p>
-<p>The most striking feature of Figure 7 is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores just 2.4% in the ATP and 1.0% in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the overarching match drift is accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
+<p>The cumulative match tracker (the CUSUM metric introduced earlier) dominates everything else. In the ATP, this accumulated match drift accounts for 54% of the total, significantly ahead of player rank (28%) and rolling win percentage (17%). In the WTA, the pattern holds: match drift at 54%, player rank at 27%, and rolling win percentage at 15%.</p>
+<p>The most striking feature of Figure 7 is the bar you can barely see. Winning Streak, which measures whether a player won their last four consecutive points, scores just 1.3% in the ATP and 3.7% in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the overarching match drift is accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
 <p>What shapes the outcome of these high-leverage moments most is accumulated match drift, not short-term bursts of form.</p>
 </section>
 <section id="the-uncomfortable-conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="the-uncomfortable-conclusion">The Uncomfortable Conclusion</h2>
-<p>Within this sample, momentum is not universal: it operates in opposite directions depending on context. Winning a break point is estimated to reduce the probability of winning the next point by around 6 percentage points in the ATP and 3 in the WTA. Winning a tiebreak point increases it. The break point effect is a hangover, the exact opposite of what commentators assume. The tiebreak effect is consistent with positive momentum (the kind of carryover crowds imagine), but it only exists in that specific context. Because these two effects pull in opposite directions, they cancel each other out in aggregate analyses that treat all pressure moments as identical.</p>
+<p>Within this sample, momentum is not universal: it operates in opposite directions depending on context. Winning a break point is estimated to reduce the probability of winning the next point by around 5 percentage points in the ATP and 2 in the WTA. Winning a tiebreak point increases it. The break point effect is a hangover, the exact opposite of what commentators assume. The tiebreak effect is consistent with positive momentum (the kind of carryover crowds imagine), but it only exists in that specific context. Because these two effects pull in opposite directions, they cancel each other out in aggregate analyses that treat all pressure moments as identical.</p>
 <p>This finding is mathematically robust. Whether I control only for player ranking or include the full set of form variables, the results barely twitch. The split between break points and tiebreaks is consistent across both tours and remains entirely stable under the simpler model.</p>
 <p>In fact, the break point “hangover” is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural serving advantage. The negative hangover effect persists despite this tailwind, suggesting a causal drag strong enough to outweigh the structural advantage of the serve.</p>
 <p>This analysis has real boundaries. Estimating all effects within a single model mitigates the risk of p-hacking, but volunteer-charted datasets naturally skew toward elite, televised matches, and this data cannot measure unobserved physiological factors like fatigue. This model only tests immediate point-to-point effects; whether momentum compounds across longer sequences remains an open question for future research.</p>

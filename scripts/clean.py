@@ -62,7 +62,7 @@ def load_and_filter_matches(filepath: str) -> pd.DataFrame:
     # player pool, play under less broadcast scrutiny, and are systematically
     # lower-ranked than main draw entrants. Including them would mix two
     # distinct competitive contexts and bias any ranking-based controls.
-    df = df[~df['Round'].str.startswith('Q', na=False)]
+    df = df[~df['Round'].str.match(r'^Q\d', na=False)]
 
     return df
 

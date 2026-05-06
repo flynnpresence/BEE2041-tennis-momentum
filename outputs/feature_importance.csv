@@ -1,5 +1,5 @@
 feature,ATP,WTA
-Player Ranking,0.315,0.2807
-Rolling Win % (last 10),0.1564,0.1874
-Winning Streak (last 4),0.0243,0.0101
-Cumulative Momentum Score,0.5043,0.5218
+Player Ranking,0.2753,0.2731
+Rolling Win % (last 10),0.1707,0.1524
+Winning Streak (last 4),0.0128,0.0369
+Cumulative Momentum Score,0.5411,0.5375
