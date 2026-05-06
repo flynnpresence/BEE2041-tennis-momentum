@@ -66,7 +66,7 @@ def download(filename: str, url: str) -> None:
     for attempt in range(3):
         try:
             # certifi provides a trusted CA bundle for SSL verification
-            response = requests.get(url, headers=HEADERS, verify=certifi.where())
+            response = requests.get(url, headers=HEADERS, verify=certifi.where(), timeout=30)
             response.raise_for_status()
             with open(dest, 'wb') as f:
                 f.write(response.content)
