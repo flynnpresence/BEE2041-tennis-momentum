@@ -159,7 +159,7 @@ Figure 4 shows the causal effect by ranking band. Across all four bands in both 
 
 Figure 5 breaks this down by variable. Two findings stand out. First, the break point win row sits left of zero in both tours, while the tiebreak win row sits right of zero. Second, rolling win percentage runs in opposite directions between tours: negative for the ATP and positive for the WTA, though the WTA error bar is wide, making the estimate imprecise. This suggests recent form plays a different role across tours, a nuance that would be invisible if the datasets had been merged. Player rank and the other control rows sit close to zero across both tours, suggesting baseline skill alone does not determine who wins the next point.
 
-The combined causal effect is negative for both tours (ATP: -0.0325, WTA: -0.0363). The combined WTA estimate is actually more negative than the break point estimate alone. This is a classic case of Simpson's Paradox, a statistical trap where combining different groups of data reverses or hides the true trends found inside them. By lumping break points and tiebreaks together, pooling the two creates a misleading aggregate that ignores how different these two pressures actually are.
+The combined causal effect is negative for both tours (ATP: -0.0325, WTA: -0.0363). The combined WTA estimate is actually more negative than the break point estimate alone. This is a classic case of Simpson's Paradox, a statistical trap where combining different groups of data reverses or hides the true trends found inside them. Because these analyses pool break points and tiebreaks together, they create a misleading aggregate that ignores how different these two pressures actually are.
 
 If I stopped here, the hot hand would look like a complete fallacy. But this combined number treats all high-leverage moments as identical. What happens if I split the two types of pressure apart?
 
@@ -204,7 +204,7 @@ Within this sample, momentum is not universal: it operates in opposite direction
 
 This finding is mathematically robust. Whether I control only for player ranking or include the full set of form variables, the results barely twitch. The split between break points and tiebreaks is consistent across both tours and remains entirely stable under the simpler model.
 
-In fact, the break point "hangover" is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural 64% win-probability advantage. The negative hangover effect persists despite this massive tailwind, suggesting a causal drag strong enough to outweigh the structural advantage of the serve.
+In fact, the break point "hangover" is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural serving advantage. The negative hangover effect persists despite this tailwind, suggesting a causal drag strong enough to outweigh the structural advantage of the serve.
 
 This analysis has real boundaries. Estimating all effects within a single model mitigates the risk of p-hacking, but volunteer-charted datasets naturally skew toward elite, televised matches, and this data cannot measure unobserved physiological factors like fatigue. This model only tests immediate point-to-point effects; whether momentum compounds across longer sequences remains an open question for future research.
 

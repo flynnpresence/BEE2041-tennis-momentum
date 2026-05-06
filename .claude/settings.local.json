@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc /Users/flynnpresence/Documents/BEE2041-tennis-momentum/blog.qmd --to plain)",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}
