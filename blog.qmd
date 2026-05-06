@@ -149,7 +149,7 @@ To manage computation, the causal forest subsamples to 15,000 observations per r
 </div>
 ```
 
-Figure 4 shows the causal effect by ranking band. Across all four bands in both tours, the effect sits below zero. Top-ranked players show no meaningful positive momentum effect. Neither do qualifiers.
+Figure 4 shows the causal effect by ranking band. In the ATP, the effect sits below zero across all four bands. In the WTA, top-ranked players show a negative effect, while lower-ranked players show a small positive effect, suggesting momentum may operate differently outside the elite.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
