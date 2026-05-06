@@ -989,8 +989,8 @@ def main() -> None:
         wta_tb_ate, wta_tb_ate_se
     )
 
-    # Output 6
-    print('\n--- Output 6: Feature importance ---')
+    # Output 7
+    print('\n--- Output 7: Feature importance ---')
     plot_feature_importance(atp_imp, wta_imp)
 
     # Export ATE results as CSV: provides a Python-generated data file
