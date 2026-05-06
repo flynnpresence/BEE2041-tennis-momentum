@@ -127,7 +127,7 @@ For every player, I calculated their Tiebreak Over-Expectation (TBOE). This metr
 </div>
 ```
 
-Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 26 ATP players and 6 WTA players qualify. In the ATP, the distribution runs from Daniel Altmaier at -0.23 to Dennis Novak at +0.17, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 6 players qualify, and Yulia Putintseva at -0.31 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
+Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 26 ATP players and 6 WTA players qualify. In the ATP, the distribution runs from Daniel Altmaier at -0.20 to Dennis Novak at +0.11, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 6 players qualify, and Yulia Putintseva at -0.26 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
 
 TBOE captures an approximate within-match tiebreak tendency; it cannot reveal whether winning a specific pressure point causes the next one to go the same way.
 
