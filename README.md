@@ -21,7 +21,7 @@ To address conflicting conclusions in existing literature (Gilovich et al., 1985
 - **Random Focal Player Mask:** Each match is randomly viewed from the perspective of one player to prevent perfectly correlated duplicate observations and satisfy independence assumptions.
 - **Forward-Rolling Priors:** Luck proxies use neutral tour-wide Bayesian priors (0.38 for return points; 0.5 for tiebreaks) to avoid cold-start bias at match beginnings.
 - **Deconfounding Baseline Skill:** Official rankings are attached via a two-step validated merge (tournament-specific then season-median fallback) to isolate momentum from player quality. Elo was considered but rejected: the two-stage fallback process required to achieve full coverage across all 56,253 points is not readily supported by available Elo data.
-- **Retirement Matches:** Retirement matches could not be filtered at point level because the Match Charting Project data contains no match outcome flag. These matches remain in the dataset; they are a small fraction of the total and affect both tours equally, so they do not materially skew the findings.
+- **Retirement Matches:** Retirement matches could not be filtered at point level because the Match Charting Project data contains no match outcome flag; their points remain in the dataset. Rankings from retirement matches are excluded from the ranking lookup via the W/O|RET filter applied in both ranking steps. These matches are a small fraction of the total and affect both tours equally, so they do not materially skew the findings.
 - **Clustered Standard Errors:** Logistic models use match-level clustering to account for intra-match point dependency. Causal forest standard errors reflect the standard error of the mean CATE (Conditional Average Treatment Effect, the individual causal effect estimated for each observation) across observations.
 - **Stratified Subsampling:** The causal forest subsamples to 15,000 observations per run using stratified sampling (ensuring treated and control observations are proportionally represented); the ATP is subsampled from 38,488 points and the WTA from 17,765 points.
 - **VIF Check:** A Variance Inflation Factor check confirmed no problematic multicollinearity among control variables (maximum score 1.22; VIF above 10 indicates problematic overlap).
@@ -121,7 +121,6 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 
 - Du, C., Zhang, C. and Zhou, L. (2025). A novel methodological framework for analyzing the momentum effect in tennis singles. [online] Available at: https://arxiv.org/abs/2509.01243 [Accessed 20 Apr. 2026].
 - Gilovich, T., Vallone, R. and Tversky, A. (1985). The hot hand in basketball: On the misperception of random sequences. *Cognitive Psychology*, [online] 17(3), pp.295–314. doi:https://doi.org/10.1016/0010-0285(85)90010-6.
-- Kovalchik, S.A. (2016). Searching for the GOAT of tennis win prediction. *Journal of Quantitative Analysis in Sports*, [online] 12(3). doi:https://doi.org/10.1515/jqas-2015-0059.
 - Miller, J.B. and Sanjurjo, A. (2018). Surprised by the Hot Hand Fallacy? A Truth in the Law of Small Numbers. *OSF Preprints*. doi:https://doi.org/10.31219/osf.io/sv9x2.
 - Sackmann, J. (2023). The Match Charting Project. [online] GitHub. Available at: https://github.com/JeffSackmann/tennis_MatchChartingProject [Accessed 20 Apr. 2026].
 
