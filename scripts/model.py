@@ -53,6 +53,21 @@ ALPHA     = 0.05
 SEED      = 42
 np.random.seed(SEED)
 
+# Display labels for chart axes (short form)
+LABEL_MAP = {
+    'Focal_Ranking':   'Player Rank',
+    'Rolling_Win_Pct': 'Rolling Win %',
+    'Streak_k4':       'Winning Streak (Last 4)',
+    'CUSUM':           'Momentum Score',
+}
+# Display labels for CSV export consumed by blog_data.js (long form)
+EXPORT_LABEL_MAP = {
+    'Focal_Ranking':   'Player Ranking',
+    'Rolling_Win_Pct': 'Rolling Win % (last 10)',
+    'Streak_k4':       'Winning Streak (last 4)',
+    'CUSUM':           'Cumulative Momentum Score',
+}
+
 
 # ── Output 1: Per-player Chi-squared summary table ────────────────────────────
 def plot_chi2_table(tests: pd.DataFrame) -> None:
@@ -539,12 +554,7 @@ def plot_model_table(
     """
     import plotly.graph_objects as go
 
-    label_map = {
-        'Focal_Ranking':   'Player Rank',
-        'Rolling_Win_Pct': 'Rolling Win %',
-        'Streak_k4':       'Winning Streak (Last 4)',
-        'CUSUM':           'Momentum Score',
-    }
+    label_map = LABEL_MAP
 
     atp_coef = atp_coef.copy()
     wta_coef = wta_coef.copy()
@@ -708,12 +718,7 @@ def plot_feature_importance(atp_imp: pd.DataFrame,
     """
     import plotly.graph_objects as go
 
-    label_map = {
-        'Focal_Ranking':   'Player Rank',
-        'Rolling_Win_Pct': 'Rolling Win %',
-        'Streak_k4':       'Winning Streak (Last 4)',
-        'CUSUM':           'Momentum Score',
-    }
+    label_map = LABEL_MAP
 
     atp_imp = atp_imp.copy()
     wta_imp = wta_imp.copy()
@@ -1003,12 +1008,7 @@ def main() -> None:
     print('  Saved ate_results.csv')
 
     # Export feature importance for blog.js dynamic rendering
-    _label_map = {
-        'CUSUM':           'Cumulative Momentum Score',
-        'Focal_Ranking':   'Player Ranking',
-        'Rolling_Win_Pct': 'Rolling Win % (last 10)',
-        'Streak_k4':       'Winning Streak (last 4)',
-    }
+    _label_map = EXPORT_LABEL_MAP
     feat_imp_export = pd.DataFrame({
         'feature': [_label_map[f] for f in CONTROLS],
         'ATP': [
