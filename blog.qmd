@@ -143,7 +143,15 @@ Consistent with the sequential dependence framework (Gilovich et al., 1985; Mill
 </div>
 ```
 
-Figure 4 shows the causal effect (CATE: the individual effect estimated per observation) across ranking bands. It is generally positive, with lower-ranked ATP players showing the largest estimated boost. Figure 5 breaks this down by variable: the break point row sits right of zero in both tours; rolling win percentage runs in opposite directions between tours (negative ATP, positive WTA), suggesting recent form plays a different role across tours; and baseline skill alone sits close to zero in both.
+Figure 4 shows the causal effect (CATE: the individual effect estimated per observation) across ranking bands. It is generally positive, with lower-ranked ATP players showing the largest estimated boost.
+
+```{=html}
+<div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
+<iframe src="outputs/output5_model_table.html" width="100%" height="540" frameborder="0" scrolling="no"></iframe>
+</div>
+```
+
+Figure 5 breaks this down by variable: the break point row sits right of zero in both tours; rolling win percentage runs in opposite directions between tours (negative ATP, positive WTA), suggesting recent form plays a different role across tours; and baseline skill alone sits close to zero in both.
 
 The combined causal effect is positive for both tours (ATP: +0.0957, WTA: +0.0532). If I stopped here, the picture would suggest that winning any high-leverage moment provides a consistent positive boost. But this combined number treats break points and tiebreaks as identical. What happens when we split them apart?
 
