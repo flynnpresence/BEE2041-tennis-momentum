@@ -77,7 +77,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         .transform(cusum_expanding)
     )
 
-    # ── BPOR & TBOE: Forward-Rolling Luck Proxies ───────────────────────────
+    # ── TBOE: Forward-Rolling Luck Proxy ────────────────────────────────────
     # Use High_Leverage_TB from clean.py directly. TbSet is a set-format flag
     # (True for all 2023 GS rows) and cannot identify individual tiebreak points.
     # Score-based recomputation here would reproduce the same "0-0" miss bug.
