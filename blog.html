@@ -217,12 +217,12 @@ Split by Pressure Type
 </section>
 <section id="if-not-momentum-then-what" class="level2">
 <h2 class="anchored" data-anchor-id="if-not-momentum-then-what">If Not Momentum, Then What?</h2>
-<p>Break point wins are dominated by a structural mechanism: the serving transition that follows. The tiebreak strips that mechanism away. What drives outcomes across both pressure types? Figure 7 ranks the four control variables by their contribution to the model’s estimates.</p>
+<p>If the serving advantage is absent in tiebreaks, what actually shapes how much winning a high-leverage point matters? Figure 7 ranks the model’s control variables by their predictive weight.</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>The cumulative match tracker (the CUSUM metric introduced earlier) is the dominant variable. In both tours, CUSUM leads by a wide margin. In the WTA, accumulated match drift accounts for 56% of the total, ahead of player rank (25%) and rolling win percentage (16%). In the ATP, CUSUM also leads at 56%, followed by player rank at 23% and rolling win percentage at 20%. Together, rank and recent form account for around 43% of the ATP model’s predictive weight.</p>
-<p>Winning Streak, which measures whether a player won their last four consecutive points, scores 1% in the ATP and 2% in the WTA. It is virtually flat. Knowing that a player is on a short hot streak tells the model almost nothing once the overarching match drift is accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
+<p>The cumulative match tracker (CUSUM) dominates. Across both tours, accumulated match drift accounts for 56% of the model’s weight, with baseline player rank and rolling win percentage accounting for most of the remainder.</p>
+<p>Crucially, Winning Streak (whether a player won their last four consecutive points) scores a virtually flat 1% to 2%. Knowing a player is on a short hot streak tells the model almost nothing once overarching match drift is accounted for. The hot hand, in its most literal form, has no predictive power here.</p>
 <p>What most determines how winning a high-leverage point affects a player is accumulated match drift, not short-term bursts of form.</p>
 </section>
 <section id="the-uncomfortable-conclusion" class="level2">
