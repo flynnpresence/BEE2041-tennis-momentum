@@ -38,7 +38,7 @@ make all
 
 This runs the full pipeline in sequence: download → clean → features → model → build_blog_data → render.
 
-Requires Python 3.10+ (tested on 3.12.7), pip, and [Quarto](https://quarto.org) 1.9+ (tested on 1.9.37) installed on your system. Note: pandas 3.0.1 requires Python ≥ 3.10. The download step requires an internet connection to fetch raw data from GitHub.
+Requires Python 3.10+ (tested on 3.12.7), pip, and [Quarto](https://quarto.org) 1.9+ (tested on 1.9.37) installed on your system. Note: Quarto is an external binary not managed by pip and must be installed separately. Note: pandas 3.0.1 requires Python ≥ 3.10. The download step requires an internet connection to fetch raw data from GitHub.
 
 Run `make reset` to wipe all generated files and start fresh.
 
