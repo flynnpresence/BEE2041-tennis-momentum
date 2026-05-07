@@ -863,7 +863,8 @@ def plot_reveal_chart(
             showgrid=True,
             gridcolor='#eeeeee',
             zeroline=False,
-            range=[-0.09, 0.20]
+            range=[-0.09, 0.20],
+            autorange=False
         ),
         xaxis=dict(showgrid=False, zeroline=False),
         updatemenus=[dict(
