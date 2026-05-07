@@ -36,7 +36,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         Streak_k4       : 1 if focal player won last STREAK_K consecutive points
         Rolling_Win_Pct : Rolling win % over last ROLLING_WIN points in match
         CUSUM           : Cumulative sum of deviations from expanding mean
-        BPOR            : Rolling historical BP win rate minus return point win rate
         TBOE            : Rolling historical TB win rate minus rolling win %
     """
     df = df.sort_values(['match_id', 'Set1', 'Set2', 'Gm1', 'Gm2', 'Pt']).copy()
@@ -79,39 +78,13 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # ── BPOR & TBOE: Forward-Rolling Luck Proxies ───────────────────────────
-    # np.where avoids .map() boolean dtype issues in groupby context
-    df['is_returning'] = (df['Svr'] != np.where(
-        df['focal_is_p1'], 1, 2)).astype(int)
-
-    # Server-receiver format: break points are always receiver-at-advantage scores.
-    df['is_bp'] = df['Pts'].astype('string').isin(
-        ['0-40', '15-40', '30-40', '40-AD']).astype(int)
-
     # Use High_Leverage_TB from clean.py directly. TbSet is a set-format flag
     # (True for all 2023 GS rows) and cannot identify individual tiebreak points.
     # Score-based recomputation here would reproduce the same "0-0" miss bug.
     df['_is_tb_point'] = df['High_Leverage_TB']
 
     def calculate_luck_proxies(match_df: pd.DataFrame) -> pd.DataFrame:
-        """Calculate BPOR and TBOE using historical (shifted) expanding sums."""
-        # BPOR: historical break point win rate minus historical return point win rate
-        ret_played = match_df['is_returning'].shift(1).expanding().sum()
-        ret_won    = (match_df['is_returning']
-                      * match_df['Point_Won']).shift(1).expanding().sum()
-        # 0.38 is the approximate ATP/WTA return point win rate used as a
-        # Bayesian prior for players with no historical return data in this match.
-        # Derived from tour-wide averages: returners win ~38% of points served.
-        # Applied symmetrically to both terms so initial BPOR = 0 (neutral).
-        ret_rate   = (ret_won / ret_played).fillna(0.38)  # Prior: tour avg return win rate
-
-        bp_played  = match_df['is_bp'].shift(1).expanding().sum()
-        bp_won     = (match_df['is_bp']
-                      * match_df['Point_Won']).shift(1).expanding().sum()
-        # Same 0.38 prior applied to break point conversion rate.
-        bp_rate    = (bp_won / bp_played).fillna(0.38)  # Prior: tour avg return win rate
-
-        match_df['BPOR'] = bp_rate - ret_rate
-
+        """Calculate TBOE using historical (shifted) expanding sums."""
         # TBOE: uses _is_tb_point (= High_Leverage_TB from clean.py)
         tb_played  = match_df['_is_tb_point'].shift(1).expanding().sum()
         tb_won     = (match_df['_is_tb_point']
@@ -131,7 +104,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         [calculate_luck_proxies(group) for _, group in df.groupby('match_id')],
         ignore_index=True
     )
-    df = df.drop(columns=['is_returning', 'is_bp', '_is_tb_point'])
+    df = df.drop(columns=['_is_tb_point'])
 
     return df
 
@@ -159,7 +132,6 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
         'Streak_k4',
         'Rolling_Win_Pct',
         'CUSUM',
-        'BPOR',
         'TBOE',
         'Point_Won',
         'Next_Point_Won',
@@ -173,13 +145,12 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
     df['Opponent_Player'] = df['Opponent_Player'].astype('string')
     df['Rolling_Win_Pct'] = df['Rolling_Win_Pct'].astype(float)
     df['CUSUM']           = df['CUSUM'].astype(float)
-    df['BPOR']            = df['BPOR'].astype(float)
     df['TBOE']            = df['TBOE'].astype(float)
 
     # ── Validation: confirm no NaNs in core predictive columns ───────────────
+    assert df['Streak_k4'].notna().all(), "NaNs in Streak_k4"
     assert df['Rolling_Win_Pct'].notna().all(), "NaNs in Rolling_Win_Pct"
     assert df['CUSUM'].notna().all(), "NaNs in CUSUM"
-    assert df['BPOR'].notna().all(), "NaNs in BPOR"
     assert df['TBOE'].notna().all(), "NaNs in TBOE"
     assert df['Next_Point_Won'].notna().all(), "NaNs in Next_Point_Won"
 
@@ -338,12 +309,10 @@ def main() -> None:
     print(f'\n  ATP Streak_k4 mean:       {atp["Streak_k4"].mean():.4f}')
     print(f'  ATP Rolling_Win_Pct mean:  {atp["Rolling_Win_Pct"].mean():.4f}')
     print(f'  ATP CUSUM mean:            {atp["CUSUM"].mean():.4f}')
-    print(f'  ATP BPOR mean:             {atp["BPOR"].mean():.4f}')
     print(f'  ATP TBOE mean:             {atp["TBOE"].mean():.4f}')
     print(f'\n  WTA Streak_k4 mean:       {wta["Streak_k4"].mean():.4f}')
     print(f'  WTA Rolling_Win_Pct mean:  {wta["Rolling_Win_Pct"].mean():.4f}')
     print(f'  WTA CUSUM mean:            {wta["CUSUM"].mean():.4f}')
-    print(f'  WTA BPOR mean:             {wta["BPOR"].mean():.4f}')
     print(f'  WTA TBOE mean:             {wta["TBOE"].mean():.4f}')
     print('\n=== Done ===')
 
