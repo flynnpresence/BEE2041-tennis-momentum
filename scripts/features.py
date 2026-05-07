@@ -296,11 +296,13 @@ def main() -> None:
     print('\nLoading ATP cleaned points...')
     atp = pd.read_csv(os.path.join(
         PROC_DIR, 'atp_cleaned_points.csv'), low_memory=False)
+    atp['focal_is_p1'] = atp['focal_is_p1'].astype(bool)
     print(f'  Loaded {len(atp):,} rows')
 
     print('Loading WTA cleaned points...')
     wta = pd.read_csv(os.path.join(
         PROC_DIR, 'wta_cleaned_points.csv'), low_memory=False)
+    wta['focal_is_p1'] = wta['focal_is_p1'].astype(bool)
     print(f'  Loaded {len(wta):,} rows')
 
     # Engineer features separately: no cross-tour contamination
