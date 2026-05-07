@@ -1,6 +1,6 @@
 # The Wrong Kind of Momentum
 
-Live blog: https://flynnpresence.github.io/BEE2041-tennis-momentum/blog.html
+> **Live blog:** https://flynnpresence.github.io/BEE2041-tennis-momentum/blog.html
 
 BEE2041 Data Science in Economics, University of Exeter
 
