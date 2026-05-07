@@ -107,7 +107,7 @@ ul.task-list li input[type="checkbox"] {
     <div class="hero-banner__eyebrow">A Data Science in Economics Project · 2026</div>
     <h1 class="hero-banner__title">The Wrong Kind of Momentum</h1>
     <p class="hero-banner__dek">
-      Why the type of pressure determines whether winning a big moment helps or hurts.
+      Why break-point momentum may be structural, not psychological.
     </p>
     <div class="hero-banner__meta">
       <div><span>Author</span><span>Flynn Presence</span></div>
@@ -172,7 +172,7 @@ Grand Slams · 2 Tours
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output2_cusum_wta.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>Instead, Alexandrova performs above her average almost continuously. The line stays positive for 88 points, dips briefly, then sharply recovers to finish above +4. Du et al.&nbsp;(2025) would interpret this oscillation as shifting momentum. It is simply a player performing consistently well, interrupted by a single brief slump. That is not momentum. It is variance.</p>
+<p>Instead, Alexandrova performs above her average almost continuously. The line stays positive for 88 points, dips briefly, then sharply recovers to finish above +4. Du et al.&nbsp;(2025) would interpret this oscillation as shifting momentum. It is simply a player performing consistently well, interrupted by a single brief slump. That looks less like momentum and more like ordinary match variance.</p>
 </section>
 <section id="what-about-the-biggest-moments" class="level2">
 <h2 class="anchored" data-anchor-id="what-about-the-biggest-moments">What About the Biggest Moments?</h2>
@@ -197,7 +197,7 @@ Grand Slams · 2 Tours
 <iframe src="outputs/output5_model_table.html" width="100%" height="540" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>Figure 5 breaks this down by variable: the break point row sits right of zero in both tours; rolling win percentage runs in opposite directions between tours (negative ATP, positive WTA), suggesting recent form plays a different role across tours; and baseline skill alone sits close to zero in both.</p>
-<p>The combined causal effect is positive for both tours (ATP: +0.0957, WTA: +0.0532). If I stopped here, the picture would suggest that winning any high-leverage moment provides a consistent positive boost. But this combined number treats break points and tiebreaks as identical. What happens when we split them apart?</p>
+<p>The combined estimated effect is positive for both tours (ATP: +0.0957, WTA: +0.0532). If I stopped here, the picture would suggest that winning any high-leverage moment provides a consistent positive boost. But this combined number treats break points and tiebreaks as identical. What happens when we split them apart?</p>
 </section>
 <section id="the-finding-that-changes-everything" class="level2">
 <h2 class="anchored" data-anchor-id="the-finding-that-changes-everything">The Finding That Changes Everything</h2>
@@ -216,7 +216,7 @@ Split by Pressure Type
 </div>
 <p>As Figure 6 shows, winning a break point boosts the probability of winning the next point by around 15 percentage points in the ATP and 6 in the WTA. But this positive signal is not evidence of psychological momentum. It is a built-in feature of how tennis scoring works.</p>
 <p>Whether the server saves it or the returner converts it, the next point systematically favours the break-point winner through the serving structure. I verified this empirically across 1,496 ATP break point wins (100%). Since servers naturally win 60–65% of points, this built-in serving advantage accounts for most of the boost.</p>
-<p>In tiebreaks, where the serving advantage is largely neutralised by alternating serve structure, the ATP momentum signal disappears. Serve alternates every two points, so winning a tiebreak point confers no clear advantage on the next. In the ATP, the causal effect is statistically indistinguishable from zero (+0.0003). In the WTA, the effect is negative (-0.0564); the WTA sample is smaller (209 treated observations) and the magnitude should be treated with caution, but the interval excludes zero entirely.</p>
+<p>In tiebreaks, where the serving advantage is largely neutralised by alternating serve structure, the ATP momentum signal disappears. Serve alternates every two points, so winning a tiebreak point confers no clear advantage on the next. In the ATP, the estimated effect is statistically indistinguishable from zero (+0.0003). In the WTA, the effect is negative (-0.0564); the WTA sample is smaller (209 treated observations) and the magnitude should be treated with caution, but the interval excludes zero entirely.</p>
 <p>Because break points are far more common than tiebreaks, the earlier combined estimates are dominated by the serving-transition signal, masking the absence of psychological momentum.</p>
 </section>
 <section id="if-not-momentum-then-what" class="level2">
