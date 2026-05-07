@@ -101,6 +101,127 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 
 ---
 
+## Data Dictionary
+
+All processed data files are emitted to `data/processed/`. Features are engineered strictly forward-rolling within match groups: no point's value depends on points that come after it.
+
+### processed_features.csv
+
+Model checkpoint. One row per point, focal-player perspective. Last point of each match excluded (no successor for `Next_Point_Won`). This is the file consumed by `model.py`.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `match_id` | str | Match identifier from the Match Charting Project. Format: `YYYYMMDD-{M\|W}-Tournament-Round-Player1-Player2`. |
+| `Pt` | int64 | Point number within the match (1-indexed, sequential). |
+| `Tournament` | str | Grand Slam: Australian Open, Roland Garros, Wimbledon, or US Open. |
+| `Round` | str | Round code (R128, R64, R32, R16, QF, SF, F). Qualifying rounds excluded upstream. |
+| `Surface` | str | Court surface (Hard, Clay, Grass). |
+| `Focal_Player` | str | Name of the randomly assigned focal player for this match. |
+| `Opponent_Player` | str | Focal player's opponent. |
+| `Focal_Ranking` | int64 | Official ATP/WTA ranking of focal player. Primary source: tournament-specific ranking from the GS results table. Fallback: season-median ranking. |
+| `Opponent_Ranking` | int64 | Same convention as `Focal_Ranking`, applied to opponent. |
+| `Ranking_Diff` | int64 | `Focal_Ranking - Opponent_Ranking`. Positive = focal is the lower-ranked (worse) player. |
+| `Svr` | int64 | Server on this point. 1 or 2, refers to Player_1 / Player_2 in the original match record, not focal / opponent. |
+| `TbSet` | bool | Set-format flag (True for all 2023 GS rows). Does not identify individual tiebreak points; use `High_Leverage_TB` for that. |
+| `High_Leverage` | int64 | 1 if break point or tiebreak point; 0 otherwise. Treatment indicator for the causal forest. |
+| `High_Leverage_BP` | int64 | 1 if break point (`Pts` in {0-40, 15-40, 30-40, 40-AD}); 0 otherwise. |
+| `High_Leverage_TB` | int64 | 1 if point played within a tiebreak (`Gm1 == 6 & Gm2 == 6`); 0 otherwise. |
+| `Streak_k4` | int64 | 1 if focal player won all of the previous 4 points in the match; 0 otherwise. Uses only past points. 0 by construction for the first 4 points of every match. |
+| `Rolling_Win_Pct` | float64 | Focal player's win rate over up to the previous 10 points in the match (current point excluded). Window grows from 1 point at the start of the match to a maximum of 10. Range [0, 1]. Initialised at 0.5 (neutral prior) for the first point of each match. |
+| `CUSUM` | float64 | Cumulative deviation of focal player from their expanding within-match win rate. Positive = focal is performing above their match-to-date average. Computed using shifted (past-only) values; CUSUM = 0 at the first point of each match by construction. |
+| `TBOE` | float64 | Tiebreak Over-Expectation. Within-match historical tiebreak win rate minus current `Rolling_Win_Pct`. Positive = focal overperforms in tiebreaks relative to general form. The tiebreak-rate component is initialised at 0.5 before any tiebreak points have been played; combined with `Rolling_Win_Pct` also at 0.5, TBOE starts at 0. |
+| `Point_Won` | int64 | 1 if focal player won the current point; 0 otherwise. |
+| `Next_Point_Won` | int64 | 1 if focal player wins the immediately following point; 0 otherwise. Outcome variable for all causal models. |
+| `Tour` | str | `'ATP'` or `'WTA'`. |
+
+### atp_cleaned_points.csv / wta_cleaned_points.csv
+
+Per-tour intermediate output of `clean.py`. One row per point. Contains all engineered columns plus passthrough fields from the Match Charting Project source files.
+
+**Structural and score-state columns** (from `charting-{m,w}-points-2020s.csv`):
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `match_id` | str | Match identifier (see format above). |
+| `Pt` | int64 | Point number within the match (1-indexed). |
+| `Set1`, `Set2` | int64 | Sets won by Player_1 / Player_2 so far in the match. |
+| `Gm1`, `Gm2` | int64 | Games won by Player_1 / Player_2 so far in the current set. |
+| `Gm#` | int64 | Game number within the current set, beginning at 1. (See Sackmann's `data_dictionary.txt`.) |
+| `Pts` | str | Score at the start of the point in server-receiver format (e.g. `30-40`). |
+| `TbSet` | bool | True if the current set is being played to a tiebreak format (True for all 2023 GS rows). |
+| `Svr` | int64 | Server on this point: 1 (Player_1) or 2 (Player_2). |
+| `PtWinner` | int64 | Winner of the point: 1 (Player_1) or 2 (Player_2). |
+| `1st` | str | Charting code for the outcome of the first serve and rally. User-submitted free-text per Sackmann's notation. Empty for points where no first serve was charted. |
+| `2nd` | str | Charting code for the second serve and rally, where applicable. Empty if no second serve. |
+| `Notes` | str | Charter's free-text notes (e.g. challenge outcomes). Mostly empty. |
+
+**Match metadata columns** (from `charting-{m,w}-matches.csv`):
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `Player_1`, `Player_2` | str | Original player labels from the matches file (Player_1 always served first). Independent of focal / opponent assignment. |
+| `Pl_1_hand`, `Pl_2_hand` | str | Handedness: `'R'` (right) or `'L'` (left). |
+| `Date` | str | Match date in `YYYYMMDD` format. |
+| `Tournament` | str | Grand Slam name with underscores converted to spaces. |
+| `Round` | str | Round code. |
+| `Time` | str | Match start time where recorded; otherwise empty. |
+| `Court` | str | Court name where recorded (e.g. `'Centre Court'`, `'Court Philippe Chatrier'`); otherwise empty. |
+| `Surface` | str | Hard, Clay, or Grass. |
+| `Umpire` | str | Chair umpire name where recorded; otherwise empty. |
+| `Best_of` | int64 | Match format: 5 (ATP Grand Slam) or 3 (WTA Grand Slam). |
+| `Final_TB?` | str | Final-set tiebreak format flag from the source file (e.g. `'1'`, `'A'`, `'N'`). Encoding follows Sackmann's matches schema. |
+| `Charted_by` | str | Volunteer charter handle. |
+
+**Engineered columns** (added by `clean.py`):
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `High_Leverage` | int64 | 1 if break point or tiebreak point; 0 otherwise. |
+| `High_Leverage_BP` | int64 | 1 if break point (`Pts` in {0-40, 15-40, 30-40, 40-AD}); 0 otherwise. |
+| `High_Leverage_TB` | int64 | 1 if point played within a tiebreak (`Gm1 == 6 & Gm2 == 6`); 0 otherwise. |
+| `focal_is_p1` | bool | True if focal player is Player_1, False if Player_2. Random per-match assignment, seeded with `np.random.seed(42)`. |
+| `Focal_Player` | str | Name of focal player (= Player_1 if `focal_is_p1`, else Player_2). |
+| `Opponent_Player` | str | Name of opponent (= Player_2 if `focal_is_p1`, else Player_1). |
+| `Point_Won` | int64 | 1 if focal player won the current point; 0 otherwise. |
+| `Focal_Is_Server` | int64 | 1 if focal player is serving on this point; 0 otherwise. |
+| `Next_Point_Won` | int64 | 1 if focal player wins the next point; 0 otherwise. Last point of each match dropped (no successor). |
+| `Tournament_Key` | str | Normalised tournament name used as a merge key for ranking attachment. Identical to `Tournament` after `Us Open` to `US Open` substitution. |
+| `Focal_Ranking` | int64 | Official ranking of focal player. Primary: GS-specific lookup. Fallback: season-median ranking. |
+| `Opponent_Ranking` | int64 | Same convention applied to opponent. |
+| `Ranking_Diff` | int64 | `Focal_Ranking - Opponent_Ranking`. Positive = focal is lower-ranked. |
+
+For full Sackmann-source column semantics (notation codes inside `1st`, `2nd`, etc.), see `tennis_MatchChartingProject/data_dictionary.txt`.
+
+### per_player_tests.csv
+
+Output of the per-player Chi-squared and Wald-Wolfowitz runs tests run in `features.py`. Used to populate Output 1 (Chi-squared summary table) in the blog. One row per player; players with fewer than 20 focal points excluded.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `Tour` | str | `'ATP'` or `'WTA'`. |
+| `Player` | str | Player name. |
+| `N_Points` | int64 | Number of points contributed by this player as focal. Minimum 20 for inclusion. |
+| `Win_Rate` | float64 | Proportion of focal points won. Range [0, 1]. |
+| `Chi2_Stat` | float64 | Pearson chi-squared statistic from 2x2 contingency table of `Point_Won` x `Next_Point_Won`. NaN if not computable. |
+| `Chi2_P` | float64 | Uncorrected two-sided p-value for the chi-squared independence test. |
+| `Chi2_Sig` | int64 | 1 if `Chi2_P < 0.05` (uncorrected); 0 otherwise. |
+| `Runs_Z` | float64 | Standardised z-statistic from the Wald-Wolfowitz runs test on the sequence of `Point_Won`. |
+| `Runs_P` | float64 | Uncorrected two-sided p-value for the runs test. |
+| `Runs_Sig` | int64 | 1 if `Runs_P < 0.05` (uncorrected); 0 otherwise. |
+| `Chi2_P_BH` | float64 | Benjamini-Hochberg FDR-corrected p-value for the chi-squared test. |
+| `Chi2_Sig_BH` | int64 | 1 if `Chi2_P_BH` crosses the BH threshold (FDR = 0.05); 0 otherwise. |
+| `Runs_P_BH` | float64 | BH-corrected p-value for the runs test. |
+| `Runs_Sig_BH` | int64 | 1 if `Runs_P_BH` crosses the BH threshold; 0 otherwise. |
+
+**Notes**
+
+- **Forward-rolling principle.** All within-match features (`Streak_k4`, `Rolling_Win_Pct`, `CUSUM`, `TBOE`) are computed using `shift(1)` before any rolling or expanding window, guaranteeing that no feature value depends on the point it predicts. This is enforced in `features.py::engineer_features`.
+- **Neutral priors.** `Rolling_Win_Pct` and the tiebreak-win-rate component of `TBOE` are initialised at 0.5 to avoid cold-start bias at match beginnings.
+- **Focal-player assignment.** One player per match is randomly designated as focal (`np.random.seed(42)`). This prevents the perfectly correlated duplicate observations that would arise from tracking both players, which would violate the independence assumption of the causal forest.
+- **Constants** (set in `features.py`): `STREAK_K = 4`, `ROLLING_WIN = 10`, `ALPHA = 0.05`.
+
+---
+
 ## Outputs
 
 | # | File | Description |

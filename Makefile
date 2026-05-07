@@ -8,14 +8,15 @@
 
 PYTHON = python3
 
-.PHONY: all reset help
+.PHONY: all reset help pipeline
 
 # ─── Help ─────────────────────────────────────────────────────────────
 help:
 	@echo "Targets:"
-	@echo "  make all    - build entire project, skipping unchanged steps"
-	@echo "  make reset  - wipe all generated files for a clean rebuild"
-	@echo "  make help   - show this message"
+	@echo "  make all      - build entire project, skipping unchanged steps"
+	@echo "  make pipeline - run data pipeline only (no Quarto required)"
+	@echo "  make reset    - wipe all generated files for a clean rebuild"
+	@echo "  make help     - show this message"
 
 # ─── Master target ────────────────────────────────────────────────────
 all: blog.html
@@ -49,6 +50,10 @@ blog_data.js: scripts/build_blog_data.py outputs/ate_results.csv
 # ─── Step 6: Quarto render ───────────────────────────────────────────
 blog.html: blog.qmd blog_data.js blog.js styles.css
 	quarto render blog.qmd --to html
+
+# ─── Pipeline (no Quarto required) ──────────────────────────────────
+pipeline: outputs/ate_results.csv
+	@echo "Pipeline complete. Numerical outputs in outputs/. Run 'make all' (requires Quarto) to render the blog."
 
 # ─── Reset ───────────────────────────────────────────────────────────
 reset:
