@@ -87,7 +87,7 @@ The raw data comes from Jeff Sackmann's Match Charting Project, a volunteer-comp
 
 The dataset covers 38,488 ATP points (169 matches) and 17,765 WTA points (128 matches), reflecting the men's best-of-five format.
 
-Data was standardised by matching player records and excluding retirements and qualifying rounds. Official ATP and WTA rankings measure baseline skill, consistent with Kovalchik (2016). Rankings were chosen over Elo (a dynamic skill-rating system that updates after every match) because a two-stage matching process, using tournament-specific rankings with season-median fallback, achieved full coverage across all 56,253 points.
+Data was standardised by matching player records and excluding qualifying rounds; retirement matches could not be filtered at point level as the charting data contains no match outcome flag. Official ATP and WTA rankings measure baseline skill. Kovalchik (2016) confirms ranking differential is among the strongest predictors of player ability in tennis, though the paper argues Elo ultimately outperforms raw rankings. Rankings were chosen over Elo (a dynamic skill-rating system that updates after every match) because a two-stage matching process, using tournament-specific rankings with season-median fallback, achieved full coverage across all 56,253 points.
 
 I kept the tours separate, since pooling would have obscured the comparison that matters most.
 
@@ -127,7 +127,7 @@ For every player, I calculated their Tiebreak Over-Expectation (TBOE). This metr
 </div>
 ```
 
-Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 28 ATP players and 7 WTA players qualify. In the ATP, the distribution runs from Daniel Altmaier at -0.19 to Dennis Novak at +0.08, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 7 players qualify, and Yulia Putintseva at -0.27 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
+Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 28 ATP players and 7 WTA players qualify. In the ATP, the distribution runs from Daniel Altmaier at -0.14 to Mackenzie McDonald at +0.11, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 7 players qualify, and Yulia Putintseva at -0.27 sits visually apart, though this likely reflects the limited sample rather than genuine clutch ability.
 
 TBOE captures an approximate within-match tiebreak tendency; it cannot reveal whether winning a specific pressure point causes the next one to go the same way.
 
@@ -176,7 +176,7 @@ If I stopped here, the hot hand would look like a complete fallacy. But this com
 </div>
 
 
-As Figure 6 shows, converting a break point actually causes a drop in the probability of winning the next point across both tours. Break points generate a clear, measurable drag. Think of it as an emotional hangover: perhaps the relief of winning a crucial point briefly lowers focus or intensity for the point that follows.
+As Figure 6 shows, converting a break point is estimated to produce a drop in the probability of winning the next point across both tours. Break points generate a clear, measurable drag. Think of it as an emotional hangover: perhaps the relief of winning a crucial point briefly lowers focus or intensity for the point that follows.
 
 Tiebreaks tell a more complex story. In the ATP, winning a tiebreak point generates a near-zero causal effect (+0.0003, SE = 0.0016, 95% CI: −0.003 to +0.003): the estimate spans zero and finds no evidence of momentum. In the WTA, the effect is sharply negative. Winning a tiebreak point is estimated to reduce the probability of winning the next one by -0.0564 — roughly six times as large in magnitude as the WTA break point hangover. The WTA tiebreak result is based on 209 treated observations, a smaller sample than the break point analyses, and the precise magnitude should be treated with caution; however, the direction is clear and the estimate is tightly constrained (SE = 0.0086, 95% CI: −0.073 to −0.040).
 
@@ -204,9 +204,9 @@ Within this sample, momentum is not universal: it is context-dependent across bo
 
 The core findings are mathematically stable. The break point hangover holds in both tours under both model specifications. The ATP tiebreak null result is consistent under the reduced control set. The WTA tiebreak negative direction is also consistent, though its magnitude is less stable given the small treated sample.
 
-In fact, the break point "hangover" is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural serving advantage. The negative hangover effect persists despite this tailwind, suggesting a causal drag strong enough to outweigh the structural advantage of the serve.
+In fact, the break point "hangover" is even more severe than it looks. Converting a break point transitions the winner to serving, which carries a structural serving advantage. The negative hangover effect persists despite this tailwind, suggesting an estimated drag strong enough to outweigh the structural advantage of the serve.
 
-This analysis has real boundaries. Estimating all effects within a single model mitigates the risk of p-hacking, but volunteer-charted datasets naturally skew toward elite, televised matches, and this data cannot measure unobserved physiological factors like fatigue. This model only tests immediate point-to-point effects; whether momentum compounds across longer sequences remains an open question for future research.
+This analysis has real boundaries. Estimating all effects within a single model mitigates the risk of p-hacking, but volunteer-charted datasets naturally skew toward elite, televised matches, and this data cannot measure unobserved physiological factors like fatigue. This model only tests immediate point-to-point effects; whether momentum compounds across longer sequences remains an open question for future research. The break point estimate also bundles psychological and structural components: converting a break transitions the winner to serving, which confers a mechanical advantage on subsequent points. Disentangling the two would require subgroup analysis by post-point serve status, which is beyond the scope of this study.
 
 Ultimately, the picture is more nuanced than prior research suggested. In tennis, researchers have long debated whether the hot hand exists. The evidence here suggests they may have been asking too broad a question. The break point hangover is real and consistent across both tours. Whether WTA tiebreaks genuinely generate a large negative effect, or whether 209 observations is insufficient to pin down the true magnitude, is a question this dataset cannot fully resolve. In the ATP, tiebreak points produce no detectable effect in either direction. And because break points occur roughly four times more often than tiebreaks, any pooled analysis will be dominated by the hangover signal, regardless of what is happening in tiebreaks.
 
