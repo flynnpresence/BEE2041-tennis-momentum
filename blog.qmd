@@ -12,7 +12,7 @@ format:
     css: styles.css
     include-in-header:
       text: |
-        <meta name="description" content="An analysis of 56,253 points from volunteer-charted matches across all four 2023 Grand Slams reveals that winning a break point boosts the next point through a structural serving advantage, not psychological momentum. Tiebreaks, where that mechanism is absent, produce a null effect in the ATP and a negative effect in the WTA.">
+        <meta name="description" content="An analysis of 56,253 points from volunteer-charted matches across all four 2023 Grand Slams reveals that the next-point win probability after a break point is elevated by a structural serving advantage rather than psychological momentum. Tiebreaks, where that mechanism is absent, produce a null effect in the ATP and a negative effect in the WTA.">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     include-after-body:
