@@ -115,7 +115,7 @@ Instead, Alexandrova performs above her average almost continuously. The line st
 
 ## What About the Biggest Moments?
 
-For every player, I calculated their Tiebreak Over-Expectation (TBOE). This metric asks whether, during tiebreaks, a player performs above or below their own match average. If certain players consistently raise their game, I would expect outliers pulling sharply away from zero.
+To test pressure situations, I calculated each player's Tiebreak Over-Expectation (TBOE): whether they perform above or below their own match average during tiebreaks. If players consistently raise their game, I would expect outliers pulling sharply away from zero.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
@@ -123,9 +123,9 @@ For every player, I calculated their Tiebreak Over-Expectation (TBOE). This metr
 </div>
 ```
 
-Figure 3 plots TBOE scores for players with at least 20 tiebreak points, from lowest to highest, to prevent finite-sample variance from creating artificial outliers (Miller and Sanjurjo, 2018). Of the full sample, 28 ATP players and 7 WTA players qualify. In the ATP, the distribution runs from Daniel Altmaier at -0.14 to Mackenzie McDonald at +0.11, with no player pulling sharply away from the pack. The WTA sample is too small for strong conclusions: only 7 players qualify, and Yulia Putintseva at -0.27 sits visually apart at the bottom while Karolina Muchova leads at +0.12, though the spread likely reflects the limited sample rather than genuine clutch ability.
+To prevent small-sample noise from creating artificial outliers (Miller and Sanjurjo, 2018), Figure 3 only plots players with at least 20 tiebreak points (28 ATP, 7 WTA). In the ATP, scores cluster tightly between -0.14 and +0.11; no one sharply separates from the pack. The WTA sample is too small for strong conclusions: one player sits visibly apart at the bottom, though with only 7 qualifiers the spread likely reflects the limited sample rather than genuine clutch ability.
 
-TBOE captures an approximate within-match tiebreak tendency; it cannot reveal whether winning a specific pressure point causes the next one to go the same way.
+Crucially, TBOE only captures an overall tiebreak tendency. It cannot answer the real question: does winning a specific pressure point cause the next one to go the same way?
 
 ## Correlation or Causation?
 
