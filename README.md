@@ -19,7 +19,7 @@ This project tests whether point-by-point momentum exists in professional tennis
 To address conflicting conclusions in existing literature (Gilovich et al., 1985 vs. Miller and Sanjurjo, 2018), this project implements several safeguards:
 
 - **Random Focal Player Mask:** Each match is randomly viewed from the perspective of one player to prevent perfectly correlated duplicate observations and satisfy independence assumptions.
-- **Forward-Rolling Priors:** Luck proxies use neutral tour-wide Bayesian priors (0.38 for return points; 0.5 for tiebreaks) to avoid cold-start bias at match beginnings.
+- **Forward-Rolling Priors:** Luck proxies use a neutral tour-wide Bayesian prior (0.5 for tiebreaks) to avoid cold-start bias at match beginnings.
 - **Deconfounding Baseline Skill:** Official rankings are attached via a two-step validated merge (tournament-specific then season-median fallback) to isolate momentum from player quality. Elo was considered but rejected: the two-stage fallback process required to achieve full coverage across all 56,253 points is not readily supported by available Elo data.
 - **Retirement Matches:** Retirement matches could not be filtered at point level because the Match Charting Project data contains no match outcome flag; their points remain in the dataset. Rankings from retirement matches are excluded from the ranking lookup via the W/O|RET filter applied in both ranking steps. These matches are a small fraction of the total and affect both tours equally, so they do not materially skew the findings.
 - **Clustered Standard Errors:** Logistic models use match-level clustering to account for intra-match point dependency. Causal forest standard errors reflect the standard error of the mean CATE (Conditional Average Treatment Effect, the individual causal effect estimated for each observation) across observations.
@@ -105,7 +105,7 @@ The Match Charting Project is licensed under CC BY 4.0. The ATP and WTA results 
 
 | # | File | Description |
 |---|------|-------------|
-| 1 | output1_chi2_table.html | Per-player Chi-squared and runs test results |
+| 1 | output1_chi2_table.html | Summary of per-player Chi-squared and runs test results by tour |
 | 2 | output2_cusum_wta.html | CUSUM momentum tracker, Alexandrova vs Brengle |
 | 3 | output3_tboe_scatter.html | Tiebreak over-expectation by player |
 | 4 | output4_cate_plot.html | Heterogeneous causal effects across player rankings |
