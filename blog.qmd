@@ -153,7 +153,7 @@ Figure 4 shows the causal effect (CATE: the individual effect estimated per obse
 
 Figure 5 breaks this down by variable: the break point row sits right of zero in both tours; rolling win percentage runs in opposite directions between tours (negative ATP, positive WTA), suggesting recent form plays a different role across tours; and baseline skill alone sits close to zero in both.
 
-The combined estimated effect is positive for both tours (ATP: +0.0957, WTA: +0.0532). If I stopped here, the picture would suggest that winning any high-leverage moment provides a consistent positive boost. But this combined number treats break points and tiebreaks as identical. What happens when we split them apart?
+The combined estimated effect is positive for both tours (ATP: +0.0957, WTA: +0.0532). If I stopped here, the picture would suggest that winning any high-leverage moment provides a consistent positive boost. But this combined number treats break points and tiebreaks as identical. What happens when I split them apart?
 
 ## The Finding That Changes Everything
 
@@ -174,11 +174,11 @@ Whether the server saves it or the returner converts it, the next point systemat
 
 In tiebreaks, where the serving advantage is largely neutralised by alternating serve structure, the ATP momentum signal disappears. Serve alternates every two points, so winning a tiebreak point confers no clear advantage on the next. In the ATP, the estimated effect is statistically indistinguishable from zero (+0.0003). In the WTA, the effect is negative (-0.0564); the WTA sample is smaller (209 treated observations) and the magnitude should be treated with caution, but the interval excludes zero entirely.
 
-Because break points are far more common than tiebreaks, the earlier combined estimates are dominated by the serving-transition signal, masking the absence of psychological momentum.
+Because break points are far more common than tiebreaks, the earlier combined estimates are dominated by the serving-transition signal, obscuring the lack of a clear momentum effect in tiebreaks.
 
 ## If Not Momentum, Then What?
 
-If the serving advantage is absent in tiebreaks, what actually shapes how much winning a high-leverage point matters? Figure 7 ranks the model's control variables by their predictive weight.
+If the serving advantage is largely neutralised in tiebreaks, what actually shapes how much winning a high-leverage point matters? Figure 7 ranks the model's control variables by their predictive weight.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
