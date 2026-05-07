@@ -8,7 +8,7 @@ BEE2041 Data Science in Economics, University of Exeter
 
 ## Overview
 
-This project tests whether point-by-point momentum exists in professional tennis using volunteer-charted matches across all four 2023 Grand Slams (169 ATP matches, ~33% of men's draws; 128 WTA matches, ~25% of women's draws). It applies logistic regression and a Causal Forest (econml) to estimate whether winning a high-leverage point causally increases the probability of winning the next point.
+This project tests whether point-by-point momentum exists in professional tennis using volunteer-charted matches across all four 2023 Grand Slams (169 ATP matches, ~33% of men's draws; 128 WTA matches, ~25% of women's draws). It applies logistic regression and a Causal Forest (econml) to estimate the effect of winning a high-leverage point on the probability of winning the next point.
 
 **Finding:** Break points produce a large positive effect on the next point in both tours (ATP: +0.1526, WTA: +0.0648), driven by the serving transition that follows a break point win rather than psychological momentum. Tiebreaks diverge sharply: null in the ATP (+0.0003, SE = 0.0016) and negative in the WTA (-0.0564, based on 209 treated observations). The combined ATEs (ATP: +0.0957, WTA: +0.0532) are dominated by the more frequent break point effect, explaining why pooled analyses reach conflicting conclusions.
 
@@ -20,12 +20,12 @@ To address conflicting conclusions in existing literature (Gilovich et al., 1985
 
 - **Random Focal Player Mask:** Each match is randomly viewed from the perspective of one player to prevent perfectly correlated duplicate observations and satisfy independence assumptions.
 - **Forward-Rolling Priors:** Luck proxies use neutral tour-wide Bayesian priors (0.38 for return points; 0.5 for tiebreaks) to avoid cold-start bias at match beginnings.
-- **Deconfounding Baseline Skill:** Consistent with Kovalchik (2016), official rankings are attached via a two-step validated merge (tournament-specific then season-median fallback) to isolate momentum from player quality. Elo was considered but rejected: the two-stage fallback process required to achieve full coverage across all 56,253 points is not readily supported by available Elo data.
+- **Deconfounding Baseline Skill:** Official rankings are attached via a two-step validated merge (tournament-specific then season-median fallback) to isolate momentum from player quality. Elo was considered but rejected: the two-stage fallback process required to achieve full coverage across all 56,253 points is not readily supported by available Elo data.
 - **Retirement Matches:** Retirement matches could not be filtered at point level because the Match Charting Project data contains no match outcome flag. These matches remain in the dataset; they are a small fraction of the total and affect both tours equally, so they do not materially skew the findings.
 - **Clustered Standard Errors:** Logistic models use match-level clustering to account for intra-match point dependency. Causal forest standard errors reflect the standard error of the mean CATE (Conditional Average Treatment Effect, the individual causal effect estimated for each observation) across observations.
 - **Stratified Subsampling:** The causal forest subsamples to 15,000 observations per run using stratified sampling (ensuring treated and control observations are proportionally represented); the ATP is subsampled from 38,488 points and the WTA from 17,765 points.
 - **VIF Check:** A Variance Inflation Factor check confirmed no problematic multicollinearity among control variables (maximum score 1.22; VIF above 10 indicates problematic overlap).
-- **Causal Forest (Double Machine Learning, DML):** Employs econml to estimate the Average Treatment Effect while controlling for player ranking, rolling win percentage, CUSUM (cumulative momentum score), and winning streak length, isolating the "success breeds success" mechanic.
+- **Causal Forest (Double Machine Learning, DML):** Employs econml to estimate the Average Treatment Effect while controlling for player ranking, rolling win percentage, CUSUM (cumulative momentum score), and winning streak length.
 
 ---
 
@@ -38,7 +38,7 @@ make all
 
 This runs the full pipeline in sequence: download → clean → features → model → build_blog_data → render.
 
-Requires Python 3.10+ (tested on 3.12.7), pip, and [Quarto](https://quarto.org) 1.9+ (tested on 1.9.37) installed on your system. Note: Quarto is an external binary not managed by pip and must be installed separately. Note: pandas 3.0.1 requires Python ≥ 3.10. The download step requires an internet connection to fetch raw data from GitHub.
+Requires Python 3.10+ (tested on 3.12.7), pip, and [Quarto](https://quarto.org) 1.9+ (tested on 1.9.37) installed on your system. Note: Quarto is an external binary not managed by pip and must be installed separately. Note: pandas 3.0.1 requires Python ≥ 3.9. The download step requires an internet connection to fetch raw data from GitHub.
 
 Run `make reset` to wipe all generated files and start fresh.
 
