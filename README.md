@@ -8,7 +8,7 @@ BEE2041 Data Science in Economics, University of Exeter
 
 ## Overview
 
-This project tests whether point-by-point momentum exists in professional tennis using all four 2023 Grand Slams across both ATP and WTA tours. It applies logistic regression and a Causal Forest (econml) to estimate whether winning a high-leverage point causally increases the probability of winning the next point.
+This project tests whether point-by-point momentum exists in professional tennis using volunteer-charted matches across all four 2023 Grand Slams (169 ATP matches, ~33% of men's draws; 128 WTA matches, ~25% of women's draws). It applies logistic regression and a Causal Forest (econml) to estimate whether winning a high-leverage point causally increases the probability of winning the next point.
 
 **Finding:** Break points generate a hangover effect across both tours (ATP: -0.0489, WTA: -0.0102). Tiebreaks diverge by tour: null in the ATP (+0.0003, SE = 0.0016) and strongly negative in the WTA (-0.0564, based on 209 treated observations). The near-zero ATP tiebreak effect means the aggregate is dominated by the break point hangover, explaining why prior studies reached conflicting conclusions.
 

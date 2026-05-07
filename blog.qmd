@@ -12,7 +12,7 @@ format:
     css: styles.css
     include-in-header:
       text: |
-        <meta name="description" content="An analysis of 56,253 points across all four 2023 Grand Slams reveals why momentum is context-dependent: break points generate a consistent hangover effect across both tours, while tiebreaks diverge — null in the ATP, strongly negative in the WTA.">
+        <meta name="description" content="An analysis of 56,253 points from volunteer-charted matches across all four 2023 Grand Slams reveals why momentum is context-dependent: break points generate a consistent hangover effect across both tours, while tiebreaks diverge — null in the ATP, strongly negative in the WTA.">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     include-after-body:
@@ -55,9 +55,9 @@ But did winning under that kind of pressure make the next points more likely to 
 
 Gilovich et al. (1985) famously dismissed the "hot hand" (the feeling that one success magically increases the odds of the next) as a "cognitive illusion." However, Miller and Sanjurjo (2018) proved this analysis contained a streak selection bias that systematically underestimated genuine persistence. In tennis, recent Cumulative Sum (CUSUM)-based studies (tracking cumulative performance deviations) like Du et al. (2025) find strong statistical evidence of momentum, but rely on thin 31-match samples measuring correlation, not cause.
 
-This project scales the test. I analysed 56,253 points across all four 2023 Grand Slams and both tours, seven times the size of the most recent study. The results suggest momentum in tennis is context-dependent: the type of pressure determines whether winning a big point helps you or hurts you.
+This project scales the test. I analysed 56,253 points from volunteer-charted matches across all four 2023 Grand Slams and both tours, seven times the size of the most recent study. The results suggest momentum in tennis is context-dependent: the type of pressure determines whether winning a big point helps you or hurts you.
 
-## The Data: Every Point, Every Grand Slam
+## The Data: Four Grand Slams, Two Tours
 
 ::: {.stats-grid}
 

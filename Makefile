@@ -1,29 +1,40 @@
 # ══════════════════════════════════════════════════════════════════════
 # BEE2041 Tennis Momentum Pipeline
 # Usage:
-#   make all - builds entire project, skips unchanged steps
+#   make all   - builds entire project, skips unchanged steps
 #   make reset - wipes all generated files for a clean rebuild
+#   make help  - shows available targets
 # ══════════════════════════════════════════════════════════════════════
 
 PYTHON = python3
 
-.PHONY: all reset
+.PHONY: all reset help
+
+# ─── Help ─────────────────────────────────────────────────────────────
+help:
+	@echo "Targets:"
+	@echo "  make all    - build entire project, skipping unchanged steps"
+	@echo "  make reset  - wipe all generated files for a clean rebuild"
+	@echo "  make help   - show this message"
 
 # ─── Master target ────────────────────────────────────────────────────
 all: blog.html
 
 # ─── Step 1: Download raw data ────────────────────────────────────────
-data/raw/charting-m-matches.csv: scripts/download.py
+# download.py fetches multiple raw files; stamp tracks overall completion
+.download.stamp: scripts/download.py
 	$(PYTHON) scripts/download.py
+	touch .download.stamp
 
 # ─── Step 2: Clean and merge ──────────────────────────────────────────
-data/processed/atp_cleaned_points.csv: scripts/clean.py \
-    data/raw/charting-m-matches.csv
+# clean.py writes both atp_cleaned_points.csv and wta_cleaned_points.csv;
+# stamp tracks overall completion rather than a single output file
+.clean.stamp: scripts/clean.py .download.stamp
 	$(PYTHON) scripts/clean.py
+	touch .clean.stamp
 
 # ─── Step 3: Feature engineering ─────────────────────────────────────
-data/processed/processed_features.csv: scripts/features.py \
-    data/processed/atp_cleaned_points.csv
+data/processed/processed_features.csv: scripts/features.py .clean.stamp
 	$(PYTHON) scripts/features.py
 
 # ─── Step 4: Modelling and outputs ───────────────────────────────────
@@ -42,7 +53,8 @@ blog.html: blog.qmd blog_data.js blog.js styles.css
 # ─── Reset ───────────────────────────────────────────────────────────
 reset:
 	rm -f data/processed/*.csv outputs/*.html outputs/*.csv \
-	      outputs/*.png blog_data.js blog.html
+	      outputs/*.png blog_data.js blog.html \
+	      .download.stamp .clean.stamp
 	rm -rf data/raw/* blog_files/
 	touch data/raw/.gitkeep data/processed/.gitkeep
 	@echo "Pipeline reset: run make all to rebuild"
