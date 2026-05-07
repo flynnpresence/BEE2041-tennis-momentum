@@ -969,13 +969,20 @@ def main() -> None:
     )
 
 
-    _, atp_ate_r, _, _, _ = run_causal_forest(
+    _, atp_ate_r, atp_ate_r_se, _, _ = run_causal_forest(
         atp, 'ATP', controls=['Focal_Ranking'])
-    _, wta_ate_r, _, _, _ = run_causal_forest(
+    _, wta_ate_r, wta_ate_r_se, _, _ = run_causal_forest(
         wta, 'WTA', controls=['Focal_Ranking'])
     print(f'\n  Robustness (ranking-only controls):')
     print(f'    ATP: Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
     print(f'    WTA: Full: {wta_ate:.4f} | Reduced: {wta_ate_r:.4f}')
+
+    ate_robustness = pd.DataFrame([
+        {'Tour': 'ATP', 'Type': 'Combined (ranking only)', 'ATE': round(atp_ate_r, 4), 'SE': round(atp_ate_r_se, 4)},
+        {'Tour': 'WTA', 'Type': 'Combined (ranking only)', 'ATE': round(wta_ate_r, 4), 'SE': round(wta_ate_r_se, 4)},
+    ])
+    ate_robustness.to_csv(os.path.join(OUT_DIR, 'ate_results_robustness.csv'), index=False)
+    print('  Saved ate_results_robustness.csv')
 
     # Output 4
     print('\n--- Output 4: CATE plot ---')

@@ -234,6 +234,7 @@ Output of the per-player Chi-squared and Wald-Wolfowitz runs tests run in `featu
 | 6 | output6_reveal_chart.html | Standalone Plotly reveal chart (the interactive version embedded in the blog is rendered by D3 via blog.js) |
 | 7 | output7_feature_importance.html | Causal Forest feature importance, ATP and WTA |
 | - | ate_results.csv | Python-generated ATE values |
+| - | ate_results_robustness.csv | Robustness check ATEs using ranking-only controls |
 | - | feature_importance.csv | Python-generated feature importance values |
 
 ---

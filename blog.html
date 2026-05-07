@@ -166,7 +166,7 @@ Grand Slams · 2 Tours
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output1_chi2_table.html" width="100%" height="180" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>Figure 1 summarises per-player test results across all 156 players. Uncorrected, 14.1% of ATP players (Chi-squared) and 15.4% (runs test) showed non-random sequences — above the 5% random baseline, which initially appears to support momentum. WTA figures were lower at 5.1% and 7.7%, barely clearing the baseline. After applying a Benjamini-Hochberg correction to filter out statistical false alarms, the signal nearly disappears. Across all 156 players, only one ATP player survives the runs test and none survive the Chi-squared test; one WTA player survives both tests. Adjusted, evidence for individual momentum largely evaporates.</p>
+<p>Figure 1 summarises per-player test results across all 156 players. Uncorrected, 14.1% of ATP players (Chi-squared) and 15.4% (runs test) showed non-random sequences, above the 5% random baseline, which initially appears to support momentum. WTA figures were lower at 5.1% and 7.7%, barely clearing the baseline. After applying a Benjamini-Hochberg correction to filter out statistical false alarms, the signal nearly disappears. Across all 156 players, only one ATP player survives the runs test and none survive the Chi-squared test; one WTA player survives both tests. Adjusted, evidence for individual momentum largely evaporates.</p>
 <p>But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are systematically biased against finding momentum in short sequences.</p>
 <p>Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match, a running tally of overperformance. When a player wins points faster than their match average, the line climbs. Genuine momentum would look like sustained directional movement.</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
@@ -192,7 +192,7 @@ Grand Slams · 2 Tours
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output4_cate_plot.html" width="100%" height="460" frameborder="0" scrolling="no"></iframe>
 </div>
-<p>Figure 4 shows the causal effect (CATE: the individual effect estimated per observation) across ranking bands. The estimated effect is generally positive across ranking bands, though Figure 6 later shows this signal is largely driven by the structural serving advantage following break-point wins.</p>
+<p>Figure 4 shows the estimated difference in next-point win probability between high-leverage point wins and the rest of the dataset (CATE: the individual effect estimated per observation), holding skill, form, and momentum constant. The estimated effect is generally positive across ranking bands, though Figure 6 later shows this signal is largely driven by the structural serving advantage following break-point wins.</p>
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
 <iframe src="outputs/output5_model_table.html" width="100%" height="540" frameborder="0" scrolling="no"></iframe>
 </div>
@@ -216,7 +216,7 @@ Split by Pressure Type
 </div>
 <p>Figure 6 opens with the combined effect; clicking “Split by Pressure Type” reveals the break-point and tiebreak estimates separately. Winning a break point boosts the probability of winning the next point by around 15 percentage points in the ATP and 6 in the WTA. But this positive signal is not evidence of psychological momentum. The evidence points instead to a structural feature of how tennis scoring works.</p>
 <p>Whether the server saves it or the returner converts it, the next point systematically favours the break-point winner through the serving structure. I verified this empirically across 1,496 ATP break point wins (100%). Since servers naturally win 60–65% of points, this built-in serving advantage likely accounts for much of the boost.</p>
-<p>In tiebreaks, where the serving advantage is largely neutralised by alternating serve structure, the ATP momentum signal disappears. Serve alternates every two points, so winning a tiebreak point confers no clear advantage on the next. In the ATP, the estimated effect is statistically indistinguishable from zero (+0.0003, SE = 0.0016). In the WTA, the estimated effect is negative (-0.0564, SE = 0.0086); the WTA sample is smaller (209 treated observations) and the magnitude should be treated with caution, but the interval excludes zero entirely.</p>
+<p>In tiebreaks, where the serving advantage is largely neutralised by alternating serve structure, the ATP momentum signal disappears. Serve alternates every two points, so winning a tiebreak point confers no clear advantage on the next. In the ATP, the estimated effect is statistically indistinguishable from zero (+0.0003, SE = 0.0016). In the WTA, the estimated effect is negative (-0.0564, SE = 0.0086); the WTA sample is smaller (209 treated observations), the magnitude should be treated with caution, and the standard error is a CLT approximation — individual CATE estimates are not independent draws, so the boundary should be read as indicative rather than definitive.</p>
 <p>Because break points are far more common than tiebreaks, the earlier combined estimates are dominated by the serving-transition signal, obscuring the absence of a clear positive momentum effect in tiebreaks.</p>
 </section>
 <section id="if-not-momentum-then-what" class="level2">
@@ -226,7 +226,7 @@ Split by Pressure Type
 <iframe src="outputs/output7_feature_importance.html" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
 </div>
 <p>The cumulative match tracker (CUSUM) dominates. Across both tours, accumulated match drift accounts for 56% of the model’s weight, with baseline player rank and rolling win percentage accounting for most of the remainder.</p>
-<p>Crucially, Winning Streak (whether a player won their last four consecutive points) scores a virtually flat 1% to 2%. This means that whether a player is on a hot streak does not meaningfully change how large the causal effect of winning a break point is — a distinct question from whether streaks predict outcomes in general, which the independence tests above address directly. Within the causal forest, streak status adds almost nothing once match drift is accounted for.</p>
+<p>Crucially, Winning Streak (whether a player won their last four consecutive points) scores a virtually flat 1% to 2%. This means that whether a player is on a hot streak does not meaningfully change how large the causal effect of winning a break point is, a distinct question from whether streaks predict outcomes in general, which the independence tests above address directly. Within the causal forest, streak status adds almost nothing once match drift is accounted for.</p>
 <p>What most determines how winning a high-leverage point affects a player is accumulated match drift, not short-term bursts of form.</p>
 </section>
 <section id="the-uncomfortable-conclusion" class="level2">
