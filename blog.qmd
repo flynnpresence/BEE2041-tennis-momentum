@@ -131,7 +131,7 @@ Crucially, TBOE only captures an overall tiebreak tendency. It cannot answer the
 
 Everything so far tests correlation. But a dominating player naturally wins more break points; the association might simply reflect that good players win more of everything, not that winning the big point caused the subsequent success.
 
-To separate correlation from causation, I used a causal forest (an advanced machine learning model). Unlike standard methods that assume a one-size-fits-all rule, it estimates the causal effect of winning a high-leverage point across different player subgroups. The model relies on one crucial assumption: once I adjust for a player's skill, form, and match trajectory, there are no "hidden factors" driving both the big pressure point and the point immediately after.
+To separate correlation from causation, I used a causal forest (an advanced machine learning model). Unlike standard methods that assume a one-size-fits-all rule, it estimates the causal effect of winning a high-leverage point across different player subgroups. The model relies on one crucial assumption: once I adjust for a player's skill, form, and match trajectory, no unobserved factor simultaneously affects both the pressure point and the following point.
 
 Consistent with the sequential dependence framework (Gilovich et al., 1985; Miller and Sanjurjo, 2018), a high-leverage win is a won break point or tiebreak point. The baseline comprises all other match points rather than lost pressure points, because in tiebreaks the alternating serve structure can mechanically disadvantage the point winner on the next point. To isolate the causal effect beyond existing skill and form, the model holds four variables constant: official player ranking, rolling win percentage (last ten points), short-term winning streak (last four points), and the CUSUM match tracker.
 
@@ -168,7 +168,7 @@ The combined estimated effect is positive for both tours (ATP: +0.0957, WTA: +0.
 </div>
 
 
-As Figure 6 shows, winning a break point boosts the probability of winning the next point by around 15 percentage points in the ATP and 6 in the WTA. But this positive signal is not evidence of psychological momentum. It is a built-in feature of how tennis scoring works.
+Figure 6 opens with the combined effect; clicking "Split by Pressure Type" reveals the break-point and tiebreak estimates separately. Winning a break point boosts the probability of winning the next point by around 15 percentage points in the ATP and 6 in the WTA. But this positive signal is not evidence of psychological momentum. It is a built-in feature of how tennis scoring works.
 
 Whether the server saves it or the returner converts it, the next point systematically favours the break-point winner through the serving structure. I verified this empirically across 1,496 ATP break point wins (100%). Since servers naturally win 60–65% of points, this built-in serving advantage accounts for most of the boost.
 
@@ -196,7 +196,7 @@ What most determines how winning a high-leverage point affects a player is accum
 
 The evidence suggests that for decades, researchers debating the "hot hand" in tennis have been asking an imprecise question, clouded by a serving advantage mistaken for psychology.
 
-The apparent positive effect of winning a break point is real and consistent. But it is mechanical, not psychological. Because break points occur far more often than tiebreaks, pooled analyses are dominated by this serving-transition signal. When that serving advantage is stripped away in tiebreaks, the momentum signal vanishes in the ATP and turns negative in the WTA.
+The apparent positive effect of winning a break point is real and consistent. But it is mechanical, not psychological. Because break points occur far more often than tiebreaks, pooled analyses are dominated by this serving-transition signal. When that serving advantage is stripped away in tiebreaks, the ATP signal disappears, while the WTA estimate turns negative, though the smaller WTA tiebreak sample warrants caution.
 
 (Note: The core findings remain stable across multiple model specifications. This dataset naturally skews toward elite matches and cannot measure unobserved physiological factors like fatigue; whether momentum compounds across longer sequences remains open for future research. Separating the psychological component from the structural serving advantage would require subgroup analysis beyond the scope of this study.)
 
