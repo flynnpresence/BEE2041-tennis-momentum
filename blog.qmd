@@ -95,7 +95,7 @@ I kept the tours separate, since pooling would have obscured the comparison that
 
 Does winning a point make the next one more likely to go your way?
 
-I ran two tests per player: a Pearson Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether winning a point is completely independent of the previous point; the runs test asks whether players go on hot streaks more often than you'd expect from a coin flip. I tested 78 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.
+I ran two tests per player: a Chi-squared independence test and a Wald-Wolfowitz runs test. The Chi-squared test asks whether winning a point is completely independent of the previous point; the runs test asks whether players go on hot streaks more often than you'd expect from a coin flip. I tested 78 ATP and 78 WTA players separately; pooling would risk hiding individual patterns inside aggregate noise.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">
@@ -103,7 +103,7 @@ I ran two tests per player: a Pearson Chi-squared independence test and a Wald-W
 </div>
 ```
 
-The results are the first blow to the momentum theory. In the ATP, 14.1% of players showed evidence of non-random sequences on the Chi-squared test, and 15.4% on the runs test. In the WTA, the figures are lower still: 5.1% and 7.7%. After applying a Benjamini-Hochberg correction to control the false discovery rate (the proportion of flagged results that are actually false alarms) across all players, no ATP players survive correction on the Chi-squared test while one survives on the runs test; one WTA player survives on the Chi-squared test and one survives on the runs test. The uncorrected figures barely exceeded the 5% random baseline; once adjusted, evidence for individual momentum largely disappears.
+The results are the first blow to the momentum theory. In the ATP, 14.1% of players showed evidence of non-random sequences on the Chi-squared test, and 15.4% on the runs test. In the WTA, the figures are lower still: 5.1% and 7.7%. After applying a Benjamini-Hochberg correction to control the false discovery rate (the proportion of flagged results that are actually false alarms) across all players, no ATP players survive correction on the Chi-squared test while one survives on the runs test; one WTA player survives on the Chi-squared test and one survives on the runs test. In the WTA, the uncorrected figures barely exceeded the 5% random baseline; in the ATP, they ran higher but still fell well short of systematic evidence. Once adjusted, evidence for individual momentum largely disappears.
 
 But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are notoriously underpowered and systematically biased against finding momentum in short sequences.
 
@@ -115,7 +115,7 @@ Figure 2 tracks the Cumulative Sum (CUSUM) score across the longest WTA match. T
 </div>
 ```
 
-Figure 2 shows a sustained above-average run that eventually collapses. The line spends the first 150 points predominantly above zero, suggesting Alexandrova is controlling the match, before dropping sharply from around point 180 to its lowest point at 187. There is no sustained directional run anywhere. Du et al. (2025) argue this oscillation is itself evidence of momentum shifting between players. I read it differently: it looks like the natural variance of two evenly matched competitors trading points.
+Figure 2 shows Alexandrova performing above her own match average for almost the entire match. The line stays above zero for the first 88 points, dips briefly, reaching approximately −1.8 around point 100, then recovers sharply and climbs to finish above +4. Du et al. (2025) would interpret this oscillation as momentum shifting between players. But the chart tells a simpler story: one player performing consistently above her own average, interrupted by a single 15-point spell of below-average play that reverses immediately. That is not momentum. It is variance.
 
 ## What About the Biggest Moments?
 
