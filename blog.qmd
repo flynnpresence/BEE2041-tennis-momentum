@@ -99,7 +99,7 @@ To find out, I ran two tests for 78 ATP and 78 WTA players separately: a Chi-squ
 </div>
 ```
 
-Figure 1 shows per-player test results for all 156 players. The results deal the first blow to momentum theory. Uncorrected, only 14.1% of ATP players (Chi-squared) and 15.4% (runs test) showed non-random sequences. WTA figures were even lower at 5.1% and 7.7%. ATP figures ran notably higher than the 5% random baseline; WTA barely cleared it. After applying a Benjamini-Hochberg correction to filter out statistical false alarms, the signal nearly disappears. Across all 156 players, only one ATP player survives the runs test (zero for Chi-squared); the same WTA player survives both tests. Adjusted, evidence for individual momentum largely evaporates.
+Figure 1 summarises per-player test results across all 156 players. The results deal the first blow to momentum theory. Uncorrected, only 14.1% of ATP players (Chi-squared) and 15.4% (runs test) showed non-random sequences. WTA figures were even lower at 5.1% and 7.7%. ATP figures ran notably higher than the 5% random baseline; WTA barely cleared it. After applying a Benjamini-Hochberg correction to filter out statistical false alarms, the signal nearly disappears. Across all 156 players, only one ATP player survives the runs test (zero for Chi-squared); the same WTA player survives both tests. Adjusted, evidence for individual momentum largely evaporates.
 
 But I cannot stop here. Miller and Sanjurjo (2018) proved traditional methods like the runs test are systematically biased against finding momentum in short sequences.
 
