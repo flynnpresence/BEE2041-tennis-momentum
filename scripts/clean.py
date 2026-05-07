@@ -246,11 +246,11 @@ def process_tour(
 
     # ── 1. Engineer High_Leverage Treatment Flag ──────────────────────────────
     # Break points: detected from Pts score string
-    bp_p1_serving = (merged['Svr'] == 1) & merged['Pts'].astype(
-        'string').isin(['0-40', '15-40', '30-40', '40-AD'])
-    bp_p2_serving = (merged['Svr'] == 2) & merged['Pts'].astype(
-        'string').isin(['40-0', '40-15', '40-30', 'AD-40'])
-    is_bp = bp_p1_serving | bp_p2_serving
+    # Score format is server-receiver (confirmed from raw data): '0-40' always
+    # means receiver has 40, regardless of which player is serving. The two-branch
+    # approach (separate Svr==1 / Svr==2 conditions) was wrong: '40-0' with Svr=2
+    # is a game point for the server, not a break point.
+    is_bp = merged['Pts'].astype('string').isin(['0-40', '15-40', '30-40', '40-AD'])
 
     # Tiebreak POINTS: all points where Gm1=6 and Gm2=6 are tiebreak points.
     # Score-based detection misses the first point of every tiebreak because "0-0"
