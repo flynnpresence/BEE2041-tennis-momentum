@@ -196,7 +196,7 @@
 
     const y = d3
       .scaleLinear()
-      .domain([-0.07, 0.07])
+      .domain([-0.09, 0.20])
       .range([innerHeight, 0])
       .nice();
 
