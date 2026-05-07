@@ -55,7 +55,7 @@ But did winning under that kind of pressure make the next points more likely to 
 
 Gilovich et al. (1985) famously dismissed the "hot hand" (the belief that a player's chance of success is greater following a previous success than following a failure) as a "cognitive illusion." However, Miller and Sanjurjo (2018) proved this analysis contained a streak selection bias. In tennis, recent Cumulative Sum (CUSUM)-based studies like Du et al. (2025) find strong statistical evidence of momentum, but rely on thin 31-match samples measuring correlation, not cause.
 
-This project scales the test. I analysed 56,253 points from volunteer-charted matches across all four 2023 Grand Slams and both tours, a sample significantly larger than any recent study. The results suggest that much of what commentators call momentum after a break point may instead emerge from the structural serving advantage on the following point.
+This project scales the test. I analysed 56,253 points from volunteer-charted matches across all four 2023 Grand Slams and both professional tours (the men's ATP and women's WTA), a sample significantly larger than any recent study. The results suggest that much of what commentators call momentum after a break point may instead emerge from the structural serving advantage on the following point.
 
 ## The Data: Four Grand Slams, Two Tours
 
@@ -83,7 +83,7 @@ This project scales the test. I analysed 56,253 points from volunteer-charted ma
 
 :::
 
-The raw data comes from Jeff Sackmann's Match Charting Project, a volunteer-compiled database where tennis analysts manually record every point and exact score state. The same dataset has been used in prior momentum research, including Du et al. (2025); the contribution here is scale and the break point vs tiebreak distinction. Break points and tiebreaks are the high-leverage moments: genuinely rare, making up roughly 12% of ATP points and 13% of WTA points.
+The raw data comes from Jeff Sackmann's Match Charting Project, a volunteer-compiled database where tennis analysts manually record every point and exact score state. The same dataset has been used in prior momentum research, including Du et al. (2025); the contribution here is scale and the break point vs tiebreak distinction. Break points (where the receiving player is one point away from winning the game) and tiebreaks (a high-stakes, point-by-point game used to decide a tied set) are the high-leverage moments: genuinely rare, making up roughly 12% of ATP points and 13% of WTA points.
 
 The dataset covers 38,488 ATP points (169 matches, best-of-five sets) and 17,765 WTA points (128 matches, best-of-three). Official rankings control for baseline skill. I kept the tours separate, since pooling would have obscured the comparison that matters most.
 
