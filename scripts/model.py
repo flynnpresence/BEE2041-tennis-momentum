@@ -973,13 +973,28 @@ def main() -> None:
         atp, 'ATP', controls=['Focal_Ranking'])
     _, wta_ate_r, wta_ate_r_se, _, _ = run_causal_forest(
         wta, 'WTA', controls=['Focal_Ranking'])
+    _, atp_bp_ate_r, atp_bp_ate_r_se, _, _ = run_causal_forest(
+        atp, 'ATP', treatment_label='bp', controls=['Focal_Ranking'])
+    _, wta_bp_ate_r, wta_bp_ate_r_se, _, _ = run_causal_forest(
+        wta, 'WTA', treatment_label='bp', controls=['Focal_Ranking'])
+    # Note: TB-specific ranking-only specifications were tested but produced
+    # numerically unstable estimates due to small treated samples (729 ATP, 209 WTA).
+    # DML with a single control under rare-treatment conditions yields propensity
+    # scores near the boundaries, inflating the inverse-propensity weighting.
+    # The full 4-control specification is stable for TB; reduced-control robustness
+    # is reported only for Combined and BP.
+
     print(f'\n  Robustness (ranking-only controls):')
-    print(f'    ATP: Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
-    print(f'    WTA: Full: {wta_ate:.4f} | Reduced: {wta_ate_r:.4f}')
+    print(f'    ATP Combined:    Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
+    print(f'    WTA Combined:    Full: {wta_ate:.4f} | Reduced: {wta_ate_r:.4f}')
+    print(f'    ATP Break Point: Full: {atp_bp_ate:.4f} | Reduced: {atp_bp_ate_r:.4f}')
+    print(f'    WTA Break Point: Full: {wta_bp_ate:.4f} | Reduced: {wta_bp_ate_r:.4f}')
 
     ate_robustness = pd.DataFrame([
-        {'Tour': 'ATP', 'Type': 'Combined (ranking only)', 'ATE': round(atp_ate_r, 4), 'SE': round(atp_ate_r_se, 4)},
-        {'Tour': 'WTA', 'Type': 'Combined (ranking only)', 'ATE': round(wta_ate_r, 4), 'SE': round(wta_ate_r_se, 4)},
+        {'Tour': 'ATP', 'Type': 'Combined (ranking only)',    'ATE': round(atp_ate_r, 4),    'SE': round(atp_ate_r_se, 4)},
+        {'Tour': 'WTA', 'Type': 'Combined (ranking only)',    'ATE': round(wta_ate_r, 4),    'SE': round(wta_ate_r_se, 4)},
+        {'Tour': 'ATP', 'Type': 'Break Point (ranking only)', 'ATE': round(atp_bp_ate_r, 4), 'SE': round(atp_bp_ate_r_se, 4)},
+        {'Tour': 'WTA', 'Type': 'Break Point (ranking only)', 'ATE': round(wta_bp_ate_r, 4), 'SE': round(wta_bp_ate_r_se, 4)},
     ])
     ate_robustness.to_csv(os.path.join(OUT_DIR, 'ate_results_robustness.csv'), index=False)
     print('  Saved ate_results_robustness.csv')
