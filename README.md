@@ -14,7 +14,7 @@ This project tests whether point-by-point momentum exists in professional tennis
 
 ---
 
-## Methodological Rigor
+## Methodological Rigour
 
 To address conflicting conclusions in existing literature (Gilovich et al., 1985 vs. Miller and Sanjurjo, 2018), this project implements several safeguards:
 
@@ -40,7 +40,7 @@ This runs the full pipeline in sequence: download → clean → features → mod
 
 Requires Python 3.10+ (tested on 3.12.7), pip, and [Quarto](https://quarto.org) 1.9+ (tested on 1.9.37) installed on your system. Note: Quarto is an external binary not managed by pip and must be installed separately. Note: pandas 3.0.1 requires Python ≥ 3.9. The download step requires an internet connection to fetch raw data from GitHub.
 
-Run `make reset` to wipe all generated files and start fresh.
+Run `make pipeline` to run the data pipeline without rendering the blog (no Quarto required). Run `make reset` to wipe all generated files and start fresh.
 
 Note: Raw data is read from `data/raw/` and never modified. All cleaned and feature-engineered data is written to `data/processed/`, following the principle that raw data is sacred.
 

@@ -186,7 +186,7 @@ Beyond the serving mechanism, what predicts how large the estimated effect is ac
 </div>
 ```
 
-The cumulative match tracker (CUSUM) dominates. Across both tours, accumulated match drift accounts for 56% of the model's weight, with baseline player rank and rolling win percentage accounting for most of the remainder.
+The cumulative match tracker (CUSUM) dominates. Across both tours, accumulated match drift (what CUSUM captures: the cumulative gap between actual and average performance) accounts for 56% of the model's weight, with baseline player rank and rolling win percentage accounting for most of the remainder.
 
 Crucially, Winning Streak (whether a player won their last four consecutive points) scores a virtually flat 1% to 2%. This means that whether a player is on a hot streak does not meaningfully change how large the estimated effect of a break-point win is, a distinct question from whether streaks predict outcomes in general, which the independence tests above address directly. Within the causal forest, streak status adds almost nothing once match drift is accounted for.
 
