@@ -1,9 +1,10 @@
 # ══════════════════════════════════════════════════════════════════════
 # BEE2041 Tennis Momentum Pipeline
 # Usage:
-#   make all   - builds entire project, skips unchanged steps
-#   make reset - wipes all generated files for a clean rebuild
-#   make help  - shows available targets
+#   make all      - builds entire project, skips unchanged steps
+#   make pipeline - runs data pipeline only (no Quarto required)
+#   make reset    - wipes all generated files for a clean rebuild
+#   make help     - shows available targets
 # ══════════════════════════════════════════════════════════════════════
 
 PYTHON = python3
