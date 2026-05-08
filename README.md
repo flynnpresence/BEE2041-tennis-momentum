@@ -53,23 +53,24 @@ Note: The Makefile uses `outputs/ate_results.csv` as the sentinel for the model 
 ```
 BEE2041-tennis-momentum/
 ├── data/
-│   ├── raw/            # Raw data: never modified
-│   └── processed/      # Cleaned and feature-engineered data
+│   ├── raw/                # Raw data: never modified
+│   └── processed/          # Cleaned and feature-engineered data
+├── outputs/                # HTML charts and CSV results from model.py
 ├── scripts/
-│   ├── download.py     # Downloads raw data from Jeff Sackmann's GitHub
-│   ├── clean.py        # Filters, merges, and validates data
-│   ├── features.py     # Engineers momentum and control features
-│   ├── model.py        # Logistic regression and Causal Forest
-│   └── build_blog_data.py  # Generates blog_data.js for D3 chart
-├── outputs/            # HTML charts and CSV results from model.py
-├── blog.qmd            # Quarto blog source
-├── blog.html           # Rendered blog (auto-generated)
-├── blog.js             # D3 reveal chart and interactive elements
-├── blog_data.js        # Python-generated data constants (auto-generated)
-├── styles.css          # Blog styling
-├── Makefile            # Pipeline orchestration
-├── README.md           # Project documentation
-└── requirements.txt    # Python dependencies
+│   ├── build_blog_data.py  # Generates blog_data.js for D3 chart
+│   ├── clean.py            # Filters, merges, and validates data
+│   ├── download.py         # Downloads raw data from Jeff Sackmann's GitHub
+│   ├── features.py         # Engineers momentum and control features
+│   └── model.py            # Logistic regression and Causal Forest
+├── .gitignore              # Git ignore patterns (excludes raw/processed data, build artefacts)
+├── Makefile                # Pipeline orchestration
+├── README.md               # Project documentation
+├── blog.html               # Rendered blog (auto-generated)
+├── blog.js                 # D3 reveal chart and interactive elements
+├── blog.qmd                # Quarto blog source
+├── blog_data.js            # Python-generated data constants (auto-generated)
+├── requirements.txt        # Python dependencies
+└── styles.css              # Blog styling
 ```
 
 ---
