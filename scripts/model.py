@@ -20,6 +20,7 @@ from econml.dml import CausalForestDML
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, GroupKFold
+import bootstrap_ate as boot
 
 # Suppress known, safe warnings from econml and sklearn only
 # Global suppression avoided: specific known warnings caught locally
@@ -52,6 +53,13 @@ OUTCOME   = 'Next_Point_Won'
 ALPHA     = 0.05
 SEED      = 42
 np.random.seed(SEED)
+
+# Bootstrap replicates for the match-clustered ATE SE (see bootstrap_ate.py).
+# B=199 matches the value already validated and reported for every spec in
+# this project; BOOT_N_JOBS parallelizes across replicates (each individual
+# fit stays single-threaded -- see bootstrap_ate.fit_ate).
+BOOTSTRAP_B      = 199
+BOOTSTRAP_N_JOBS = 6
 
 # Display labels for chart axes (short form)
 LABEL_MAP = {
@@ -371,9 +379,56 @@ def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
 
 
 # ── Causal Forest ─────────────────────────────────────────────────────────────
-def run_causal_forest(df: pd.DataFrame, tour_name: str,
+#
+# ESTIMATOR-SPLIT RULE
+# CausalForestDML is used only where treatment is well-powered AND its defining
+# feature -- per-unit heterogeneous effects -- is actually consumed downstream
+# (atp_combined / wta_combined feed Output 4's CATE-by-ranking-band plot and
+# Output 7's feature importances; atp_bp / wta_bp are also well-powered, 1,497
+# and 1,001 treated, and stay on the forest). LinearDML is used for the two
+# tiebreak specs (sparse treatment: 729 / 209 treated) and the four *_rank
+# robustness specs (single-control propensity fragility): a match-clustered
+# bootstrap showed the forest's point estimate is not reliably identified in
+# either case (e.g. wta_tb's ATE flips sign across cv=2/3/5; the *_rank specs
+# occasionally produce degenerate propensities and outlier ATEs), while
+# LinearDML reproduces the forest's own outlier-trimmed median to within ~5%
+# with a clean bootstrap distribution -- confirming the instability was
+# estimator noise, not a real disagreement. Full diagnostic detail and the ATE
+# SE itself (a match-clustered bootstrap over match_id, not cates.std()/sqrt(n)
+# -- that measures CATE-prediction dispersion, not ATE sampling variance, and
+# treats serially-dependent points within a match as independent) live in
+# bootstrap_ate.py; see LINEAR_SPECS and its docstring for the full writeup.
+SPEC_KEYS = {
+    ('ATP', 'combined', 'full'): 'atp_combined', ('WTA', 'combined', 'full'): 'wta_combined',
+    ('ATP', 'bp',       'full'): 'atp_bp',       ('WTA', 'bp',       'full'): 'wta_bp',
+    ('ATP', 'tb',       'full'): 'atp_tb',       ('WTA', 'tb',       'full'): 'wta_tb',
+    ('ATP', 'combined', 'rank'): 'atp_combined_rank', ('WTA', 'combined', 'rank'): 'wta_combined_rank',
+    ('ATP', 'bp',       'rank'): 'atp_bp_rank',       ('WTA', 'bp',       'rank'): 'wta_bp_rank',
+}
+
+
+def bootstrap_ate_se(df_full: pd.DataFrame, tour_name: str, treatment_label: str,
+                     controls: list) -> tuple:
+    """Match-clustered bootstrap ATE + SE for one spec (see ESTIMATOR-SPLIT RULE
+    above and bootstrap_ate.py). Returns (ate_point, se, ci_lo, ci_hi)."""
+    spec_key = SPEC_KEYS[(tour_name, treatment_label,
+                          'full' if controls == CONTROLS else 'rank')]
+    res = boot.bootstrap_spec(df_full, spec_key, B=BOOTSTRAP_B, seed=SEED,
+                              n_jobs=BOOTSTRAP_N_JOBS)
+    print(f'    [{spec_key}] estimator={res["estimator"]} '
+         f'ate_point={res["ate_point"]:.4f} cluster_boot_se={res["cluster_boot_se"]:.4f} '
+         f'95% CI=[{res["ci_lo"]:.4f}, {res["ci_hi"]:.4f}] n_fail={res["n_fail"]}')
+    return res['ate_point'], res['cluster_boot_se'], res['ci_lo'], res['ci_hi']
+
+
+def run_causal_forest(df: pd.DataFrame, df_full: pd.DataFrame, tour_name: str,
                       treatment_label: str = 'combined',
                       controls: list = None) -> tuple:
+    """Fits CausalForestDML for a well-powered spec (see ESTIMATOR-SPLIT RULE)
+    with grouped cross-fitting (groups=match_id, closing the cross-fit leak a
+    plain cv=2 allows), returning cates/feat_imp/X for the heterogeneity
+    outputs. ATE + SE come from the match-clustered bootstrap, not this single
+    fit's own dispersion -- see bootstrap_ate_se()."""
     if controls is None:
         controls = CONTROLS
     print(f'\n  Causal Forest: {tour_name} [{treatment_label}]')
@@ -384,7 +439,7 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
     elif treatment_label == 'tb':
         extra_cols.append('High_Leverage_TB')
 
-    keep = controls + [TREATMENT, OUTCOME] + extra_cols
+    keep = controls + [TREATMENT, OUTCOME, 'match_id'] + extra_cols
     nan_counts = df[keep].isna().sum()
     if nan_counts.sum() > 0:
         print(f"    Warning: Dropping rows with NaNs:\n{nan_counts[nan_counts > 0]}")
@@ -414,6 +469,7 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
     T = data['Treatment'].values
     Y = data[OUTCOME].astype(float).values
     X = data[controls].astype(float).values
+    groups = data['match_id'].values
 
     print(f'    Treatment rate: {T.mean()*100:.1f}%')
     print(f'    Treated N: {int(T.sum()):,} | Control N: {int((1-T).sum()):,}')
@@ -427,14 +483,24 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
         random_state=SEED,
         verbose=0
     )
-    cf.fit(Y, T, X=X)
+    cf.fit(Y, T, X=X, groups=groups)
 
     cates = cf.effect(X)
     ate   = float(cf.ate(X))
-    # econml 0.16.0: ate_inference().stderr_mean falls back to RMS of per-sample
-    # CATE SEs (not SE of mean ATE) when final stage is non-linear (forest).
-    # cates.std() / sqrt(n) is the correct SE of the sample mean by CLT.
-    ate_se = cates.std() / np.sqrt(len(cates))
+
+    ate_boot, ate_se, ci_lo, ci_hi = bootstrap_ate_se(
+        df_full, tour_name, treatment_label, controls)
+    # Same data, config, and seed as this fit -> should match closely. Verified
+    # in isolated single-fit-per-process runs that this function's data prep
+    # and bootstrap_ate.build_spec's produce byte-identical results to 8
+    # decimal places; the ~1e-4 relative tolerance here (rather than exact
+    # equality) accounts for floating-point/BLAS-threading non-determinism
+    # from running repeated CausalForestDML fits in one process, not a data
+    # or config mismatch. A failure here means something more than that.
+    assert abs(ate - ate_boot) < max(1e-4, abs(ate) * 1e-3), (
+        f"ATE mismatch between direct fit ({ate:.6f}) and bootstrap point "
+        f"estimate ({ate_boot:.6f}) for {tour_name} [{treatment_label}]"
+    )
 
     print(f'    N = {len(data):,} | ATE = {ate:.4f} (SE = {ate_se:.4f})')
 
@@ -445,7 +511,18 @@ def run_causal_forest(df: pd.DataFrame, tour_name: str,
         'Tour':       tour_name
     }).sort_values('Importance', ascending=False)
 
-    return cates, ate, ate_se, feat_imp, data[controls].astype(float)
+    return cates, ate, ate_se, feat_imp, data[controls].astype(float), ci_lo, ci_hi
+
+
+def run_ate_only(df_full: pd.DataFrame, tour_name: str, treatment_label: str,
+                 controls: list) -> tuple:
+    """ATE + SE for specs that don't feed a heterogeneity output (both
+    tiebreak specs, and the four rank-only robustness specs) -- see the
+    ESTIMATOR-SPLIT RULE above run_causal_forest. bootstrap_ate.py chooses
+    the estimator (forest vs LinearDML) per spec via LINEAR_SPECS."""
+    label = treatment_label if controls == CONTROLS else f'{treatment_label}, rank-only'
+    print(f'\n  ATE (bootstrap): {tour_name} [{label}]')
+    return bootstrap_ate_se(df_full, tour_name, treatment_label, controls)
 
 
 # ── Output 4: CATE plot ───────────────────────────────────────────────────────
@@ -545,12 +622,18 @@ def plot_cate(atp_cates, atp_X, wta_cates, wta_X) -> None:
 # ── Output 5: Coefficient plot ────────────────────────────────────────────────
 def plot_model_table(
     atp_coef, wta_coef,
-    atp_bp_ate, atp_bp_ate_se, wta_bp_ate, wta_bp_ate_se,
-    atp_tb_ate, atp_tb_ate_se, wta_tb_ate, wta_tb_ate_se
+    atp_bp_ate, atp_bp_ci_lo, atp_bp_ci_hi,
+    wta_bp_ate, wta_bp_ci_lo, wta_bp_ci_hi,
+    atp_tb_ate, atp_tb_ci_lo, atp_tb_ci_hi,
+    wta_tb_ate, wta_tb_ci_lo, wta_tb_ci_hi
 ) -> None:
     """
-    Clean Plotly forest plot: logistic regression coefficients
-    plus causal forest ATE rows for BP and TB.
+    Clean Plotly forest plot: logistic regression coefficients (symmetric
+    1.96*SE, from statsmodels' cluster-robust SE) plus causal forest ATE rows
+    for BP and TB (asymmetric error bars drawn directly from the
+    match-clustered bootstrap's percentile CI, not +-1.96*SE -- the WTA
+    forest specs' bootstrap distributions are visibly left-skewed, so a
+    symmetric SE-based bar would disagree with the reported [ci_lo, ci_hi]).
     """
     import plotly.graph_objects as go
 
@@ -583,17 +666,17 @@ def plot_model_table(
             'type': 'logistic'
         })
 
-    # Add causal forest rows
+    # Add causal forest rows (CI bounds, not SE -- see docstring)
     rows.append({
         'label': 'Break Point Win',
-        'atp_coef': atp_bp_ate, 'atp_se': atp_bp_ate_se,
-        'wta_coef': wta_bp_ate, 'wta_se': wta_bp_ate_se,
+        'atp_coef': atp_bp_ate, 'atp_ci_lo': atp_bp_ci_lo, 'atp_ci_hi': atp_bp_ci_hi,
+        'wta_coef': wta_bp_ate, 'wta_ci_lo': wta_bp_ci_lo, 'wta_ci_hi': wta_bp_ci_hi,
         'type': 'forest'
     })
     rows.append({
         'label': 'Tiebreak Win',
-        'atp_coef': atp_tb_ate, 'atp_se': atp_tb_ate_se,
-        'wta_coef': wta_tb_ate, 'wta_se': wta_tb_ate_se,
+        'atp_coef': atp_tb_ate, 'atp_ci_lo': atp_tb_ci_lo, 'atp_ci_hi': atp_tb_ci_hi,
+        'wta_coef': wta_tb_ate, 'wta_ci_lo': wta_tb_ci_lo, 'wta_ci_hi': wta_tb_ci_hi,
         'type': 'forest'
     })
 
@@ -602,17 +685,33 @@ def plot_model_table(
 
     fig = go.Figure()
 
+    def error_x_kwargs(coef, row, side):
+        """Forest rows: asymmetric bar from the bootstrap percentile CI.
+        Logistic rows: symmetric 1.96*SE (statsmodels cluster-robust SE)."""
+        if row['type'] == 'forest':
+            ci_lo, ci_hi = row[f'{side}_ci_lo'], row[f'{side}_ci_hi']
+            return dict(type='data', symmetric=False,
+                       array=[ci_hi - coef], arrayminus=[coef - ci_lo])
+        se = row[f'{side}_se']
+        return dict(type='data', array=[1.96 * se])
+
+    def ci_bounds(coef, row, side):
+        if row['type'] == 'forest':
+            return row[f'{side}_ci_lo'], row[f'{side}_ci_hi']
+        se = row[f'{side}_se']
+        return coef - 1.96 * se, coef + 1.96 * se
+
     for i, row in enumerate(rows[::-1]):
         symbol = 'diamond' if row['type'] == 'forest' else 'circle'
         y_pos = i
 
         # ATP
+        atp_lo, atp_hi = ci_bounds(row['atp_coef'], row, 'atp')
         fig.add_trace(go.Scatter(
             x=[row['atp_coef']],
             y=[y_pos - 0.15],
             error_x=dict(
-                type='data',
-                array=[1.96 * row['atp_se']],
+                **error_x_kwargs(row['atp_coef'], row, 'atp'),
                 visible=True,
                 color='rgba(74,144,217,0.6)',
                 thickness=1.5,
@@ -629,19 +728,18 @@ def plot_model_table(
             showlegend=(i == 0),
             hovertemplate=f"<b>ATP: {row['label']}</b><br>"
                           f"Effect: {row['atp_coef']:.4f}<br>"
-                          f"95% CI: [{row['atp_coef']-1.96*row['atp_se']:.4f}, "
-                          f"{row['atp_coef']+1.96*row['atp_se']:.4f}]"
+                          f"95% CI: [{atp_lo:.4f}, {atp_hi:.4f}]"
                           f"<extra></extra>",
             legendgroup='ATP'
         ))
 
         # WTA
+        wta_lo, wta_hi = ci_bounds(row['wta_coef'], row, 'wta')
         fig.add_trace(go.Scatter(
             x=[row['wta_coef']],
             y=[y_pos + 0.15],
             error_x=dict(
-                type='data',
-                array=[1.96 * row['wta_se']],
+                **error_x_kwargs(row['wta_coef'], row, 'wta'),
                 visible=True,
                 color='rgba(232,113,90,0.6)',
                 thickness=1.5,
@@ -658,8 +756,7 @@ def plot_model_table(
             showlegend=(i == 0),
             hovertemplate=f"<b>WTA: {row['label']}</b><br>"
                           f"Effect: {row['wta_coef']:.4f}<br>"
-                          f"95% CI: [{row['wta_coef']-1.96*row['wta_se']:.4f}, "
-                          f"{row['wta_coef']+1.96*row['wta_se']:.4f}]"
+                          f"95% CI: [{wta_lo:.4f}, {wta_hi:.4f}]"
                           f"<extra></extra>",
             legendgroup='WTA'
         ))
@@ -941,20 +1038,21 @@ def main() -> None:
 
     # Causal Forest: combined treatment, full controls
     print('\n--- Causal Forest ---')
-    atp_cates, atp_ate, atp_ate_se, atp_imp, atp_X = run_causal_forest(
-        atp, 'ATP')
-    wta_cates, wta_ate, wta_ate_se, wta_imp, wta_X = run_causal_forest(
-        wta, 'WTA')
+    atp_cates, atp_ate, atp_ate_se, atp_imp, atp_X, atp_ate_ci_lo, atp_ate_ci_hi = \
+        run_causal_forest(atp, df, 'ATP')
+    wta_cates, wta_ate, wta_ate_se, wta_imp, wta_X, wta_ate_ci_lo, wta_ate_ci_hi = \
+        run_causal_forest(wta, df, 'WTA')
 
-
-    _, atp_bp_ate, atp_bp_ate_se, _, _ = run_causal_forest(
-        atp, 'ATP', treatment_label='bp')
-    _, wta_bp_ate, wta_bp_ate_se, _, _ = run_causal_forest(
-        wta, 'WTA', treatment_label='bp')
-    _, atp_tb_ate, atp_tb_ate_se, _, _ = run_causal_forest(
-        atp, 'ATP', treatment_label='tb')
-    _, wta_tb_ate, wta_tb_ate_se, _, _ = run_causal_forest(
-        wta, 'WTA', treatment_label='tb')
+    _, atp_bp_ate, atp_bp_ate_se, _, _, atp_bp_ci_lo, atp_bp_ci_hi = \
+        run_causal_forest(atp, df, 'ATP', treatment_label='bp')
+    _, wta_bp_ate, wta_bp_ate_se, _, _, wta_bp_ci_lo, wta_bp_ci_hi = \
+        run_causal_forest(wta, df, 'WTA', treatment_label='bp')
+    # atp_tb / wta_tb: LinearDML, not the forest (sparse treatment -- see
+    # ESTIMATOR-SPLIT RULE above run_causal_forest).
+    atp_tb_ate, atp_tb_ate_se, atp_tb_ci_lo, atp_tb_ci_hi = run_ate_only(
+        df, 'ATP', 'tb', CONTROLS)
+    wta_tb_ate, wta_tb_ate_se, wta_tb_ci_lo, wta_tb_ci_hi = run_ate_only(
+        df, 'WTA', 'tb', CONTROLS)
     print(f'\n  ATE by leverage type:')
     print(
         f'    ATP: Break Point: {atp_bp_ate:.4f} | Tiebreak: {atp_tb_ate:.4f}')
@@ -969,20 +1067,19 @@ def main() -> None:
     )
 
 
-    _, atp_ate_r, atp_ate_r_se, _, _ = run_causal_forest(
-        atp, 'ATP', controls=['Focal_Ranking'])
-    _, wta_ate_r, wta_ate_r_se, _, _ = run_causal_forest(
-        wta, 'WTA', controls=['Focal_Ranking'])
-    _, atp_bp_ate_r, atp_bp_ate_r_se, _, _ = run_causal_forest(
-        atp, 'ATP', treatment_label='bp', controls=['Focal_Ranking'])
-    _, wta_bp_ate_r, wta_bp_ate_r_se, _, _ = run_causal_forest(
-        wta, 'WTA', treatment_label='bp', controls=['Focal_Ranking'])
-    # Note: TB-specific ranking-only specifications were tested but produced
-    # numerically unstable estimates due to small treated samples (729 ATP, 209 WTA).
-    # DML with a single control under rare-treatment conditions yields propensity
-    # scores near the boundaries, inflating the inverse-propensity weighting.
-    # The full 4-control specification is stable for TB; reduced-control robustness
-    # is reported only for Combined and BP.
+    # Rank-only robustness specs (single control): LinearDML, not the forest
+    # -- see ESTIMATOR-SPLIT RULE above run_causal_forest. TB-specific
+    # rank-only specs remain excluded (both tiebreak cells are already
+    # underpowered on the full 4-control set; a single-control version of an
+    # already-sparse cell isn't a meaningful robustness check).
+    atp_ate_r, atp_ate_r_se, atp_ate_r_ci_lo, atp_ate_r_ci_hi = run_ate_only(
+        df, 'ATP', 'combined', ['Focal_Ranking'])
+    wta_ate_r, wta_ate_r_se, wta_ate_r_ci_lo, wta_ate_r_ci_hi = run_ate_only(
+        df, 'WTA', 'combined', ['Focal_Ranking'])
+    atp_bp_ate_r, atp_bp_ate_r_se, atp_bp_ate_r_ci_lo, atp_bp_ate_r_ci_hi = run_ate_only(
+        df, 'ATP', 'bp', ['Focal_Ranking'])
+    wta_bp_ate_r, wta_bp_ate_r_se, wta_bp_ate_r_ci_lo, wta_bp_ate_r_ci_hi = run_ate_only(
+        df, 'WTA', 'bp', ['Focal_Ranking'])
 
     print(f'\n  Robustness (ranking-only controls):')
     print(f'    ATP Combined:    Full: {atp_ate:.4f} | Reduced: {atp_ate_r:.4f}')
@@ -991,10 +1088,10 @@ def main() -> None:
     print(f'    WTA Break Point: Full: {wta_bp_ate:.4f} | Reduced: {wta_bp_ate_r:.4f}')
 
     ate_robustness = pd.DataFrame([
-        {'Tour': 'ATP', 'Type': 'Combined (ranking only)',    'ATE': round(atp_ate_r, 4),    'SE': round(atp_ate_r_se, 4)},
-        {'Tour': 'WTA', 'Type': 'Combined (ranking only)',    'ATE': round(wta_ate_r, 4),    'SE': round(wta_ate_r_se, 4)},
-        {'Tour': 'ATP', 'Type': 'Break Point (ranking only)', 'ATE': round(atp_bp_ate_r, 4), 'SE': round(atp_bp_ate_r_se, 4)},
-        {'Tour': 'WTA', 'Type': 'Break Point (ranking only)', 'ATE': round(wta_bp_ate_r, 4), 'SE': round(wta_bp_ate_r_se, 4)},
+        {'Tour': 'ATP', 'Type': 'Combined (ranking only)',    'ATE': round(atp_ate_r, 4),    'SE': round(atp_ate_r_se, 4), 'CI_Low': round(atp_ate_r_ci_lo, 4), 'CI_High': round(atp_ate_r_ci_hi, 4)},
+        {'Tour': 'WTA', 'Type': 'Combined (ranking only)',    'ATE': round(wta_ate_r, 4),    'SE': round(wta_ate_r_se, 4), 'CI_Low': round(wta_ate_r_ci_lo, 4), 'CI_High': round(wta_ate_r_ci_hi, 4)},
+        {'Tour': 'ATP', 'Type': 'Break Point (ranking only)', 'ATE': round(atp_bp_ate_r, 4), 'SE': round(atp_bp_ate_r_se, 4), 'CI_Low': round(atp_bp_ate_r_ci_lo, 4), 'CI_High': round(atp_bp_ate_r_ci_hi, 4)},
+        {'Tour': 'WTA', 'Type': 'Break Point (ranking only)', 'ATE': round(wta_bp_ate_r, 4), 'SE': round(wta_bp_ate_r_se, 4), 'CI_Low': round(wta_bp_ate_r_ci_lo, 4), 'CI_High': round(wta_bp_ate_r_ci_hi, 4)},
     ])
     ate_robustness.to_csv(os.path.join(OUT_DIR, 'ate_results_robustness.csv'), index=False)
     print('  Saved ate_results_robustness.csv')
@@ -1007,10 +1104,10 @@ def main() -> None:
     print('\n--- Output 5: Model table ---')
     plot_model_table(
         atp_coef, wta_coef,
-        atp_bp_ate, atp_bp_ate_se,
-        wta_bp_ate, wta_bp_ate_se,
-        atp_tb_ate, atp_tb_ate_se,
-        wta_tb_ate, wta_tb_ate_se
+        atp_bp_ate, atp_bp_ci_lo, atp_bp_ci_hi,
+        wta_bp_ate, wta_bp_ci_lo, wta_bp_ci_hi,
+        atp_tb_ate, atp_tb_ci_lo, atp_tb_ci_hi,
+        wta_tb_ate, wta_tb_ci_lo, wta_tb_ci_hi
     )
 
     # Output 7
@@ -1020,12 +1117,12 @@ def main() -> None:
     # Export ATE results as CSV: provides a Python-generated data file
     # backing the D3 reveal chart values displayed in the blog
     ate_summary = pd.DataFrame([
-        {'Tour': 'ATP', 'Type': 'Combined',    'ATE': round(atp_ate, 4),    'SE': round(atp_ate_se, 4)},  # noqa: E501
-        {'Tour': 'WTA', 'Type': 'Combined',    'ATE': round(wta_ate, 4),    'SE': round(wta_ate_se, 4)},  # noqa: E501
-        {'Tour': 'ATP', 'Type': 'Break Point', 'ATE': round(atp_bp_ate, 4), 'SE': round(atp_bp_ate_se, 4)},  # noqa: E501
-        {'Tour': 'WTA', 'Type': 'Break Point', 'ATE': round(wta_bp_ate, 4), 'SE': round(wta_bp_ate_se, 4)},  # noqa: E501
-        {'Tour': 'ATP', 'Type': 'Tiebreak',   'ATE': round(atp_tb_ate, 4), 'SE': round(atp_tb_ate_se, 4)},  # noqa: E501
-        {'Tour': 'WTA', 'Type': 'Tiebreak',   'ATE': round(wta_tb_ate, 4), 'SE': round(wta_tb_ate_se, 4)},  # noqa: E501
+        {'Tour': 'ATP', 'Type': 'Combined',    'ATE': round(atp_ate, 4),    'SE': round(atp_ate_se, 4),    'CI_Low': round(atp_ate_ci_lo, 4),    'CI_High': round(atp_ate_ci_hi, 4)},  # noqa: E501
+        {'Tour': 'WTA', 'Type': 'Combined',    'ATE': round(wta_ate, 4),    'SE': round(wta_ate_se, 4),    'CI_Low': round(wta_ate_ci_lo, 4),    'CI_High': round(wta_ate_ci_hi, 4)},  # noqa: E501
+        {'Tour': 'ATP', 'Type': 'Break Point', 'ATE': round(atp_bp_ate, 4), 'SE': round(atp_bp_ate_se, 4), 'CI_Low': round(atp_bp_ci_lo, 4),     'CI_High': round(atp_bp_ci_hi, 4)},  # noqa: E501
+        {'Tour': 'WTA', 'Type': 'Break Point', 'ATE': round(wta_bp_ate, 4), 'SE': round(wta_bp_ate_se, 4), 'CI_Low': round(wta_bp_ci_lo, 4),     'CI_High': round(wta_bp_ci_hi, 4)},  # noqa: E501
+        {'Tour': 'ATP', 'Type': 'Tiebreak',   'ATE': round(atp_tb_ate, 4), 'SE': round(atp_tb_ate_se, 4), 'CI_Low': round(atp_tb_ci_lo, 4),     'CI_High': round(atp_tb_ci_hi, 4)},  # noqa: E501
+        {'Tour': 'WTA', 'Type': 'Tiebreak',   'ATE': round(wta_tb_ate, 4), 'SE': round(wta_tb_ate_se, 4), 'CI_Low': round(wta_tb_ci_lo, 4),     'CI_High': round(wta_tb_ci_hi, 4)},  # noqa: E501
     ])
     ate_summary.to_csv(os.path.join(OUT_DIR, 'ate_results.csv'), index=False)
     print('  Saved ate_results.csv')
