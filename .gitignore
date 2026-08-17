@@ -16,3 +16,12 @@ blog_files/
 # Makefile build stamps
 .download.stamp
 .clean.stamp
+
+# Agent tooling / session-local, never intended for the public repo
+.claude/
+
+# Inference diagnostics: evidence trail from the SE bootstrap investigation
+# (outlier rates, LinearDML-vs-forest comparisons, per-spec replicate CSVs).
+# Kept locally for writing the methodology doc; not official pipeline output
+# and expensive to regenerate (~67 min), so gitignored rather than deleted.
+diagnostics/
