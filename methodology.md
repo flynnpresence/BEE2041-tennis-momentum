@@ -137,14 +137,17 @@ own evidence, not a footnote:
 
 ### 7a. Robustness — The Strategic-Momentum Objection and the Leverage-Scaling Test
 
-> **STATUS: PROVISIONAL DRAFT.** This section rests on four open dependencies
-> (proxy result pending, Morris measure not yet built, treatment-definition fork
-> unresolved, discouragement-in-tiebreaks unverified against the source model)
-> plus one resolved-but-flagged item (the Page & Coates citation is now sourced
-> and correctly scoped, with a primary-source spot-check still owed before
-> journal submission) — all listed at §7a.7. It is a specification of a test not
-> yet run, not a report of a result. Do not read any sentence below as claiming
-> the effect is flat
+> **STATUS: PROVISIONAL DRAFT.** This section rests on three open dependencies
+> (proxy result pending, Morris measure not yet built, discouragement-in-tiebreaks
+> unverified against the source model) plus one design item to action before the
+> proxy runs (the leverage measure needs broadening beyond within-game score state
+> — spread check found that axis alone gives only 4 buckets for the treated
+> population) plus one resolved-but-flagged item (the Page & Coates citation is now
+> sourced and correctly scoped, with a primary-source spot-check still owed before
+> journal submission) — all listed at §7a.7. The treatment-definition fork is
+> resolved (option 1 primary, option 2 as positive control — see §7a.3). This is a
+> specification of a test not yet run, not a report of a result. Do not read any
+> sentence below as claiming the effect is flat
 > across leverage — that is the empirical question this section exists to
 > answer.
 
@@ -206,23 +209,51 @@ read as a function of it, either by reading the causal-forest CATE against the l
 axis or by re-estimating the ATE within leverage strata. No new identification
 machinery is introduced; the design of §4 is reused with one added covariate.
 
-**Design fork on the treatment definition (must be settled before running).** The
-headline treatment (won high-leverage point) is, by construction, concentrated at the
-upper end of the leverage range, which gives limited variation to scale *across*. Two
-options follow:
+**Design fork on the treatment definition — resolved.** The headline treatment (won
+high-leverage point) is, by construction, concentrated at the upper end of the leverage
+range. Two options were considered:
 
 1. Read the existing won-HLP effect across the leverage it does span (narrower range,
    no change to the treatment, directly interpretable against the headline).
 2. Broaden the treatment to *winning any point*, estimated across the full leverage
-   gradient. This matches Gauriot and Page's own design (their treatment is winning a
-   point in general) and gives the full 0–0-to-deuce range their slope is defined on,
-   at the cost of estimating a broader effect than the paper's headline.
+   gradient, matching Gauriot and Page's own design.
 
-Option 2 is the stronger test of the objection because it meets Gauriot and Page on
-their own terrain and where leverage varies most; option 1 is the more conservative
-extension of the existing specification. The section should probably report both, with
-option 2 as the primary discriminating test — but this is a design decision to confirm,
-not a settled choice.
+**Option 1 is primary; option 2 is a positive control, not a co-primary test.** Option 1
+is the direct defence — it tests heterogeneity in the exact estimand the paper's spine
+rests on. Making the redefined, broader treatment of option 2 the primary discriminating
+test would invite the objection that the test answers "does momentum-in-general scale
+with leverage," not "does *our* break-point effect scale with leverage" — a different
+question that happens to sit on Gauriot and Page's own terrain. Option 2's proper role is
+validating the leverage measure itself: since Gauriot and Page's rising gradient is an
+already-established finding on the *winning-any-point* population, replicating it there
+confirms the instrument can detect a real gradient when one exists. That licenses trusting
+a null from the same instrument on option 1. The asymmetry that follows matters and should
+stay visible in the write-up: **a successful option 2 (replicating the known rising
+gradient) validates the measure and supports treating option 1's result at face value; a
+failed option 2 (flat where a gradient is known to exist) is inconclusive about option 1,
+not evidence against it** — it would mean the instrument lacks power or specificity, not
+that Gauriot and Page's finding fails to replicate. Report both, primary result from
+option 1, option 2 as the validity check that licenses trusting it.
+
+**Leverage-spread pre-check (done, on existing data, no new fitting).** Checked whether
+the won-break-point treated population (option 1's treatment) spans enough leverage
+internally to make the test well-posed. Three axes, using
+`data/processed/{atp,wta}_cleaned_points.csv` restricted to `High_Leverage_BP==1 &
+Point_Won==1` (1,497 ATP / 1,001 WTA):
+
+| axis | spread |
+|---|---|
+| Within-game score state (`Pts`) | Only 4 discrete values by construction (0-40/15-40/30-40/40-AD) — every treated point *is* a break point, so this axis alone is genuinely coarse (non-degenerate: 10-36% each, but 4 levels, not a gradient). |
+| Game-score margin in the set (`\|Gm1-Gm2\|`) | Good spread: 0-5, median 1, IQR [0, 2]. Break points occur across both tight and lopsided set states. |
+| Set number | Spans all sets with reasonable weight (ATP 0-4, WTA 0-2), not concentrated in one set. |
+
+**Conclusion: option 1 is well-posed, but not on the within-game-closeness proxy alone as
+§7a.4 currently describes it.** That axis alone gives only 4 buckets for the treated
+population specifically (by construction of what a break point is). Game-margin and
+set-number carry real, currently-unused spread. §7a.4's proxy needs broadening to
+incorporate match/set context, not just point-level score state, before it's fit for
+option 1 — a narrow proxy would make option 1 look under-powered when the actual
+constraint is the leverage *definition*, not the data.
 
 The test runs on the **full regular-play point population**, where power is abundant
 (tens of thousands of points), rather than on the sparse tiebreak cells. This is
@@ -305,9 +336,19 @@ assumed.
 2. **Morris measure to replace the proxy before ship.** The proxy is reconnaissance
    only; the win-probability-swing measure is required for the methodology document and
    the paper.
-3. **Treatment-definition fork unsettled** (§7a.3): won-HLP-across-its-range vs.
-   won-any-point-across-full-leverage. Confirm before running; the latter is the
-   stronger test.
+3. **Resolved: treatment-definition fork.** Option 1 (won-HLP-across-its-range) is
+   primary; option 2 (won-any-point-across-full-leverage) is a positive control on the
+   leverage measure, not a co-primary test — see §7a.3 for the reasoning and the
+   asymmetry (successful option 2 validates the measure; a failed option 2 is
+   inconclusive about option 1, not damning). Leverage-spread pre-check confirmed
+   option 1 is well-posed, conditional on item 3a below.
+3a. **New: the leverage proxy (§7a.4) needs broadening before it's fit for option 1.**
+   The spread check found the within-game-closeness axis alone gives only 4 discrete
+   buckets for the won-break-point population (break points are, by construction, an
+   already-narrow slice of within-game states). Game-score margin and set number carry
+   real, currently unused spread. §7a.4's proxy description needs to incorporate
+   match/set context, not just point-level score state, before the reconnaissance test
+   runs on option 1.
 4. **UNVERIFIED mechanistic claim:** the assertion that discouragement *persists in
    tiebreaks* (and that the tiebreak null therefore also rebuts discouragement) has
    **not** been checked against Gauriot and Page's actual continuation-value model. It is
@@ -349,13 +390,18 @@ register — that boundary is deliberate, see §6 — this document is not.)
 
 *Status: §1–6 and §8–9 are skeleton, ready to fill from material already
 committed. §7a (strategic-momentum objection) is a full provisional draft,
-not yet actionable — four open items block it, listed at §7a.7: the
-reconnaissance proxy hasn't been run, the Morris/Klaassen-Magnus importance
-measure isn't built, the treatment-definition fork (§7a.3) is unresolved, and
-the discouragement-in-tiebreaks claim is unverified against Gauriot & Page's
-actual model. The Page & Coates (2017) citation in §7a.6 is now sourced and
-correctly scoped (documented male-specific winner effect; explicitly not a
-refutation of their mechanism) — it and the Gauriot & Page figures are
-verified against project notebook extracts, with a primary-source spot-check
-still owed before journal submission, not before this draft. Nothing in §7a
-should be treated as analysis-ready until the four open items clear.*
+not yet actionable. The treatment-definition fork is resolved (option 1
+primary, option 2 as positive control, asymmetry stated — §7a.3), confirmed
+well-posed by a leverage-spread pre-check on existing data. What remains,
+listed at §7a.7: the leverage proxy needs broadening beyond within-game score
+state before it runs (item 3a — the spread check found that axis alone gives
+only 4 buckets for the treated population); the reconnaissance proxy hasn't
+been built or run; the Morris/Klaassen-Magnus importance measure isn't built;
+and the discouragement-in-tiebreaks claim is unverified against Gauriot &
+Page's actual model, with no confirmed path to primary-source access yet.
+The Page & Coates (2017) citation in §7a.6 is sourced and correctly scoped
+(documented male-specific winner effect; explicitly not a refutation of their
+mechanism) — it and the Gauriot & Page figures are verified against project
+notebook extracts, with a primary-source spot-check owed before journal
+submission, not before this draft. Nothing in §7a should be treated as
+analysis-ready until the remaining open items clear.*
