@@ -129,6 +129,7 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
         'High_Leverage',
         'High_Leverage_BP',
         'High_Leverage_TB',
+        'High_Leverage_SGP',
         'Streak_k4',
         'Rolling_Win_Pct',
         'CUSUM',

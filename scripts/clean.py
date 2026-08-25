@@ -267,6 +267,21 @@ def process_tour(
     merged['High_Leverage_BP'] = is_bp.astype(int)
     merged['High_Leverage_TB'] = is_tb_point.astype(int)
 
+    # Server game points: the mirror image of a break point. Server one point
+    # from holding (or already at advantage) while the receiver has not yet
+    # reached the game-winning score. Mirrors is_bp's set exactly, swapping
+    # which side of the server-receiver score string is at the winning
+    # threshold: {40-0, 40-15, 40-30, AD-40} vs break point's {0-40, 15-40,
+    # 30-40, 40-AD}. Deuce (40-40) and tiebreak points (numeric Pts strings)
+    # are excluded by construction -- neither matches this string set. Not
+    # part of the High_Leverage treatment; used only as the §7a.1 matched-
+    # comparison group (high leverage, no serve transfer on the winning side).
+    is_sgp = merged['Pts'].astype('string').isin(['40-0', '40-15', '40-30', 'AD-40'])
+    assert not (is_bp & is_sgp).any(), (
+        f"Break point and server-game-point flags overlap for {tour_name}"
+    )
+    merged['High_Leverage_SGP'] = is_sgp.astype(int)
+
     # ── 2. Apply Random Positional Mask ───────────────────────────────────────
     # Each match has two players. We randomly designate one as the "focal"
     # player per match and track outcomes from their perspective. Without

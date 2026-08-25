@@ -82,6 +82,12 @@ SPECS = {
     'wta_bp':       ('WTA', 'bp',       CONTROLS),
     'atp_tb':       ('ATP', 'tb',       CONTROLS),
     'wta_tb':       ('WTA', 'tb',       CONTROLS),
+    # §7a.1 matched-comparison group: high-leverage points where the winner
+    # does not thereby serve the next point (see clean.py's High_Leverage_SGP).
+    # Well-powered (3,645 ATP / 1,464 WTA treated, both larger than atp_bp /
+    # wta_bp), so it stays on the forest like the BP specs.
+    'atp_sgp':      ('ATP', 'sgp',      CONTROLS),
+    'wta_sgp':      ('WTA', 'sgp',      CONTROLS),
     # ranking-only robustness specs (Combined + BP only; TB is unstable at 1 control,
     # per model.py's own note -- omitted deliberately)
     'atp_combined_rank': ('ATP', 'combined', ['Focal_Ranking']),
@@ -135,6 +141,9 @@ def build_spec(df_tour: pd.DataFrame, treatment_label: str) -> pd.DataFrame:
     elif treatment_label == 'tb':
         extra.append('High_Leverage_TB')
         flag = 'High_Leverage_TB'
+    elif treatment_label == 'sgp':
+        extra.append('High_Leverage_SGP')
+        flag = 'High_Leverage_SGP'
     else:
         flag = 'High_Leverage'
 
