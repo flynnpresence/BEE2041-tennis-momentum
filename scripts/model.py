@@ -313,10 +313,14 @@ def plot_tboe(atp: pd.DataFrame, wta: pd.DataFrame) -> None:
 # ── VIF Check ────────────────────────────────────────────────────────────────
 def check_vif(df: pd.DataFrame, tour_name: str) -> None:
     """Computes VIF on logistic regression predictors to verify no multicollinearity."""
-    keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id']
+    keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id',
+                       'High_Leverage_BP', 'High_Leverage_TB', 'High_Leverage_SGP']
     data = df[keep].dropna().copy()
     data['HL_Win'] = ((data['High_Leverage'] == 1) & (
         data['Point_Won'] == 1)).astype(float)
+    # Ordinary-points-only control -- see run_causal_forest's comment.
+    won_sgp = (data['High_Leverage_SGP'] == 1) & (data['Point_Won'] == 1)
+    data = data[(data['HL_Win'] == 1) | ~won_sgp].copy()
 
     predictors = CONTROLS + ['HL_Win']
     X = data[predictors].astype(float).values
@@ -332,13 +336,17 @@ def check_vif(df: pd.DataFrame, tour_name: str) -> None:
 # ── Logistic Regression ───────────────────────────────────────────────────────
 def run_logistic(df: pd.DataFrame, tour_name: str) -> pd.DataFrame:
     print(f'\n  Logistic regression: {tour_name}')
-    keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id']
+    keep = CONTROLS + [TREATMENT, OUTCOME, 'Point_Won', 'match_id',
+                       'High_Leverage_BP', 'High_Leverage_TB', 'High_Leverage_SGP']
     nan_counts = df[keep].isna().sum()
     if nan_counts.sum() > 0:
         print(f"    Warning: Dropping rows with NaNs:\n{nan_counts[nan_counts > 0]}")
     data = df[keep].dropna().copy()
     data['HL_Win'] = ((data['High_Leverage'] == 1) & (
         data['Point_Won'] == 1)).astype(float)
+    # Ordinary-points-only control -- see run_causal_forest's comment.
+    won_sgp = (data['High_Leverage_SGP'] == 1) & (data['Point_Won'] == 1)
+    data = data[(data['HL_Win'] == 1) | ~won_sgp].copy()
 
     # Formula API: equivalent to sm.Logit but uses R-style patsy formula
     formula = f"{OUTCOME} ~ " + " + ".join(CONTROLS) + " + HL_Win"
@@ -433,11 +441,7 @@ def run_causal_forest(df: pd.DataFrame, df_full: pd.DataFrame, tour_name: str,
         controls = CONTROLS
     print(f'\n  Causal Forest: {tour_name} [{treatment_label}]')
 
-    extra_cols = ['Point_Won']
-    if treatment_label == 'bp':
-        extra_cols.append('High_Leverage_BP')
-    elif treatment_label == 'tb':
-        extra_cols.append('High_Leverage_TB')
+    extra_cols = ['Point_Won', 'High_Leverage_BP', 'High_Leverage_TB', 'High_Leverage_SGP']
 
     keep = controls + [TREATMENT, OUTCOME, 'match_id'] + extra_cols
     nan_counts = df[keep].isna().sum()
@@ -454,6 +458,24 @@ def run_causal_forest(df: pd.DataFrame, df_full: pd.DataFrame, tour_name: str,
     else:
         data['Treatment'] = ((data['High_Leverage'] == 1) & (
             data['Point_Won'] == 1)).astype(float)
+
+    # Control pool is ORDINARY points only, not "everything else" -- see
+    # bootstrap_ate.py's build_spec docstring for the full rationale and the
+    # quantified contamination this closes (0.2-1.3pp per spec/tour, always
+    # inflating the published ATE's magnitude). Must match build_spec exactly:
+    # this function's own direct fit is checked against bootstrap_ate_se's
+    # result below via an equality assert, so the two data-construction paths
+    # cannot diverge.
+    won_bp  = (data['High_Leverage_BP']  == 1) & (data['Point_Won'] == 1)
+    won_tb  = (data['High_Leverage_TB']  == 1) & (data['Point_Won'] == 1)
+    won_sgp = (data['High_Leverage_SGP'] == 1) & (data['Point_Won'] == 1)
+    if treatment_label == 'bp':
+        other_won = won_tb | won_sgp
+    elif treatment_label == 'tb':
+        other_won = won_bp | won_sgp
+    else:
+        other_won = won_sgp
+    data = data[(data['Treatment'] == 1) | ~other_won].copy()
 
     # Stratified subsampling: preserve treatment balance
     if len(data) > 15000:
@@ -882,11 +904,12 @@ def plot_feature_importance(atp_imp: pd.DataFrame,
 def plot_reveal_chart(
     atp_ate, wta_ate,
     atp_bp_ate, wta_bp_ate,
-    atp_tb_ate, wta_tb_ate
+    atp_tb_ate, wta_tb_ate,
+    atp_sgp_ate, wta_sgp_ate
 ) -> None:
     """
     Interactive reveal chart, Plotly replacement for D3 reveal chart.
-    Toggles between combined ATE view and split BP/TB view.
+    Toggles between combined ATE view and split BP/TB/SGP view.
     """
     import plotly.graph_objects as go
 
@@ -904,8 +927,10 @@ def plot_reveal_chart(
 
     # Split view data
     split_x = ['ATP Break Point', 'WTA Break Point',
-               'ATP Tiebreak', 'WTA Tiebreak']
-    split_y = [atp_bp_ate, wta_bp_ate, atp_tb_ate, wta_tb_ate]
+               'ATP Tiebreak', 'WTA Tiebreak',
+               'ATP Server Game Point', 'WTA Server Game Point']
+    split_y = [atp_bp_ate, wta_bp_ate, atp_tb_ate, wta_tb_ate,
+               atp_sgp_ate, wta_sgp_ate]
     split_colors = [bar_color(v) for v in split_y]
 
     fig = go.Figure()
@@ -960,7 +985,7 @@ def plot_reveal_chart(
             showgrid=True,
             gridcolor='#eeeeee',
             zeroline=False,
-            range=[-0.09, 0.20],
+            range=[-0.17, 0.20],
             autorange=False
         ),
         xaxis=dict(showgrid=False, zeroline=False),
@@ -1060,10 +1085,18 @@ def main() -> None:
         f'    WTA: Break Point: {wta_bp_ate:.4f} | Tiebreak: {wta_tb_ate:.4f}')
 
     print('\n--- Reveal chart ---')
+    # SGP is computed separately (scripts/bootstrap_ate.py --spec atp_sgp,wta_sgp),
+    # not part of this pipeline's own spec set -- read its published values so
+    # the reveal chart doesn't silently omit it (see methodology.md Β§7a.3).
+    sgp_path = os.path.join(OUT_DIR, 'ate_results_sgp.csv')
+    sgp_df = pd.read_csv(sgp_path)
+    atp_sgp_ate = float(sgp_df.loc[sgp_df['Tour'] == 'ATP', 'ATE'].iloc[0])
+    wta_sgp_ate = float(sgp_df.loc[sgp_df['Tour'] == 'WTA', 'ATE'].iloc[0])
     plot_reveal_chart(
         atp_ate, wta_ate,
         atp_bp_ate, wta_bp_ate,
-        atp_tb_ate, wta_tb_ate
+        atp_tb_ate, wta_tb_ate,
+        atp_sgp_ate, wta_sgp_ate
     )
 
 

@@ -88,6 +88,76 @@ is now empirically verified, not asserted — state it as settled:
   ladder as the clustered bootstrap CI, which is the number to report as the
   interval.
 
+### 4a. Two further bugs, found in a later audit pass, both fixed and refit
+
+Two construction errors were found auditing the pipeline after §7a's SGP work
+shipped. Neither threatens the qualitative findings — both were re-verified by
+a full refit before being reported here, not assumed safe.
+
+- **CUSUM's neutral-fill bug.** `features.py`'s CUSUM computed
+  `series.shift(1).fillna(0)` *before* `.expanding().mean()`, so a fabricated
+  "loss" at the start of every match was permanently baked into the running
+  mean for the rest of that match — unlike `Rolling_Win_Pct`, whose neutral
+  fill is applied *after* its rolling calculation. Confirmed on real data: for
+  ATP matches where the focal player's win rate was 48–52% (should show
+  CUSUM ≈ 0 if the measure means what it's documented to mean), mean CUSUM was
+  +1.94 pre-fix. Fix: move the neutral fill to after the subtraction
+  (`(shifted - expanding_mean).fillna(0)`), so the fabricated value never
+  enters the running mean's denominator — only the single first-point
+  deviation, genuinely undefined with no prior data, resolves to 0. Verified
+  post-fix: the same near-50% check now gives −0.12 (a ~93% reduction, and
+  correctly near zero rather than strongly positive); a constant-outcome
+  sequence (all wins or all losses) now produces flat zero CUSUM throughout,
+  as it should for a perfectly consistent performer with no deviation from
+  their own average; and a no-look-ahead check (flip only a sequence's last
+  point, confirm every earlier CUSUM value is byte-identical) passed, so the
+  fix does not reintroduce leakage while closing the bias.
+- **Control-pool contamination.** Every spec's control pool was defined as
+  `Treatment==0`, i.e. "everything else" — which silently included other
+  high-leverage types' *won* points as if they were neutral baseline. Since
+  each type has its own large, non-zero effect, this wasn't neutral: e.g. the
+  BP spec's control pool contained ~10% won server-game points (effect ≈
+  −0.14), pulling BP's baseline down and inflating BP's apparent effect.
+  Quantified directly on raw means (ATP): the "clean" ordinary-points-only
+  baseline is 0.5100; BP's contaminated control sat at 0.4975 (−1.25pp),
+  Combined's at 0.4971 (−1.28pp), TB's at 0.5029 (−0.71pp, also inflating,
+  i.e. pulling TB away from null), SGP's at 0.5158 (+0.58pp, inflating SGP's
+  magnitude negative). Fix: both `bootstrap_ate.py`'s `build_spec()` and
+  `model.py`'s equivalent construction (`run_causal_forest`, `run_logistic`,
+  `check_vif` — these duplicate `build_spec`'s logic and must be kept in sync,
+  per the module's own docstring) now exclude every *other* treatment's
+  won-points from a spec's control, leaving only points untouched by any
+  high-leverage flag.
+- **Both fixes were folded into one refit**, not applied and reported
+  separately, since the control-pool fix alone would have forced a rerun
+  regardless of CUSUM's status. Full before/after table in §5's source CSVs
+  (`outputs/ate_results.csv`, `outputs/ate_results_sgp.csv`,
+  `outputs/ate_results_robustness.csv`); all headline numbers throughout this
+  document, the blog, and the README reflect the post-fix pipeline.
+- **BP's move, decomposed** (isolated by refitting each fix in isolation,
+  holding the other at its old/buggy value — not inferred from the combined
+  move): ATP's ~−0.0158 move is control-pool-dominated (−0.0110 from the pool
+  fix alone vs. −0.0019 from CUSUM alone, ~85%/12% of the net, small positive
+  synergy). WTA's ~−0.0217 move has **both fixes contributing comparably**
+  (−0.0154 pool, −0.0130 CUSUM), with a mild sub-additive interaction (the
+  isolated effects sum to more than the net move) — not two large offsetting
+  moves cancelling to a small net, but not a single dominant cause either.
+  This asymmetry between tours is itself worth remembering: "the contamination
+  fix moved BP" is the accurate one-line summary for ATP; for WTA it's "both
+  fixes moved it, roughly equally."
+- **What was checked before trusting the refit, not assumed:** both nulls
+  (TB, both tours) retain comparable CI width post-fix (ATP: 0.076→0.0756;
+  WTA: 0.1428→0.1649, ~15% wider but still comfortably spanning zero) and
+  both still clearly span zero — the null's character is unchanged, not just
+  its point estimate. SGP's sign held on both tours under the identical fixed
+  pipeline (ATP −0.1394, WTA −0.0725 — WTA moved slightly *more* negative,
+  ATP barely moved). Feature importance was the one genuinely open question —
+  whether CUSUM's dominance was partly a points-elapsed artifact riding on the
+  bias — and it was checked with no prior on the answer: CUSUM still dominates
+  post-fix (54.4% ATP / 57.5% WTA, vs. ~55%/59% pre-fix), so the "accumulated
+  drift" reading of feature importance survives on the numbers as they stand,
+  not because it was assumed to.
+
 ## 5. Results
 
 - Headline table: all 10 specs, ATE + match-clustered bootstrap 95% CI
@@ -149,7 +219,13 @@ own evidence, not a footnote:
 > unbuilt (deferred — see §7a.7 item 1, the crude leverage match was checked and
 > found close); the assumption that either rival mechanism *persists in tiebreaks*
 > is inference, not a tested claim in either source paper (§7a.7 items 2–3); the WTA
-> tiebreak cell remains power-limited (§7a.7 item 4).
+> tiebreak cell remains power-limited (§7a.7 item 4). All headline figures below
+> reflect a control-pool and CUSUM-construction fix found in a later audit pass and
+> folded into a full refit — see §4a for what changed, by how much, and what was
+> checked before trusting it. A cv=10 cross-fitting sensitivity check predated
+> that refit and has been cut rather than left reading as current — see §7a.7
+> item 7; fold-count robustness on the current pipeline is unrun, not
+> established.
 
 #### 7a.1 Three rivals, not one
 
@@ -287,11 +363,12 @@ the server-game-point effect should run the other way.
 
 **The result.** It does. Match-clustered bootstrap ATE (CausalForestDML, same
 estimator and controls as the BP/combined specs — well-powered, stays on the forest
-per the estimator-split rule in §4), B=199: winning a break point raises next-point
-win probability by +0.1470 in the ATP (95% CI [0.1198, 0.1748]) and +0.0863 in the
-WTA ([0.0434, 0.1079]). Winning a server game point lowers it: −0.1396 in the ATP
-([−0.1583, −0.1180]) and −0.0688 in the WTA ([−0.0938, −0.0341]). All four intervals
-sit entirely on one side of zero, and the sign flips with the serve.
+per the estimator-split rule in §4), B=199, on the clean-control-pool, fixed-CUSUM
+pipeline (§4a): winning a break point raises next-point win probability by +0.1312
+in the ATP (95% CI [0.1069, 0.1588]) and +0.0646 in the WTA ([0.0273, 0.0948]).
+Winning a server game point lowers it: −0.1394 in the ATP ([−0.1502, −0.1111]) and
+−0.0725 in the WTA ([−0.0932, −0.0276]). All four intervals sit entirely on one
+side of zero, and the sign flips with the serve.
 
 **Why the reversal is robust.** The reversal is robust in a way no single effect
 estimate is. The two treatments share one defining feature: in each, it is the focal
@@ -310,37 +387,25 @@ importance match, deferred here, would confirm the leverage alignment directly
 rather than resting on the mirror construction alone.
 
 **No magnitude claim is made.** The BP and SGP CIs overlap substantially in
-magnitude on both tours — ATP BP [0.1198, 0.1748] against SGP's magnitude
-[0.1180, 0.1583], WTA BP [0.0434, 0.1079] against SGP's magnitude
-[0.0341, 0.0938] — so
+magnitude on both tours — ATP BP [0.1069, 0.1588] against SGP's magnitude
+[0.1111, 0.1502] (now nearly fully nested), WTA BP [0.0273, 0.0948] against
+SGP's magnitude [0.0276, 0.0932] (also nearly fully nested) — so
 the effects are not statistically distinguishable in size, and nothing here should
 be read as "mirror-image" or "equal and opposite" in magnitude, on either tour. That
 would be a stronger claim than the data support and isn't needed: the sign flip
 alone, with all four CIs clear of zero, is what does the discriminating work, and it
 stands on its own regardless of how the magnitudes compare.
 
-**The sign is stable under a cross-fitting sensitivity check (cv=10, not just
-cv=2).** This is a different, more specific claim than "the estimates are stable" —
-the question is not whether the point value moves within its own CI, but whether the
-sign the whole discriminating argument leans on survives a change to the DML
-cross-fitting fold count, the exact axis on which the *original* leverage-gradient
-design (retired, see status note above) turned out to be fragile for a different
-spec (wta_tb's forest ATE flipped sign across cv=2/3/5 — §4). Re-fit at cv=10 on
-match-clustered bootstrap (B=199, same estimator, same subsample cap, six
-well-powered specs including both SGP cells; the four sparse cells — tiebreak and
-rank-only — were deliberately left at cv=2 rather than pushed to cv=10, since more
-folds there means fewer rows per hold-out and manufactures exactly the finite-sample
-instability a cv sweep is supposed to test for, not a genuine robustness check):
-at cv=10, ATP SGP is −0.1410 [−0.1589, −0.1189] and WTA SGP is −0.0642
-[−0.0931, −0.0359] — distinct point estimates from the cv=2 published values
-above (−0.1396 and −0.0688 respectively), as expected from refitting at a
-different fold count, not a re-quote of them. Both still firmly negative,
-both CIs still clear of zero, both point estimates inside their cv=2
-interval. The sign-test result the argument in §7a.2/§7a.5 is built on is therefore
-robust to cross-fitting choice specifically, not merely stable in the weaker sense
-of "moved within its own CI" — the two are different claims, and this document
-makes the stronger, more specific one because it's now been checked. (Full six-spec
-comparison table in `diagnostics/inference_bootstrap/cv10_sweep_forest.csv`.)
+**Cross-fitting sensitivity (cv=10): retable, not run on the current pipeline.**
+An earlier cv=10 sweep (six well-powered specs, B=199) found the SGP sign held
+at a different DML fold count on the pre-§4a pipeline. That check no longer
+describes a pipeline that exists — it ran on the contaminated control pools and
+biased CUSUM this document's §4a fix replaced, so its numbers are not a valid
+claim about the current, published estimates. Rather than let a stale check
+read as a current one with a "the old numbers still happen to fall inside the
+new CIs, so it's probably fine" hedge, it is cut here. Cross-fitting-fold
+robustness on the current pipeline is an open item — see §7a.7 item 7 — not an
+established one; nothing above should be read as implying it.
 
 #### 7a.4 Test 2: The tiebreak null, corroborating belief-updating
 
@@ -430,8 +495,8 @@ overturns or subsumes their set-level physiological one — different level of
 analysis, different mechanism, no refutation implied.** [Citation verified against
 project notebook extract, not the primary source; see §7a.7 item 5.]
 
-The WTA arm of Test 1 shows the same opposite-signed pattern as ATP (WTA BP +0.0863
-vs WTA SGP -0.0688), which supports reading the WTA break-point effect as
+The WTA arm of Test 1 shows the same opposite-signed pattern as ATP (WTA BP +0.0646
+vs WTA SGP -0.0725), which supports reading the WTA break-point effect as
 sex-neutral structural momentum rather than a fragile artifact — consistent with,
 not proof of, serve-transition operating identically on both tours. This is flagged
 as a question the test bears on, **not** as a contribution claim: the WTA cells
@@ -494,6 +559,15 @@ assumed beyond what the point estimates show.
    Quantitative Economics, 13(1), 355–385, DOI 10.3982/QE1679. Higher provenance
    standard than items above; no primary-source spot-check owed for the citation
    itself, only for item 3's inference about tiebreak persistence.
+7. **Cross-fitting-fold (cv=10) robustness on the current pipeline: unrun,
+   not established.** An earlier cv=10 sweep (ATP SGP −0.1410, WTA SGP
+   −0.0642) ran on the pipeline before the §4a control-pool and CUSUM fixes
+   and has been cut from §7a.3/§7a.4 rather than left reading as a current
+   check with a "probably still fine" hedge — a documented-but-unverified
+   robustness claim is exactly what this project's discipline exists to
+   avoid. Retable if fold-count robustness needs demonstrating again (e.g.
+   before journal submission); not required for the sign-flip argument
+   itself, which does not depend on this check.
 
 ## 8. Limitations
 
@@ -526,10 +600,11 @@ break points being high-leverage by construction. Its replacement, the
 matched-comparison test (§7a.3: break points vs. server game points, the
 mirror-image score states), has been run to full precision and reproduces
 exactly on a fresh process: opposite-signed effects on both tours (ATP break
-point +0.1470 vs. server game point −0.1396; WTA +0.0863 vs. −0.0688), all four
-CIs clear of zero. The claim rests on the sign only, not the magnitude — the
-BP/SGP CIs overlap substantially in size on both tours (e.g. ATP [0.1198,0.1748]
-vs. [0.1180,0.1583] in magnitude), so there is no mirror-image or
+point +0.1312 vs. server game point −0.1394; WTA +0.0646 vs. −0.0725, on the
+clean-control-pool, fixed-CUSUM pipeline — see §4a), all four CIs clear of
+zero. The claim rests on the sign only, not the magnitude — the BP/SGP CIs
+overlap substantially in size on both tours (e.g. ATP [0.1069,0.1588]
+vs. [0.1111,0.1502] in magnitude), so there is no mirror-image or
 equal-and-opposite claim here, only that both signs are clean and opposite.
 That sign flip tracks a deterministic mechanism check — the point winner
 serves next 100.0000% of the time at break points and 0.0000% of the time at

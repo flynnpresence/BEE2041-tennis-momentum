@@ -133,16 +133,27 @@ LINEAR_SPECS = {
 def build_spec(df_tour: pd.DataFrame, treatment_label: str) -> pd.DataFrame:
     """Construct the Treatment column exactly as model.py does. Keeps match_id.
     Returns the FULL (un-subsampled) spec frame; subsampling happens in fit_ate so
-    that its randomness is captured by the bootstrap."""
-    extra = ['Point_Won']
+    that its randomness is captured by the bootstrap.
+
+    Control pool is ORDINARY points only, not "everything else." A naive
+    Treatment==0 control includes points won under a DIFFERENT high-leverage
+    type -- e.g. the 'bp' spec's control silently contained won server-game
+    points (a real, large, negative-effect population), and the 'combined'
+    spec's control contained the same. Quantified on real data: excluding
+    each other treatment's won-points from a spec's control pool shifts its
+    mean Next_Point_Won by 0.2-1.3pp depending on spec/tour, always in the
+    direction that inflated the published ATE's magnitude (BP/Combined were
+    too large; TB was too far from null; SGP was too negative). This function
+    now excludes all OTHER treatments' won-points from every spec's control,
+    leaving only truly untreated (by any high-leverage flag) points as
+    control -- each spec's own treated population is unaffected."""
+    flag_cols = ['High_Leverage_BP', 'High_Leverage_TB', 'High_Leverage_SGP']
+    extra = ['Point_Won'] + flag_cols
     if treatment_label == 'bp':
-        extra.append('High_Leverage_BP')
         flag = 'High_Leverage_BP'
     elif treatment_label == 'tb':
-        extra.append('High_Leverage_TB')
         flag = 'High_Leverage_TB'
     elif treatment_label == 'sgp':
-        extra.append('High_Leverage_SGP')
         flag = 'High_Leverage_SGP'
     else:
         flag = 'High_Leverage'
@@ -150,6 +161,20 @@ def build_spec(df_tour: pd.DataFrame, treatment_label: str) -> pd.DataFrame:
     keep = list(dict.fromkeys(CONTROLS + [OUTCOME, 'match_id'] + extra + [flag]))
     data = df_tour[keep].dropna().copy()
     data['Treatment'] = ((data[flag] == 1) & (data['Point_Won'] == 1)).astype(float)
+
+    won_bp  = (data['High_Leverage_BP']  == 1) & (data['Point_Won'] == 1)
+    won_tb  = (data['High_Leverage_TB']  == 1) & (data['Point_Won'] == 1)
+    won_sgp = (data['High_Leverage_SGP'] == 1) & (data['Point_Won'] == 1)
+    if treatment_label == 'bp':
+        other_won = won_tb | won_sgp
+    elif treatment_label == 'tb':
+        other_won = won_bp | won_sgp
+    elif treatment_label == 'sgp':
+        other_won = won_bp | won_tb
+    else:
+        # combined's own treatment is (won_bp | won_tb); only SGP is "other"
+        other_won = won_sgp
+    data = data[(data['Treatment'] == 1) | ~other_won].copy()
     return data
 
 

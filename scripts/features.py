@@ -67,9 +67,28 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         # expanding mean win rate within the match. A rising CUSUM
         # means the player is winning points above their match average.
         # expanding().mean() uses only past points, no look-ahead.
-        shifted = series.shift(1).fillna(0)
+        #
+        # The neutral fill must be applied to the DEVIATIONS, not to the
+        # raw shifted series before averaging. Filling shifted's leading
+        # NaN with 0 (as an earlier version did) bakes a fabricated "loss"
+        # permanently into expanding_mean's denominator for the rest of
+        # the match, since expanding() accumulates every prior row --
+        # this produced a systematic positive bias (a 50/50 win-rate
+        # sequence showed persistently positive CUSUM, never centering on
+        # zero, and the real-data mean CUSUM was +1.79 despite Point_Won's
+        # mean being ~0.50). Leaving shifted's first value as NaN lets
+        # expanding().mean() skip it (pandas default skipna=True), so the
+        # fabricated value never enters the running mean; the resulting
+        # deviation is only undefined (NaN) for the single row with no
+        # prior point, which fillna(0) after the subtraction correctly
+        # resolves to "no deviation without history" rather than smuggling
+        # a fake data point into every later row's baseline. Verified: a
+        # constant-outcome sequence (all wins or all losses) now produces
+        # flat zero CUSUM throughout, as it should for a perfectly
+        # consistent performer with no deviation from their own average.
+        shifted = series.shift(1)
         expanding_mean = shifted.expanding().mean()
-        deviations = shifted - expanding_mean
+        deviations = (shifted - expanding_mean).fillna(0)
         return deviations.cumsum()
 
     df['CUSUM'] = (
