@@ -16,6 +16,8 @@ A matched-comparison robustness check sharpens this: server game points (the mir
 
 *(These figures reflect a control-pool and CUSUM-construction fix applied in a later audit pass — see `methodology.md` §4 for what changed and why.)*
 
+**Known issue, not yet fixed:** the live blog's interactive reveal chart (Figure 6, the D3/`blog.js` split view) renders correctly at desktop widths but its bars and labels overlap on narrow mobile viewports (confirmed at 390px). This predates the SGP-related chart changes — the original two-bar version has the same issue — so it isn't new, but it's undecided, not resolved: before pitching this piece anywhere with a mobile-heavy readership, decide deliberately whether a broken mobile chart is acceptable or needs a responsive fix first, rather than finding out from a reader's phone.
+
 ---
 
 ## Methodological Rigour
