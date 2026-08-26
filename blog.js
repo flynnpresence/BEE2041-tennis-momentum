@@ -267,7 +267,19 @@
     function render(view) {
       currentView = view;
       const data = ATE[view];
-      const barWidth = view === "combined" ? 120 : 70;
+      const groupGap = innerWidth / 2;
+      const nTypes = SPLIT_TYPE_ORDER.length;
+      // Split-view bar width is derived from the container's ACTUAL measured
+      // innerWidth, not a fixed guess -- a hardcoded value here (the original
+      // bug: 70px, sized for the combined-view's wider container assumption)
+      // silently overlapped bars and collided sub-labels once real rendering
+      // showed the reveal-section's container is much narrower (~460px inner,
+      // not ~720-800px) than a generic dry-run assumes. 0.82 of each tour's
+      // half-width slot is allotted to its bars, leaving the remainder as
+      // breathing room between tour groups.
+      const barWidth = view === "combined"
+        ? 120
+        : Math.max(28, Math.min(70, (groupGap * 0.82 - (nTypes - 1) * 12) / nTypes));
 
       let positions;
 
@@ -280,8 +292,6 @@
           subLabel: ""
         }));
       } else {
-        const groupGap = innerWidth / 2;
-        const nTypes = SPLIT_TYPE_ORDER.length;
         positions = data.map((d) => {
           const tourIndex = d.tour === "ATP" ? 0 : 1;
           const typeIndex = SPLIT_TYPE_ORDER.indexOf(d.type);
@@ -392,19 +402,43 @@
 
       subLabels.exit().transition().duration(300).style("opacity", 0).remove();
 
-      subLabels.enter()
+      // Sub-label elements are always freshly created here (never re-bound
+      // with new text -- exiting the split view removes them entirely, per
+      // the data-join above), so per-datum tspan wrapping can live entirely
+      // in .enter() without a separate update path. "Server Game Point" is
+      // wider than a three-per-tour slot can fit on one line at a readable
+      // size (measured: ~100px at 10.5px font vs. a ~55-70px bar slot), so
+      // labels with more than two words wrap onto a second line rather than
+      // shrinking to the point of illegibility or overflowing into the
+      // neighbouring group's label.
+      const subLabelsEnter = subLabels.enter()
         .append("text")
         .attr("class", "sub-label")
         .attr("text-anchor", "middle")
-        .attr("y", innerHeight + 48)
         .style("font-family", "IBM Plex Sans, sans-serif")
         .style("font-size", "10.5px")
         .style("font-weight", "500")
         .style("letter-spacing", "0.06em")
         .style("fill", "#6A6658")
         .style("opacity", 0)
-        .attr("x", (d) => d.x + barWidth / 2)
-        .text((d) => d.subLabel)
+        .attr("x", (d) => d.x + barWidth / 2);
+
+      subLabelsEnter.each(function (d) {
+        const words = d.subLabel.split(" ");
+        const lines = words.length > 2
+          ? [words.slice(0, -1).join(" "), words[words.length - 1]]
+          : [d.subLabel];
+        const startY = innerHeight + (lines.length > 1 ? 40 : 48);
+        d3.select(this)
+          .selectAll("tspan")
+          .data(lines)
+          .join("tspan")
+          .attr("x", d.x + barWidth / 2)
+          .attr("y", (_, i) => startY + i * 13)
+          .text((line) => line);
+      });
+
+      subLabelsEnter
         .transition()
         .delay(400)
         .duration(500)
