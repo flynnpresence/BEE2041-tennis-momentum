@@ -178,9 +178,11 @@ The case for a structural rather than psychological explanation does not rest on
 
 Because break points are far more common than tiebreaks, the earlier combined estimates are dominated by the serving-transition signal (the structural advantage the break-point winner gets when serve order shifts in their favour on the next point), obscuring how flat the tiebreak effect actually is.
 
+There's a sharper version of this test: server game points are the mirror image of break points — same high stakes, but winning one hands the *next* serve to the opponent instead of you. Winning a break point raises next-point win probability; winning a server game point lowers it, on both tours. The sign flips with the serve — not with who won the point — which is what you'd expect if the effect is really about the serve, and not about momentum.
+
 ## If Not Momentum, Then What?
 
-Beyond the serving mechanism, what predicts how large the estimated effect is across different players and situations? Figure 7 ranks the model's control variables by their predictive weight.
+The serving mechanism explains whether the effect appears; it doesn't explain how large it gets across different players and situations — that's a separate question, and Figure 7 ranks the model's control variables by their predictive weight.
 
 ```{=html}
 <div style="border-radius:8px; overflow:visible; margin:1.5rem 0;">

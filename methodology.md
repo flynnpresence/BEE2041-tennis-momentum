@@ -275,32 +275,44 @@ this result is reconnaissance-grade.
 against — 3,645 ATP / 1,464 WTA treated versus BP's 1,497 / 1,001 — so this is not
 an underpowered comparison the way the tiebreak cells are.
 
-**Result.** Match-clustered bootstrap ATE (CausalForestDML, same estimator and
-controls as the BP/combined specs — well-powered, stays on the forest per the
-estimator-split rule in §4), B=199:
+**Why a mirror, not a neutral control.** Break points are one instance of a broader
+question: what happens to next-point odds after a high-leverage win? Tennis doesn't
+offer an equally-high-stakes point where the outcome doesn't touch who serves next —
+every such point either transfers serve or confirms it. The nearest substitute is
+the server's own game point, defined above. It isn't neutral — the point winner
+serves next 0% of the time at a server game point versus 100% at a break point, both
+verified directly against consecutive-point serve records (§7a.3's mechanism check)
+— and that reversal is what makes it useful: if the break-point effect is the serve,
+the server-game-point effect should run the other way.
 
-| | ATE | 95% CI |
-|---|---|---|
-| ATP Break Point (existing) | +0.147 | [0.120, 0.175] |
-| ATP Server Game Point (new) | -0.140 | [-0.158, -0.118] |
-| WTA Break Point (existing) | +0.086 | [0.043, 0.108] |
-| WTA Server Game Point (new) | -0.069 | [-0.094, -0.034] |
+**The result.** It does. Match-clustered bootstrap ATE (CausalForestDML, same
+estimator and controls as the BP/combined specs — well-powered, stays on the forest
+per the estimator-split rule in §4), B=199: winning a break point raises next-point
+win probability by +0.1470 in the ATP (95% CI [0.1198, 0.1748]) and +0.0863 in the
+WTA ([0.0434, 0.1079]). Winning a server game point lowers it: −0.1396 in the ATP
+([−0.1583, −0.1180]) and −0.0688 in the WTA ([−0.0938, −0.0341]). All four intervals
+sit entirely on one side of zero, and the sign flips with the serve.
 
-**Interpretation rests on the sign, not the magnitude.** The two effects run in
-opposite directions on both tours, tracking the direction of serve transfer exactly:
-positive where winning hands the winner the next serve (BP), negative where winning
-hands the next serve to the opponent (SGP). Both BP CIs sit entirely above zero and
-both SGP CIs sit entirely below zero, on both tours — none of the four intervals
-comes close to crossing. This is what serve-transition predicts and discouragement
-does not: discouragement is a stakes effect with no reason to flip sign between two
-leverage-matched high-stakes point types that differ only in which player ends up
-serving next. A same-signed (positive, attenuated) SGP effect would have been the
-discouragement-consistent result; a null SGP effect would have been the
-originally-anticipated "no transition" result. Neither obtained.
+**Why the reversal is robust.** The reversal is robust in a way no single effect
+estimate is. The two treatments share one defining feature: in each, it is the focal
+player who wins the point. Any mechanism operating through winning — discouragement,
+belief-updating, momentum — must therefore assign both effects the same sign,
+whatever else differs between them. A sign reversal cannot be produced by a
+winning-based channel at all; it can only come from what the two treatments do not
+share, which is the direction of the serve. Two secondary checks close the remaining
+gaps. The treatments draw on the same control pool, so any baseline artefact common
+to both shifts the estimates together rather than in opposite directions. And the
+two flags are built as a literal mirror of the point-score string — break point is
+`Pts ∈ {0-40, 15-40, 30-40, 40-AD}`, server game point is the same four states with
+the server/receiver halves swapped, `Pts ∈ {40-0, 40-15, 40-30, AD-40}` — so the
+contrast is not built on obviously mismatched stakes; a formal Morris (1977)
+importance match, deferred here, would confirm the leverage alignment directly
+rather than resting on the mirror construction alone.
 
 **No magnitude claim is made.** The BP and SGP CIs overlap substantially in
-magnitude on both tours — ATP BP [0.120, 0.175] against SGP's magnitude
-[0.118, 0.158], WTA BP [0.043, 0.108] against SGP's magnitude [0.034, 0.094] — so
+magnitude on both tours — ATP BP [0.1198, 0.1748] against SGP's magnitude
+[0.1180, 0.1583], WTA BP [0.0434, 0.1079] against SGP's magnitude
+[0.0341, 0.0938] — so
 the effects are not statistically distinguishable in size, and nothing here should
 be read as "mirror-image" or "equal and opposite" in magnitude, on either tour. That
 would be a stronger claim than the data support and isn't needed: the sign flip
@@ -415,8 +427,8 @@ overturns or subsumes their set-level physiological one — different level of
 analysis, different mechanism, no refutation implied.** [Citation verified against
 project notebook extract, not the primary source; see §7a.7 item 5.]
 
-The WTA arm of Test 1 shows the same opposite-signed pattern as ATP (WTA BP +0.086
-vs WTA SGP -0.069), which supports reading the WTA break-point effect as
+The WTA arm of Test 1 shows the same opposite-signed pattern as ATP (WTA BP +0.0863
+vs WTA SGP -0.0688), which supports reading the WTA break-point effect as
 sex-neutral structural momentum rather than a fragile artifact — consistent with,
 not proof of, serve-transition operating identically on both tours. This is flagged
 as a question the test bears on, **not** as a contribution claim: the WTA cells
@@ -511,10 +523,10 @@ break points being high-leverage by construction. Its replacement, the
 matched-comparison test (§7a.3: break points vs. server game points, the
 mirror-image score states), has been run to full precision and reproduces
 exactly on a fresh process: opposite-signed effects on both tours (ATP break
-point +0.147 vs. server game point −0.140; WTA +0.086 vs. −0.069), all four
+point +0.1470 vs. server game point −0.1396; WTA +0.0863 vs. −0.0688), all four
 CIs clear of zero. The claim rests on the sign only, not the magnitude — the
-BP/SGP CIs overlap substantially in size on both tours (e.g. ATP [0.120,0.175]
-vs. [0.118,0.158] in magnitude), so there is no mirror-image or
+BP/SGP CIs overlap substantially in size on both tours (e.g. ATP [0.1198,0.1748]
+vs. [0.1180,0.1583] in magnitude), so there is no mirror-image or
 equal-and-opposite claim here, only that both signs are clean and opposite.
 That sign flip tracks a deterministic mechanism check — the point winner
 serves next 100.0000% of the time at break points and 0.0000% of the time at
