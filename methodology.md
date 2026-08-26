@@ -307,6 +307,26 @@ would be a stronger claim than the data support and isn't needed: the sign flip
 alone, with all four CIs clear of zero, is what does the discriminating work, and it
 stands on its own regardless of how the magnitudes compare.
 
+**The sign is stable under a cross-fitting sensitivity check (cv=10, not just
+cv=2).** This is a different, more specific claim than "the estimates are stable" —
+the question is not whether the point value moves within its own CI, but whether the
+sign the whole discriminating argument leans on survives a change to the DML
+cross-fitting fold count, the exact axis on which the *original* leverage-gradient
+design (retired, see status note above) turned out to be fragile for a different
+spec (wta_tb's forest ATE flipped sign across cv=2/3/5 — §4). Re-fit at cv=10 on
+match-clustered bootstrap (B=199, same estimator, same subsample cap, six
+well-powered specs including both SGP cells; the four sparse cells — tiebreak and
+rank-only — were deliberately left at cv=2 rather than pushed to cv=10, since more
+folds there means fewer rows per hold-out and manufactures exactly the finite-sample
+instability a cv sweep is supposed to test for, not a genuine robustness check):
+ATP SGP −0.141 [−0.159, −0.119], WTA SGP −0.064 [−0.093, −0.036] — both still firmly
+negative, both CIs still clear of zero, both point estimates inside their cv=2
+interval. The sign-test result the argument in §7a.2/§7a.5 is built on is therefore
+robust to cross-fitting choice specifically, not merely stable in the weaker sense
+of "moved within its own CI" — the two are different claims, and this document
+makes the stronger, more specific one because it's now been checked. (Full six-spec
+comparison table in `diagnostics/inference_bootstrap/cv10_sweep_forest.csv`.)
+
 #### 7a.4 Test 2: The tiebreak null, corroborating belief-updating
 
 The existing tiebreak result (§5: ATP +0.027, CI crosses zero; WTA −0.025, CI

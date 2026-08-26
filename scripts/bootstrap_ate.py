@@ -155,11 +155,14 @@ def build_spec(df_tour: pd.DataFrame, treatment_label: str) -> pd.DataFrame:
 
 def fit_ate(data: pd.DataFrame, controls: list, subsample_seed: int,
             forest_seed: int = SEED, want_blb: bool = False, n_jobs: int = 1,
-            estimator: str = 'forest'):
+            estimator: str = 'forest', cv: int = 2):
     """Subsample (as model.py), fit the estimator with grouped cross-fitting,
-    return (ate, blb_se_or_None). 'forest' config is verbatim from model.py.
-    'linear' (LinearDML) is used for the two rare-treatment tiebreak cells,
-    where the forest's point estimate is not identified (see LINEAR_SPECS)."""
+    return (ate, blb_se_or_None). 'forest' config is verbatim from model.py
+    except cv, which defaults to 2 (the published value) and is overridable
+    for cv-fold sensitivity sweeps (see the cv=2/3/5 wta_tb precedent this
+    module's docstring already documents). 'linear' (LinearDML) is used for
+    the two rare-treatment tiebreak cells, where the forest's point estimate
+    is not identified (see LINEAR_SPECS)."""
     d = data
     # Stratified subsample: keep all treated, sample controls to reach the cap.
     if len(d) > SUBSAMPLE_CAP:
@@ -176,7 +179,7 @@ def fit_ate(data: pd.DataFrame, controls: list, subsample_seed: int,
     nuisance_kwargs = dict(
         model_y=GradientBoostingRegressor(n_estimators=200, random_state=forest_seed),
         model_t=GradientBoostingRegressor(n_estimators=200, random_state=forest_seed),
-        cv=2,
+        cv=cv,
         random_state=forest_seed,
     )
 
@@ -242,7 +245,7 @@ def cluster_resample(data: pd.DataFrame, rng: np.random.Generator) -> pd.DataFra
 
 
 def bootstrap_spec(df: pd.DataFrame, spec_key: str, B: int,
-                   seed: int = SEED, n_jobs: int = 1) -> dict:
+                   seed: int = SEED, n_jobs: int = 1, cv: int = 2) -> dict:
     tour, tlabel, controls = SPECS[spec_key]
     estimator = 'linear' if spec_key in LINEAR_SPECS else 'forest'
     data = build_spec(df[df['Tour'] == tour].copy(), tlabel)
@@ -252,7 +255,7 @@ def bootstrap_spec(df: pd.DataFrame, spec_key: str, B: int,
     # Point estimate at the published config (seed=42), plus BLB reference SE.
     ate_point, blb_se = fit_ate(data, controls, subsample_seed=SEED,
                                 forest_seed=SEED, want_blb=True, n_jobs=1,
-                                estimator=estimator)
+                                estimator=estimator, cv=cv)
 
     # Group-level resampling grid uses distinct seeds so subsample noise is captured.
     def one_rep(b):
@@ -261,7 +264,7 @@ def bootstrap_spec(df: pd.DataFrame, spec_key: str, B: int,
         try:
             ate_b, _ = fit_ate(boot, controls, subsample_seed=seed + 1 + b,
                                forest_seed=SEED, want_blb=False, n_jobs=1,
-                               estimator=estimator)
+                               estimator=estimator, cv=cv)
             return ate_b
         except Exception:
             return np.nan
@@ -277,7 +280,7 @@ def bootstrap_spec(df: pd.DataFrame, spec_key: str, B: int,
 
     return {
         'spec': spec_key, 'tour': tour, 'type': tlabel, 'estimator': estimator,
-        'n_matches': n_matches, 'n_treated': n_treated,
+        'cv': cv, 'n_matches': n_matches, 'n_treated': n_treated,
         'ate_point': round(ate_point, 4),
         'blb_se': round(blb_se, 4) if blb_se is not None else None,
         'cluster_boot_se': round(float(ok.std(ddof=1)), 4),
@@ -290,9 +293,15 @@ def bootstrap_spec(df: pd.DataFrame, spec_key: str, B: int,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--spec', default='all',
-                    help="one of " + ", ".join(SPECS) + ", or 'all'")
+                    help="one of " + ", ".join(SPECS) + ", 'all', "
+                         "'forest' (well-powered, non-LINEAR_SPECS cells), "
+                         "'linear' (sparse LINEAR_SPECS cells), or a "
+                         "comma-separated list of spec names")
     ap.add_argument('--B', type=int, default=199, help='bootstrap replicates')
     ap.add_argument('--seed', type=int, default=SEED)
+    ap.add_argument('--cv', type=int, default=2,
+                    help='DML cross-fitting folds (published value is 2; '
+                         'override for cv-fold sensitivity sweeps)')
     ap.add_argument('--n-jobs', type=int, default=1,
                     help='parallel replicates (forest stays single-threaded)')
     ap.add_argument('--out', default=os.path.join(BASE_DIR, 'outputs',
@@ -302,11 +311,18 @@ def main():
     df = pd.read_csv(os.path.join(PROC_DIR, 'processed_features.csv'),
                      low_memory=False)
 
-    specs = list(SPECS) if args.spec == 'all' else [args.spec]
+    if args.spec == 'all':
+        specs = list(SPECS)
+    elif args.spec == 'forest':
+        specs = [s for s in SPECS if s not in LINEAR_SPECS]
+    elif args.spec == 'linear':
+        specs = [s for s in SPECS if s in LINEAR_SPECS]
+    else:
+        specs = args.spec.split(',')
     rows = []
     for s in specs:
-        print(f'\n=== {s}  (B={args.B}) ===')
-        res = bootstrap_spec(df, s, B=args.B, seed=args.seed, n_jobs=args.n_jobs)
+        print(f'\n=== {s}  (B={args.B}, cv={args.cv}) ===')
+        res = bootstrap_spec(df, s, B=args.B, seed=args.seed, n_jobs=args.n_jobs, cv=args.cv)
         for k, v in res.items():
             print(f'  {k:16s}: {v}')
         if res['n_fail'] > 0:
