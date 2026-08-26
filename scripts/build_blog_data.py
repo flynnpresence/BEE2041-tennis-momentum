@@ -71,10 +71,14 @@ def main() -> None:
     print('=== build_blog_data.py ===')
 
     ate_path = os.path.join(OUT_DIR, 'ate_results.csv')
+    sgp_path = os.path.join(OUT_DIR, 'ate_results_sgp.csv')
 
-    verify_inputs([ate_path])
+    verify_inputs([ate_path, sgp_path])
 
     blog_data = format_ate_data(ate_path)
+    # ate_results_sgp.csv has no 'Combined' row, so every row lands in
+    # format_ate_data's 'split' bucket -- append it to the main split list.
+    blog_data['split'].extend(format_ate_data(sgp_path)['split'])
 
     out_path = os.path.join(BASE_DIR, 'blog_data.js')
     export_js_constants(blog_data, out_path)

@@ -194,9 +194,12 @@
       .style("fill", "#17150F")
       .text("Figure 6: Average Treatment Effect of Winning a High-Leverage Point");
 
+    // Domain widened to fit the server-game-point split bar (ATE ~-0.14),
+    // which the original [-0.09, 0.20] range (sized for BP/tiebreak only)
+    // would clip.
     const y = d3
       .scaleLinear()
-      .domain([-0.09, 0.20])
+      .domain([-0.17, 0.20])
       .range([innerHeight, 0])
       .nice();
 
@@ -255,10 +258,16 @@
 
     let currentView = "combined";
 
+    // Split view now carries three pressure types per tour (Break Point,
+    // Tiebreak, Server Game Point) rather than the original two; this order
+    // fixes each type's slot regardless of the order rows arrive in from
+    // blog_data.js.
+    const SPLIT_TYPE_ORDER = ["Break Point", "Tiebreak", "Server Game Point"];
+
     function render(view) {
       currentView = view;
       const data = ATE[view];
-      const barWidth = view === "combined" ? 120 : 90;
+      const barWidth = view === "combined" ? 120 : 70;
 
       let positions;
 
@@ -272,11 +281,12 @@
         }));
       } else {
         const groupGap = innerWidth / 2;
+        const nTypes = SPLIT_TYPE_ORDER.length;
         positions = data.map((d) => {
           const tourIndex = d.tour === "ATP" ? 0 : 1;
-          const typeIndex = d.type === "Break Point" ? 0 : 1;
+          const typeIndex = SPLIT_TYPE_ORDER.indexOf(d.type);
           const groupCenter = groupGap * (tourIndex + 0.5);
-          const offset = (typeIndex - 0.5) * (barWidth + 12);
+          const offset = (typeIndex - (nTypes - 1) / 2) * (barWidth + 12);
 
           return {
             ...d,
@@ -346,10 +356,10 @@
 
       const tourData = view === "combined"
         ? positions
-        : [
-            { tour: "ATP", x: (positions[0].x + positions[2].x) / 2 + barWidth / 2 },
-            { tour: "WTA", x: (positions[1].x + positions[3].x) / 2 + barWidth / 2 }
-          ];
+        : ["ATP", "WTA"].map((tour) => {
+            const xs = positions.filter((d) => d.tour === tour).map((d) => d.x);
+            return { tour, x: (Math.min(...xs) + Math.max(...xs)) / 2 + barWidth / 2 };
+          });
 
       const tourLabels = labelGroup
         .selectAll(".tour-label")
