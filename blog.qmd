@@ -220,7 +220,7 @@ The next time a commentator says Carlos Alcaraz has the momentum after convertin
 
 **References**
 
-- Du, C., Zhang, C. and Zhou, L. (2025). A novel methodological framework for analyzing the momentum effect in tennis singles. [online] Available at: https://arxiv.org/abs/2509.01243 [Accessed 20 Apr. 2026].
+- Du, C., Zhang, C. and Zhou, L. (2025). A novel methodological framework for analyzing the momentum effect in tennis singles. *arXiv preprint* arXiv:2509.01243 [stat.AP]. Unreviewed preprint — no journal, conference, or competition venue listed in the arXiv metadata or the paper itself; checked directly against the arXiv record, not assumed from the citation alone.
 - Gilovich, T., Vallone, R. and Tversky, A. (1985). The hot hand in basketball: On the misperception of random sequences. *Cognitive Psychology*, [online] 17(3), pp.295–314. doi:https://doi.org/10.1016/0010-0285(85)90010-6.
 - Miller, J.B. and Sanjurjo, A. (2018). Surprised by the Hot Hand Fallacy? A Truth in the Law of Small Numbers. *OSF Preprints*. doi:https://doi.org/10.31219/osf.io/sv9x2.
 - Sackmann, J. (2023). The Match Charting Project. [online] GitHub. Available at: https://github.com/JeffSackmann/tennis_MatchChartingProject [Accessed 20 Apr. 2026].
