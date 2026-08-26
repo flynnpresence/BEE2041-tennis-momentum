@@ -331,8 +331,11 @@ well-powered specs including both SGP cells; the four sparse cells — tiebreak 
 rank-only — were deliberately left at cv=2 rather than pushed to cv=10, since more
 folds there means fewer rows per hold-out and manufactures exactly the finite-sample
 instability a cv sweep is supposed to test for, not a genuine robustness check):
-ATP SGP −0.141 [−0.159, −0.119], WTA SGP −0.064 [−0.093, −0.036] — both still firmly
-negative, both CIs still clear of zero, both point estimates inside their cv=2
+at cv=10, ATP SGP is −0.1410 [−0.1589, −0.1189] and WTA SGP is −0.0642
+[−0.0931, −0.0359] — distinct point estimates from the cv=2 published values
+above (−0.1396 and −0.0688 respectively), as expected from refitting at a
+different fold count, not a re-quote of them. Both still firmly negative,
+both CIs still clear of zero, both point estimates inside their cv=2
 interval. The sign-test result the argument in §7a.2/§7a.5 is built on is therefore
 robust to cross-fitting choice specifically, not merely stable in the weaker sense
 of "moved within its own CI" — the two are different claims, and this document

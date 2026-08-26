@@ -12,6 +12,8 @@ This project tests whether point-by-point momentum exists in professional tennis
 
 **Finding:** Break points produce a large positive effect on the next point in both tours (ATP: +0.1470, WTA: +0.0863), driven by the serving transition that follows a break point win rather than psychological momentum. Tiebreaks are null in both tours (ATP: +0.0267, 95% CI [-0.018, 0.058]; WTA: -0.0253, 95% CI [-0.092, 0.051], based on a smaller 209 treated observations). The combined ATEs (ATP: +0.1042, WTA: +0.0640) are dominated by the more frequent break point effect, explaining why pooled analyses reach conflicting conclusions.
 
+A matched-comparison robustness check sharpens this: server game points (the mirror-image score states — same high stakes, but winning transfers serve to the *opponent* rather than the winner) produce the opposite sign, on both tours (ATP: -0.1396, 95% CI [-0.1583, -0.1180]; WTA: -0.0688, 95% CI [-0.0938, -0.0341]). The effect's sign tracks which player serves next, not who won the point — evidence that the effect is structural rather than stakes- or belief-driven. See `methodology.md` §7a for the full argument.
+
 ---
 
 ## Methodological Rigour
@@ -23,7 +25,7 @@ To address conflicting conclusions in existing literature (Gilovich et al., 1985
 - **Deconfounding Baseline Skill:** Official rankings are attached via a two-step validated merge (tournament-specific then season-median fallback) to isolate momentum from player quality. Elo was considered but rejected: the two-stage fallback process required to achieve full coverage across all 56,253 points is not readily supported by available Elo data.
 - **Retirement Matches:** Retirement matches could not be filtered at point level because the Match Charting Project data contains no match outcome flag; their points remain in the dataset. Rankings from retirement matches are excluded from the ranking lookup via the W/O|RET filter applied in both ranking steps. These matches are a small fraction of the total and affect both tours equally, so they do not materially skew the findings.
 - **Clustered Standard Errors:** Logistic models use match-level clustering (`cov_type='cluster'`) to account for intra-match point dependency. Causal forest and LinearDML standard errors come from a match-clustered bootstrap (resampling whole matches, not points, since points within a match are not independent observations) rather than the dispersion of per-unit CATE predictions; see `scripts/bootstrap_ate.py`. Primary fits also use grouped cross-fitting (`groups=match_id`) so DML cross-fitting keeps each match within a single fold.
-- **Estimator Selection:** CausalForestDML is used where treatment is well-powered (the combined and break-point specs). LinearDML is used for the two tiebreak cells (sparse treatment: 729 ATP / 209 WTA) and the four rank-only robustness checks (single-control propensity fragility): a cv-fold sweep showed the forest's tiebreak point estimate flipping sign under grouped cross-fitting, while LinearDML reproduces the forest's own outlier-trimmed median to within ~5% with a stable bootstrap distribution in every case, confirming the instability was estimator noise rather than a genuine disagreement.
+- **Estimator Selection:** CausalForestDML is used where treatment is well-powered (the combined, break-point, and server-game-point specs). LinearDML is used for the two tiebreak cells (sparse treatment: 729 ATP / 209 WTA) and the four rank-only robustness checks (single-control propensity fragility): a cv-fold sweep showed the forest's tiebreak point estimate flipping sign under grouped cross-fitting, while LinearDML reproduces the forest's own outlier-trimmed median to within ~5% with a stable bootstrap distribution in every case, confirming the instability was estimator noise rather than a genuine disagreement.
 - **Stratified Subsampling:** The causal forest subsamples to 15,000 observations per run, preserving all treated observations and randomly sampling control observations to reach 15,000 total; the ATP is subsampled from 38,488 points and the WTA from 17,765 points.
 - **VIF Check:** A Variance Inflation Factor check confirmed no problematic multicollinearity among control variables (maximum score 1.22; VIF above 10 indicates problematic overlap).
 - **Causal Forest (Double Machine Learning, DML):** Employs econml to estimate the Average Treatment Effect while controlling for player ranking, rolling win percentage, CUSUM (cumulative momentum score), and winning streak length.
@@ -128,6 +130,7 @@ Model checkpoint. One row per point, focal-player perspective. Last point of eac
 | `High_Leverage` | int64 | 1 if break point or tiebreak point; 0 otherwise. Treatment indicator for the causal forest. |
 | `High_Leverage_BP` | int64 | 1 if break point (`Pts` in {0-40, 15-40, 30-40, 40-AD}); 0 otherwise. |
 | `High_Leverage_TB` | int64 | 1 if point played within a tiebreak (`Gm1 == 6 & Gm2 == 6`); 0 otherwise. |
+| `High_Leverage_SGP` | int64 | 1 if server game point (`Pts` in {40-0, 40-15, 40-30, AD-40}); 0 otherwise. The mirror image of `High_Leverage_BP` in the score string. Not part of the `High_Leverage` treatment; used as the matched-comparison group in the methodology doc's §7a robustness section (server-game-point wins run in the opposite direction from break-point wins, since winning transfers serve *away* from the winner here). |
 | `Streak_k4` | int64 | 1 if focal player won all of the previous 4 points in the match; 0 otherwise. Uses only past points. 0 by construction for the first 4 points of every match. |
 | `Rolling_Win_Pct` | float64 | Focal player's win rate over up to the previous 10 points in the match (current point excluded). Window grows from 1 point at the start of the match to a maximum of 10. Range [0, 1]. Initialised at 0.5 (neutral prior) for the first point of each match. |
 | `CUSUM` | float64 | Cumulative deviation of focal player from their expanding within-match win rate. Positive = focal is performing above their match-to-date average. Computed using shifted (past-only) values; CUSUM = 0 at the first point of each match by construction. |
@@ -181,6 +184,7 @@ Per-tour intermediate output of `clean.py`. One row per point. Contains all engi
 | `High_Leverage` | int64 | 1 if break point or tiebreak point; 0 otherwise. |
 | `High_Leverage_BP` | int64 | 1 if break point (`Pts` in {0-40, 15-40, 30-40, 40-AD}); 0 otherwise. |
 | `High_Leverage_TB` | int64 | 1 if point played within a tiebreak (`Gm1 == 6 & Gm2 == 6`); 0 otherwise. |
+| `High_Leverage_SGP` | int64 | 1 if server game point (`Pts` in {40-0, 40-15, 40-30, AD-40}); 0 otherwise. The mirror image of `High_Leverage_BP` in the score string. Not part of the `High_Leverage` treatment; used as the matched-comparison group in the methodology doc's §7a robustness section (server-game-point wins run in the opposite direction from break-point wins, since winning transfers serve *away* from the winner here). |
 | `focal_is_p1` | bool | True if focal player is Player_1, False if Player_2. Random per-match assignment, seeded with `np.random.seed(42)`. |
 | `Focal_Player` | str | Name of focal player (= Player_1 if `focal_is_p1`, else Player_2). |
 | `Opponent_Player` | str | Name of opponent (= Player_2 if `focal_is_p1`, else Player_1). |
@@ -237,6 +241,7 @@ Output of the per-player Chi-squared and Wald-Wolfowitz runs tests run in `featu
 | 7 | output7_feature_importance.html | Causal Forest feature importance, ATP and WTA |
 | - | ate_results.csv | Python-generated ATE values |
 | - | ate_results_robustness.csv | Robustness check ATEs using ranking-only controls |
+| - | ate_results_sgp.csv | Server-game-point (matched-comparison) ATE values — §7a robustness |
 | - | feature_importance.csv | Python-generated feature importance values |
 
 ---
