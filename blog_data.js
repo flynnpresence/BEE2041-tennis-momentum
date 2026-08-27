@@ -4,43 +4,43 @@ const ATE = {
   "combined": [
     {
       "tour": "ATP",
-      "value": 0.0844
+      "value": 0.0888
     },
     {
       "tour": "WTA",
-      "value": 0.0478
+      "value": 0.055
     }
   ],
   "split": [
     {
       "tour": "ATP",
       "type": "Break Point",
-      "value": 0.1312
+      "value": 0.1362
     },
     {
       "tour": "WTA",
       "type": "Break Point",
-      "value": 0.0646
+      "value": 0.0671
     },
     {
       "tour": "ATP",
       "type": "Tiebreak",
-      "value": -0.0066
+      "value": 0.0072
     },
     {
       "tour": "WTA",
       "type": "Tiebreak",
-      "value": -0.0091
+      "value": 0.0024
     },
     {
       "tour": "ATP",
       "type": "Server Game Point",
-      "value": -0.1394
+      "value": -0.1398
     },
     {
       "tour": "WTA",
       "type": "Server Game Point",
-      "value": -0.0725
+      "value": -0.0581
     }
   ]
 };

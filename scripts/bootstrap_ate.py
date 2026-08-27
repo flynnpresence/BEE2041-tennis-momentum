@@ -180,12 +180,13 @@ def build_spec(df_tour: pd.DataFrame, treatment_label: str) -> pd.DataFrame:
 
 def fit_ate(data: pd.DataFrame, controls: list, subsample_seed: int,
             forest_seed: int = SEED, want_blb: bool = False, n_jobs: int = 1,
-            estimator: str = 'forest', cv: int = 2):
+            estimator: str = 'forest', cv: int = 5):
     """Subsample (as model.py), fit the estimator with grouped cross-fitting,
     return (ate, blb_se_or_None). 'forest' config is verbatim from model.py
-    except cv, which defaults to 2 (the published value) and is overridable
-    for cv-fold sensitivity sweeps (see the cv=2/3/5 wta_tb precedent this
-    module's docstring already documents). 'linear' (LinearDML) is used for
+    except cv, which defaults to 5 (the published value as of the cv=5 refit;
+    was cv=2 before, see the cv=2/3/5 wta_tb precedent and the later cv=10
+    sweep this module's docstring documents) and is overridable for cv-fold
+    sensitivity sweeps. 'linear' (LinearDML) is used for
     the two rare-treatment tiebreak cells, where the forest's point estimate
     is not identified (see LINEAR_SPECS)."""
     d = data
@@ -270,7 +271,7 @@ def cluster_resample(data: pd.DataFrame, rng: np.random.Generator) -> pd.DataFra
 
 
 def bootstrap_spec(df: pd.DataFrame, spec_key: str, B: int,
-                   seed: int = SEED, n_jobs: int = 1, cv: int = 2) -> dict:
+                   seed: int = SEED, n_jobs: int = 1, cv: int = 5) -> dict:
     tour, tlabel, controls = SPECS[spec_key]
     estimator = 'linear' if spec_key in LINEAR_SPECS else 'forest'
     data = build_spec(df[df['Tour'] == tour].copy(), tlabel)
@@ -324,8 +325,8 @@ def main():
                          "comma-separated list of spec names")
     ap.add_argument('--B', type=int, default=199, help='bootstrap replicates')
     ap.add_argument('--seed', type=int, default=SEED)
-    ap.add_argument('--cv', type=int, default=2,
-                    help='DML cross-fitting folds (published value is 2; '
+    ap.add_argument('--cv', type=int, default=5,
+                    help='DML cross-fitting folds (published value is 5; '
                          'override for cv-fold sensitivity sweeps)')
     ap.add_argument('--n-jobs', type=int, default=1,
                     help='parallel replicates (forest stays single-threaded)')

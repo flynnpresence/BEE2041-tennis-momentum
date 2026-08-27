@@ -500,7 +500,7 @@ def run_causal_forest(df: pd.DataFrame, df_full: pd.DataFrame, tour_name: str,
         model_y=GradientBoostingRegressor(n_estimators=200, random_state=SEED),
         model_t=GradientBoostingRegressor(n_estimators=200, random_state=SEED),
         n_estimators=200,
-        cv=2,
+        cv=5,
         n_jobs=1,
         random_state=SEED,
         verbose=0

@@ -158,6 +158,78 @@ a full refit before being reported here, not assumed safe.
   drift" reading of feature importance survives on the numbers as they stand,
   not because it was assumed to.
 
+### 4b. Structural refit: DML cross-fitting default changed from cv=2 to cv=5
+
+- **The change.** The pipeline's DML cross-fitting fold count, previously
+  defaulting to 2, now defaults to 5 — `bootstrap_ate.py`'s `fit_ate`,
+  `bootstrap_spec`, and CLI default, and `model.py`'s `CausalForestDML`
+  instantiation in `run_causal_forest`. This is pipeline-wide, not
+  forest-only: every spec, forest and LinearDML alike, takes a `cv`
+  parameter, unlike the earlier cv=10 sensitivity sweep (§4a-era), which was
+  deliberately scoped to the six well-powered forest specs only.
+- **Why 5, not just "higher."** cv=2 is the minimum fold count that supports
+  cross-fitting at all (one fold trains the nuisance models, the other
+  scores the treatment effect on held-out data) and sits at the
+  high-nuisance-bias end of the bias/variance tradeoff cross-fitting
+  exists to manage: with only two folds, each nuisance model is trained on
+  roughly half the data, which can leave residual overfitting bias in the
+  Y- and T-models that DML's own theory assumes cross-fitting removes.
+  cv=5 is a standard default in the double-ML literature and in `econml`'s
+  and `scikit-learn`'s own conventions, balancing that bias reduction
+  against the variance cost of training nuisance models on smaller folds —
+  it is not chosen because more folds is unconditionally better (the
+  sparse cells are exactly the counterexample: §4a's original cv=10 sweep,
+  and this section's own bracket below, both treat very high fold counts on
+  thin cells as a finite-sample-instability risk, not a virtue).
+- **What moved.** Small shifts on every spec, no sign changes on any
+  significant cell, both nulls stayed null:
+
+  | | cv=2 | cv=5 (new default) |
+  |---|---|---|
+  | ATP Combined | 0.0844 [0.0688, 0.1128] | 0.0888 [0.0701, 0.1135] |
+  | WTA Combined | 0.0478 [0.0196, 0.0785] | 0.0550 [0.0205, 0.0805] |
+  | ATP BP | 0.1312 [0.1069, 0.1588] | 0.1362 [0.1071, 0.1602] |
+  | WTA BP | 0.0646 [0.0273, 0.0948] | 0.0671 [0.0270, 0.0943] |
+  | ATP TB | −0.0066 [−0.0285, 0.0471] | +0.0072 [−0.0232, 0.0437] |
+  | WTA TB | −0.0091 [−0.0911, 0.0738] | +0.0024 [−0.0853, 0.0657] |
+  | ATP SGP | −0.1394 [−0.1502, −0.1111] | −0.1398 [−0.1526, −0.1130] |
+  | WTA SGP | −0.0725 [−0.0932, −0.0276] | −0.0581 [−0.0923, −0.0318] |
+
+  Both tiebreak point estimates flip sign again between cv=2 and cv=5 (as
+  they did between the pre-fix and post-§4a-fix pipelines) — both were
+  already indistinguishable from zero and remain so; a near-zero estimate
+  crossing zero between specifications is expected noise around a genuine
+  null, not evidence of anything. Feature importance: CUSUM still dominates
+  (53.3% ATP / 51.8% WTA, vs. 54.4%/57.5% at cv=2) — WTA's margin narrowed
+  more than ATP's (~6pp vs. ~1pp) but the ranking order (CUSUM ≫ Ranking ≈
+  Rolling_Win_Pct ≫ Streak_k4) is unchanged.
+- **The cv=2/5/10 robustness bracket (forest specs only, B=199 each,
+  current pipeline).** Resolves §4a/§7a.7 item 7, which had cut a cv=10
+  check run on the pre-§4a pipeline rather than let it read as current. All
+  three fold counts now run on the identical, current (fixed-CUSUM,
+  clean-control-pool) pipeline:
+
+  | | cv=2 | cv=5 | cv=10 |
+  |---|---|---|---|
+  | ATP Combined | 0.0844 | 0.0888 | 0.0876 |
+  | WTA Combined | 0.0478 | 0.0550 | 0.0536 |
+  | ATP BP | 0.1312 | 0.1362 | 0.1349 |
+  | WTA BP | 0.0646 | 0.0671 | 0.0682 |
+  | ATP SGP | −0.1394 | −0.1398 | −0.1408 |
+  | WTA SGP | −0.0725 | −0.0581 | −0.0578 |
+
+  No sign changes anywhere across the bracket; every CI at every fold count
+  overlaps substantially with its neighbours. One honest asymmetry, not
+  smoothed over: ATP SGP is essentially flat across all three fold counts
+  (−0.1394/−0.1398/−0.1408, a tight range), while WTA SGP shows real
+  point-estimate movement between cv=2 (−0.0725) and cv=5/10
+  (−0.0581/−0.0578) — cv=5 and cv=10 agree closely with each other but not
+  with cv=2. The CI-based conclusion (comfortably negative, clear of zero
+  at every fold count: [−0.0932,−0.0276], [−0.0923,−0.0318],
+  [−0.0930,−0.0320]) holds throughout regardless, but "stable across
+  cv=2/5/10" is a claim about the sign and the CI, not a claim that WTA
+  SGP's point estimate is fold-count-invariant — it isn't, quite.
+
 ## 5. Results
 
 - Headline table: all 10 specs, ATE + match-clustered bootstrap 95% CI
@@ -222,10 +294,11 @@ own evidence, not a footnote:
 > tiebreak cell remains power-limited (§7a.7 item 4). All headline figures below
 > reflect a control-pool and CUSUM-construction fix found in a later audit pass and
 > folded into a full refit — see §4a for what changed, by how much, and what was
-> checked before trusting it. A cv=10 cross-fitting sensitivity check predated
-> that refit and has been cut rather than left reading as current — see §7a.7
-> item 7; fold-count robustness on the current pipeline is unrun, not
-> established.
+> checked before trusting it. §4b is a second, later structural refit: the
+> pipeline's DML cross-fitting default changed from cv=2 to cv=5, with a
+> cv=2/5/10 robustness bracket re-run on the current pipeline (resolving
+> §7a.7 item 7, previously a cut, unrun check). All BP/SGP figures below are
+> the cv=5 values.
 
 #### 7a.1 Three rivals, not one
 
@@ -363,12 +436,15 @@ the server-game-point effect should run the other way.
 
 **The result.** It does. Match-clustered bootstrap ATE (CausalForestDML, same
 estimator and controls as the BP/combined specs — well-powered, stays on the forest
-per the estimator-split rule in §4), B=199, on the clean-control-pool, fixed-CUSUM
-pipeline (§4a): winning a break point raises next-point win probability by +0.1312
-in the ATP (95% CI [0.1069, 0.1588]) and +0.0646 in the WTA ([0.0273, 0.0948]).
-Winning a server game point lowers it: −0.1394 in the ATP ([−0.1502, −0.1111]) and
-−0.0725 in the WTA ([−0.0932, −0.0276]). All four intervals sit entirely on one
-side of zero, and the sign flips with the serve.
+per the estimator-split rule in §4), B=199, cv=5, on the clean-control-pool,
+fixed-CUSUM pipeline (§4a, §4b): winning a break point raises next-point win
+probability by +0.1362 in the ATP (95% CI [0.1071, 0.1602]) and +0.0671 in the
+WTA ([0.0270, 0.0943]). Winning a server game point lowers it: −0.1398 in the ATP
+([−0.1526, −0.1130]) and −0.0581 in the WTA ([−0.0923, −0.0318]). All four
+intervals sit entirely on one side of zero, and the sign flips with the serve.
+Stable across a cv=2/5/10 robustness bracket (§4b) — no sign changes at any fold
+count, though WTA SGP's point estimate moves somewhat between cv=2 and cv=5/10
+while staying comfortably clear of zero throughout.
 
 **Why the reversal is robust.** The reversal is robust in a way no single effect
 estimate is. The two treatments share one defining feature: in each, it is the focal
@@ -387,9 +463,9 @@ importance match, deferred here, would confirm the leverage alignment directly
 rather than resting on the mirror construction alone.
 
 **No magnitude claim is made.** The BP and SGP CIs overlap substantially in
-magnitude on both tours — ATP BP [0.1069, 0.1588] against SGP's magnitude
-[0.1111, 0.1502] (now nearly fully nested), WTA BP [0.0273, 0.0948] against
-SGP's magnitude [0.0276, 0.0932] (also nearly fully nested) — so
+magnitude on both tours — ATP BP [0.1071, 0.1602] against SGP's magnitude
+[0.1130, 0.1526] (fully nested), WTA BP [0.0270, 0.0943] against SGP's
+magnitude [0.0318, 0.0923] (also fully nested) — so
 the effects are not statistically distinguishable in size, and nothing here should
 be read as "mirror-image" or "equal and opposite" in magnitude, on either tour. That
 would be a stronger claim than the data support and isn't needed: the sign flip
@@ -409,7 +485,7 @@ established one; nothing above should be read as implying it.
 
 #### 7a.4 Test 2: The tiebreak null, corroborating belief-updating
 
-The existing tiebreak result (§5: ATP +0.027, CI crosses zero; WTA −0.025, CI
+The existing tiebreak result (§5: ATP +0.0072, CI crosses zero; WTA +0.0024, CI
 crosses zero) was originally read as evidence against hot-hand momentum generally.
 It corroborates the belief-updating result Test 1 already establishes (§7a.5),
 in a setting where the serve-transition channel is fully neutralised (serve
@@ -495,8 +571,8 @@ overturns or subsumes their set-level physiological one — different level of
 analysis, different mechanism, no refutation implied.** [Citation verified against
 project notebook extract, not the primary source; see §7a.7 item 5.]
 
-The WTA arm of Test 1 shows the same opposite-signed pattern as ATP (WTA BP +0.0646
-vs WTA SGP -0.0725), which supports reading the WTA break-point effect as
+The WTA arm of Test 1 shows the same opposite-signed pattern as ATP (WTA BP +0.0671
+vs WTA SGP -0.0581), which supports reading the WTA break-point effect as
 sex-neutral structural momentum rather than a fragile artifact — consistent with,
 not proof of, serve-transition operating identically on both tours. This is flagged
 as a question the test bears on, **not** as a contribution claim: the WTA cells
@@ -559,15 +635,17 @@ assumed beyond what the point estimates show.
    Quantitative Economics, 13(1), 355–385, DOI 10.3982/QE1679. Higher provenance
    standard than items above; no primary-source spot-check owed for the citation
    itself, only for item 3's inference about tiebreak persistence.
-7. **Cross-fitting-fold (cv=10) robustness on the current pipeline: unrun,
-   not established.** An earlier cv=10 sweep (ATP SGP −0.1410, WTA SGP
-   −0.0642) ran on the pipeline before the §4a control-pool and CUSUM fixes
-   and has been cut from §7a.3/§7a.4 rather than left reading as a current
-   check with a "probably still fine" hedge — a documented-but-unverified
-   robustness claim is exactly what this project's discipline exists to
-   avoid. Retable if fold-count robustness needs demonstrating again (e.g.
-   before journal submission); not required for the sign-flip argument
-   itself, which does not depend on this check.
+7. **Resolved: cross-fitting-fold robustness on the current pipeline.** The
+   item this used to flag (an earlier cv=10 sweep that ran on the pre-§4a
+   pipeline, cut rather than left reading as current) is closed. §4b re-runs
+   the check properly: a cv=2/5/10 bracket on the current (fixed-CUSUM,
+   clean-control-pool) pipeline, all six well-powered specs, B=199 each. No
+   sign changes at any fold count. One thing the bracket surfaced that
+   wasn't visible from a single cv=10 point estimate: WTA SGP's point
+   estimate is not fold-count-invariant (−0.0725 at cv=2 vs.
+   −0.0581/−0.0578 at cv=5/10) even though its sign and CI-clear-of-zero
+   status are — see §4b for the exact numbers and the honest framing of
+   what "stable" does and doesn't claim there.
 
 ## 8. Limitations
 
@@ -600,12 +678,13 @@ break points being high-leverage by construction. Its replacement, the
 matched-comparison test (§7a.3: break points vs. server game points, the
 mirror-image score states), has been run to full precision and reproduces
 exactly on a fresh process: opposite-signed effects on both tours (ATP break
-point +0.1312 vs. server game point −0.1394; WTA +0.0646 vs. −0.0725, on the
-clean-control-pool, fixed-CUSUM pipeline — see §4a), all four CIs clear of
-zero. The claim rests on the sign only, not the magnitude — the BP/SGP CIs
-overlap substantially in size on both tours (e.g. ATP [0.1069,0.1588]
-vs. [0.1111,0.1502] in magnitude), so there is no mirror-image or
-equal-and-opposite claim here, only that both signs are clean and opposite.
+point +0.1362 vs. server game point −0.1398; WTA +0.0671 vs. −0.0581, on the
+clean-control-pool, fixed-CUSUM, cv=5 pipeline — see §4a, §4b), all four CIs
+clear of zero, and stable across a cv=2/5/10 robustness bracket (§4b) with no
+sign changes anywhere. The claim rests on the sign only, not the magnitude —
+the BP/SGP CIs overlap substantially in size on both tours (e.g. ATP
+[0.1071,0.1602] vs. [0.1130,0.1526] in magnitude), so there is no mirror-image
+or equal-and-opposite claim here, only that both signs are clean and opposite.
 That sign flip tracks a deterministic mechanism check — the point winner
 serves next 100.0000% of the time at break points and 0.0000% of the time at
 server game points, both tours. Test 1 alone is already primary evidence
