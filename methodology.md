@@ -221,14 +221,21 @@ a full refit before being reported here, not assumed safe.
   No sign changes anywhere across the bracket; every CI at every fold count
   overlaps substantially with its neighbours. One honest asymmetry, not
   smoothed over: ATP SGP is essentially flat across all three fold counts
-  (−0.1394/−0.1398/−0.1408, a tight range), while WTA SGP shows real
-  point-estimate movement between cv=2 (−0.0725) and cv=5/10
-  (−0.0581/−0.0578) — cv=5 and cv=10 agree closely with each other but not
-  with cv=2. The CI-based conclusion (comfortably negative, clear of zero
-  at every fold count: [−0.0932,−0.0276], [−0.0923,−0.0318],
+  (−0.1394/−0.1398/−0.1408, a tight range), while WTA SGP was genuinely
+  fold-sensitive at cv=2 — a ~20% point-estimate swing, not just "moves."
+  But the informative fact is *where* it lands, not just that it moves:
+  cv=5 and cv=10 converge closely on each other (−0.0581, −0.0578), and
+  cv=2 (−0.0725) is the outlier relative to that pair, not the other way
+  round. Read plainly: WTA SGP's true value sits closer to −0.058 than to
+  −0.073, cv=2 was the fold count that had it wrong, and the current
+  headline (cv=5) sits on the stable plateau with cv=10, not on the
+  outlying side. The CI-based conclusion (comfortably negative, clear of
+  zero at every fold count: [−0.0932,−0.0276], [−0.0923,−0.0318],
   [−0.0930,−0.0320]) holds throughout regardless, but "stable across
   cv=2/5/10" is a claim about the sign and the CI, not a claim that WTA
-  SGP's point estimate is fold-count-invariant — it isn't, quite.
+  SGP's point estimate is fold-count-invariant — it isn't, quite, and the
+  precise reason it isn't (cv=2 was the anomaly) is worth stating rather
+  than leaving as an unexplained wobble.
 
 ## 5. Results
 
@@ -443,8 +450,10 @@ WTA ([0.0270, 0.0943]). Winning a server game point lowers it: −0.1398 in the 
 ([−0.1526, −0.1130]) and −0.0581 in the WTA ([−0.0923, −0.0318]). All four
 intervals sit entirely on one side of zero, and the sign flips with the serve.
 Stable across a cv=2/5/10 robustness bracket (§4b) — no sign changes at any fold
-count, though WTA SGP's point estimate moves somewhat between cv=2 and cv=5/10
-while staying comfortably clear of zero throughout.
+count. WTA SGP was fold-sensitive at cv=2, but cv=5 and cv=10 converge closely
+on each other, so the current headline sits on the stable plateau and cv=2 was
+the outlier, not the other way round; all three fold counts stay comfortably
+clear of zero throughout.
 
 **Why the reversal is robust.** The reversal is robust in a way no single effect
 estimate is. The two treatments share one defining feature: in each, it is the focal
@@ -642,10 +651,12 @@ assumed beyond what the point estimates show.
    clean-control-pool) pipeline, all six well-powered specs, B=199 each. No
    sign changes at any fold count. One thing the bracket surfaced that
    wasn't visible from a single cv=10 point estimate: WTA SGP's point
-   estimate is not fold-count-invariant (−0.0725 at cv=2 vs.
-   −0.0581/−0.0578 at cv=5/10) even though its sign and CI-clear-of-zero
-   status are — see §4b for the exact numbers and the honest framing of
-   what "stable" does and doesn't claim there.
+   estimate is not fold-count-invariant: cv=5 and cv=10 converge closely
+   (−0.0581/−0.0578) and cv=2 (−0.0725) is the outlier relative to that
+   pair, not the other way round — even though the sign and
+   CI-clear-of-zero status hold at all three. See §4b for the exact
+   numbers and the honest framing of what "stable" does and doesn't claim
+   there.
 
 ## 8. Limitations
 
