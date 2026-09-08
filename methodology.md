@@ -671,6 +671,41 @@ assumed beyond what the point estimates show.
 - Single season, single year (2023) — multi-season extension is
   robustness-stage work for a journal version, not required for this
   document's claims.
+- Ball changes not controlled. New balls (Grand Slam 7/9 schedule — after
+  game 7, then every 9 games; Carboch, Blau, Sklenarik, Siman, & Placha,
+  2019, "Ball change in tennis: How does it affect match characteristics
+  and rally pace in Grand Slam tournaments?" *Journal of Human Sport and
+  Exercise*, 15(1) — quote verified directly against the paper: "The
+  tennis balls in Grand Slams, ATP and WTA tournaments are changed after
+  seven games and after every nine games thereafter"; page range reported
+  elsewhere as 153–162 but not independently confirmed against Crossref or
+  the paper's own header, which carries pre-typeset placeholders) boost
+  serve dominance and are not recorded in the charting data. They could be
+  derived from cumulative game count but are not, for three reasons: the
+  effect is a continuous wear gradient poorly captured by a binary;
+  new-ball advantage attaches to whoever serves, so under a design
+  identified off serve direction (§7a.3) it can amplify but not reverse
+  the break-point/server-game-point sign flip; and the first change at 7
+  (not 9) uses balls already worn from warm-up, further muddying a clean
+  new/old split.
+- Changeover rest not controlled. Players switch ends, and both sit and
+  rest, after the first game of a set and every odd-numbered game total
+  thereafter (ITF Rules of Tennis, Rule 29a) — but the rule has its own
+  edge cases that a naive "odd games β†’ rest" derivation would get wrong:
+  there is no seated rest after the *first* changeover specifically (ends
+  switch, play continues immediately), and a changeover that coincides
+  with the end of a set gets 120 seconds, not 90. `Gm1`/`Gm2` (needed to
+  derive this) exist in the intermediate cleaned-points files but are
+  dropped by `features.py`'s column selection before reaching the modeling
+  dataset — derivable in principle, not currently retained by the
+  pipeline, and not attempted here. Structurally this is a weaker threat
+  to the design than new balls, not just an equally-uncontrolled one:
+  changeover rest is symmetric — both players sit, both recover, and the
+  timing depends on the game count in the set, not on who just won a
+  high-leverage point or who serves next — so unlike new-ball freshness,
+  which attaches specifically to the server, a changeover-driven recovery
+  effect has no server/returner asymmetry to amplify or reverse the
+  break-point/server-game-point sign flip through in the first place.
 
 ## 9. Register
 
