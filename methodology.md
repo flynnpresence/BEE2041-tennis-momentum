@@ -695,17 +695,22 @@ assumed beyond what the point estimates show.
   there is no seated rest after the *first* changeover specifically (ends
   switch, play continues immediately), and a changeover that coincides
   with the end of a set gets 120 seconds, not 90. `Gm1`/`Gm2` (needed to
-  derive this) exist in the intermediate cleaned-points files but are
-  dropped by `features.py`'s column selection before reaching the modeling
-  dataset — derivable in principle, not currently retained by the
-  pipeline, and not attempted here. Structurally this is a weaker threat
-  to the design than new balls, not just an equally-uncontrolled one:
-  changeover rest is symmetric — both players sit, both recover, and the
-  timing depends on the game count in the set, not on who just won a
-  high-leverage point or who serves next — so unlike new-ball freshness,
-  which attaches specifically to the server, a changeover-driven recovery
-  effect has no server/returner asymmetry to amplify or reverse the
-  break-point/server-game-point sign flip through in the first place.
+  derive this) exist in the intermediate cleaned-points files; deriving a
+  changeover flag from them and adding it as a control is a choice not
+  taken here, not a data gap — `features.py`'s column selection drops them
+  before the modeling stage, but nothing prevents keeping them. Structurally
+  this is a weaker threat to the design than new balls, but the argument is
+  not "it's symmetric, therefore harmless" — a changeover can fall between
+  some break-point/server-game-point transitions and not others (its
+  *presence* at a given treatment boundary has not been checked for
+  balance across BP and SGP), so the safer claim is narrower: whatever its
+  presence pattern, a changeover's *effect* is symmetric — both players
+  sit, both recover, and neither the server nor the returner is
+  differentially rested by it. A serve-direction sign flip requires an
+  effect that helps the server and not the returner (or vice versa); a
+  changeover, unlike new-ball freshness (which attaches specifically to the
+  server), has no such asymmetry to produce one through, regardless of how
+  often it happens to coincide with either treatment.
 
 ## 9. Register
 
