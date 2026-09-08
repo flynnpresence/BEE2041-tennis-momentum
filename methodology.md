@@ -237,6 +237,61 @@ a full refit before being reported here, not assumed safe.
   precise reason it isn't (cv=2 was the anomaly) is worth stating rather
   than leaving as an unexplained wobble.
 
+### 4c. Positivity check on the well-powered forest specs
+
+Pulled out-of-fold propensity predictions (5-fold `GroupKFold`, matching the
+pipeline's own cross-fitting exactly — same `GradientBoostingRegressor`
+config as `model_t`) for the four well-powered forest specs (ATP/WTA Γ—
+BP/SGP), since DML's guarantees degrade as estimated treatment probability
+approaches 0 or 1.
+
+**Upper tail: clean, no caveat.** Max propensity across all four specs is
+0.89; zero points exceed 0.95 in any spec. Treatment-certainty isn't
+confounding any of the four ATEs.
+
+**Lower tail: real mass, a soft concern, not a violation.** The BP specs
+carry a non-trivial low-propensity share — 1.49%/1.35% (ATP/WTA) of points
+get a negative predicted propensity, plus a further 1.28%/1.44% genuinely in
+[0, 0.01) (SGP is cleaner: ~0.3–0.5% in each category). The honest claim is
+narrower than "positivity holds": a point with true propensity 0.01
+contributes an inverse-propensity weight of ~100Γ—, so the concern was never
+"is treatment literally impossible here" but "is there mass small enough to
+destabilise the estimate." What rules out a hard wall (deterministic
+non-overlap) rather than mere rarity: even restricting to points with
+predicted propensity below 0.05, the actual treated rate in that bucket is
+still 4.3–5.2% in every spec — treatment keeps occurring in the
+"unlikely" region at a rate consistent with genuine rarity, not a covariate
+region where it structurally cannot happen.
+
+**Why this doesn't bite in practice, not just in theory.** Two things,
+not one: `CausalForestDML`'s orthogonal/doubly-robust score is far less
+sensitive to extreme propensities than a raw inverse-propensity-weighted
+estimator would be — textbook DML, and the reason the design tolerates the
+mass above at all. But "robust enough at *this* mass" is a claim from
+theory, not something measured directly here, so it doesn't stand alone:
+the practical confirmation is that BP is one of the most stable cells in
+the whole pipeline — clean across the cv=2/5/10 bracket (§4b), `n_fail=0`
+throughout the match-clustered bootstrap. If the low-propensity mass were
+destabilising the BP estimates, that instability had every opportunity to
+show up as bootstrap failures or fold-sensitivity, the same way it did for
+wta_tb's forest fit (§4) and the four rank-only specs (`bootstrap_ate.py`'s
+`LINEAR_SPECS`) — and it didn't. The soft concern is real; the evidence
+that it isn't consequential is already in hand, not asserted.
+
+**One negative-value note, not a caveat on the ATEs.** The negative
+propensity predictions are a `GradientBoostingRegressor`-is-a-regressor,
+not-a-classifier artifact (unconstrained to [0,1] for a binary target) —
+and critically, this is the *same* nuisance-model machinery the published
+pipeline's own `model_t` uses internally, not something this diagnostic
+introduces. The check is representative of what the real forests see, not
+an artifact of checking.
+
+**Not done, available if pushed on:** trimming the low-propensity points
+and confirming the BP ATE barely moves would be the airtight version of
+this check. Given the bracket/bootstrap stability already rules out gross
+instability, this is journal-referee-territory rather than required here —
+a real check for a near-certain no-move, not a free one.
+
 ## 5. Results
 
 - Headline table: all 10 specs, ATE + match-clustered bootstrap 95% CI
