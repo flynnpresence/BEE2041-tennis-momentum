@@ -16,7 +16,7 @@ A matched-comparison robustness check sharpens this: server game points (the mir
 
 *(These figures use cv=5 DML cross-fitting folds, the pipeline's default as of a later structural refit — stable across a cv=2/5/10 robustness bracket, no sign changes anywhere; see `methodology.md` §4b. They also carry a control-pool and CUSUM-construction fix from an earlier audit pass — see `methodology.md` §4a for what changed and why.)*
 
-**Known issue, not yet fixed:** the live blog's interactive reveal chart (Figure 6, the D3/`blog.js` split view) renders correctly at desktop widths but its bars and labels overlap on narrow mobile viewports (confirmed at 390px). This predates the SGP-related chart changes — the original two-bar version has the same issue — so it isn't new, but it's undecided, not resolved: before pitching this piece anywhere with a mobile-heavy readership, decide deliberately whether a broken mobile chart is acceptable or needs a responsive fix first, rather than finding out from a reader's phone.
+*(Figure 6's interactive reveal chart is responsive: below a 500px container it switches to tighter margins, abbreviated pressure-type labels (BP/TB/SGP), and 3dp value labels. Verified by headless-browser render at 390px, 768px, and 1000px viewports — no bar or label overlap at any width, both chart views. The exact 4dp figures remain in the prose and in `outputs/ate_results.csv`; only the on-chart labels abbreviate.)*
 
 ---
 

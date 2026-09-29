@@ -168,9 +168,18 @@
     const container = document.getElementById("reveal-chart");
     if (!container) return;
 
-    const margin = { top: 40, right: 40, bottom: 80, left: 80 };
     const width = container.clientWidth || 800;
-    const height = 420;
+    // Narrow-viewport mode. The desktop margins (left 80) consume a quarter
+    // of a phone-width container, which — combined with six split-view bars
+    // — left ~19px per bar at 390px and produced overlapping bars and
+    // colliding labels. Everything width-dependent below keys off this flag
+    // rather than a CSS media query, because the chart is SVG drawn from
+    // measured pixels: the layout math has to know, not just the styling.
+    const isNarrow = width < 500;
+    const margin = isNarrow
+      ? { top: 34, right: 14, bottom: 74, left: 44 }
+      : { top: 40, right: 40, bottom: 80, left: 80 };
+    const height = isNarrow ? 380 : 420;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -189,10 +198,12 @@
       .attr("y", 20)
       .attr("text-anchor", "middle")
       .style("font-family", "IBM Plex Sans, sans-serif")
-      .style("font-size", "13px")
+      .style("font-size", isNarrow ? "10.5px" : "13px")
       .style("font-weight", "700")
       .style("fill", "#17150F")
-      .text("Figure 6: Average Treatment Effect of Winning a High-Leverage Point");
+      .text(isNarrow
+        ? "Figure 6: Average Treatment Effect"
+        : "Figure 6: Average Treatment Effect of Winning a High-Leverage Point");
 
     // Domain widened to fit the server-game-point split bar (ATE ~-0.14),
     // which the original [-0.09, 0.20] range (sized for BP/tiebreak only)
@@ -263,6 +274,17 @@
     // fixes each type's slot regardless of the order rows arrive in from
     // blog_data.js.
     const SPLIT_TYPE_ORDER = ["Break Point", "Tiebreak", "Server Game Point"];
+    // Abbreviations for narrow viewports: "Server Game Point" needs ~100px at
+    // the desktop label size, against a ~36px bar on a phone. Abbreviating is
+    // preferable to shrinking the font into illegibility or wrapping onto
+    // three lines. Expanded forms stay in the prose immediately above the
+    // chart, so the abbreviations are never the reader's only exposure to
+    // what BP/TB/SGP mean.
+    const SPLIT_TYPE_SHORT = {
+      "Break Point": "BP",
+      "Tiebreak": "TB",
+      "Server Game Point": "SGP",
+    };
 
     function render(view) {
       currentView = view;
@@ -276,10 +298,16 @@
       // showed the reveal-section's container is much narrower (~460px inner,
       // not ~720-800px) than a generic dry-run assumes. 0.82 of each tour's
       // half-width slot is allotted to its bars, leaving the remainder as
-      // breathing room between tour groups.
+      // breathing room between tour groups. On narrow viewports the gap
+      // between bars tightens (6px, not 12) and more of the slot is used
+      // (0.92, not 0.82), since horizontal space is the binding constraint
+      // there and inter-group separation is already carried by the tour
+      // labels.
+      const barGap = isNarrow ? 6 : 12;
+      const slotUse = isNarrow ? 0.92 : 0.82;
       const barWidth = view === "combined"
-        ? 120
-        : Math.max(28, Math.min(70, (groupGap * 0.82 - (nTypes - 1) * 12) / nTypes));
+        ? (isNarrow ? Math.min(90, innerWidth * 0.3) : 120)
+        : Math.max(20, Math.min(70, (groupGap * slotUse - (nTypes - 1) * barGap) / nTypes));
 
       let positions;
 
@@ -296,13 +324,13 @@
           const tourIndex = d.tour === "ATP" ? 0 : 1;
           const typeIndex = SPLIT_TYPE_ORDER.indexOf(d.type);
           const groupCenter = groupGap * (tourIndex + 0.5);
-          const offset = (typeIndex - (nTypes - 1) / 2) * (barWidth + 12);
+          const offset = (typeIndex - (nTypes - 1) / 2) * (barWidth + barGap);
 
           return {
             ...d,
             key: `${d.tour}-${d.type}`,
             x: groupCenter + offset - barWidth / 2,
-            subLabel: d.type
+            subLabel: isNarrow ? SPLIT_TYPE_SHORT[d.type] : d.type
           };
         });
       }
@@ -350,7 +378,7 @@
         .attr("class", "val-label")
         .attr("text-anchor", "middle")
         .style("font-family", "IBM Plex Mono, monospace")
-        .style("font-size", "13px")
+        .style("font-size", isNarrow ? "8.5px" : "13px")
         .style("font-weight", "500")
         .style("fill", "#17150F")
         .style("opacity", 0);
@@ -362,7 +390,12 @@
         .attr("x", (d) => d.x + barWidth / 2)
         .attr("y", (d) => (d.value >= 0 ? y(d.value) - 10 : y(d.value) + 18))
         .style("opacity", 1)
-        .text((d) => `${d.value >= 0 ? "+" : ""}${d.value.toFixed(4)}`);
+        // 3dp on narrow viewports, 4dp elsewhere: at ~36px bars a 4dp label
+        // ("+0.1362", 7 chars) is as wide as the bar it sits on and collides
+        // with its neighbours. This is a display accommodation on a chart
+        // label only -- the exact 4dp values are in the surrounding prose and
+        // in outputs/ate_results.csv, so no reported figure loses precision.
+        .text((d) => `${d.value >= 0 ? "+" : ""}${d.value.toFixed(isNarrow ? 3 : 4)}`);
 
       const tourData = view === "combined"
         ? positions
