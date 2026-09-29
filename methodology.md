@@ -292,6 +292,86 @@ this check. Given the bracket/bootstrap stability already rules out gross
 instability, this is journal-referee-territory rather than required here —
 a real check for a near-certain no-move, not a free one.
 
+### 4d. Building the Morris importance measure
+
+`scripts/morris_importance.py` implements the Morris (1977) / Klaassen &
+Magnus (2001) point-importance measure — a recursive point β†’ game β†’ set β†’
+match win-probability model, not a proxy. Design choice (confirmed before
+building): a single fixed, tour-wide serve-win-probability, matching
+Klaassen & Magnus's own method (they use fixed pre-match probabilities, not
+within-match rolling ones) rather than a per-player or forward-rolling rate.
+p is estimated directly from the cleaned points data (ATP: 0.6386, WTA:
+0.5686 — overall fraction of points won by whoever is serving), not assumed
+or taken from an external source.
+
+Because p is a single tour-wide constant applied to whoever is serving —
+not tied to player identity — "server" is a role, not a person:
+P(A wins a game | A serves) = P(B wins a game | B serves), the same function
+of p. This is what makes the recursion tractable without tracking two
+separate per-player serve rates, and it has a testable consequence used
+below: for two equally-able players, win probability from any *neutral*
+starting point (love-all, a tied score) must be exactly 0.5 regardless of p,
+since both players serve equally often over the course of a fair contest —
+this is not a bug when it appears in validation, it is the correct behaviour
+of the model, and distinguishing it from a real bug is exactly what the
+validation step below is for.
+
+**Validated before being trusted on real data, at every level, against
+independent Monte Carlo simulation** (not just internal consistency
+checks) — because a plausible-looking recursive probability formula is
+exactly the kind of thing that can be subtly wrong and still produce
+sensible-looking numbers:
+
+- Game level: analytical P(win game | p=0.65, love-all) = 0.8296;
+  200,000-simulation Monte Carlo = 0.8301. Base cases and the server-ad/
+  receiver-ad deuce formulas checked directly (G(4,0)=1, G(0,4)=0).
+- Tiebreak level: analytical P(win tiebreak from 0-0) = 0.5 for *any* p
+  (the neutral-start property above); Monte Carlo at p=0.65 gives 0.5013,
+  at p=0.50 gives 0.4987 — both within simulation noise of the analytical
+  value. Serve-alternation pattern (X serves point 1, then blocks of 2
+  alternate: O,O,X,X,O,O,X,X,...) checked directly against the ITF's own
+  rule, not assumed from memory.
+- Set level: analytical vs. 100,000-simulation Monte Carlo at four score
+  states, including asymmetric ones (not just the trivially-neutral
+  start): set_prob(0,0)=0.5 (MC 0.5006), set_prob(5,4, serving)=0.9148
+  (MC 0.9153), set_prob(4,5, serving)=0.4148 (MC 0.4123),
+  set_prob(5,4, receiving)=0.5852 (MC 0.5856). The asymmetric states are
+  the ones that matter: they confirm the engine produces real,
+  score-dependent variation, not just correct values at symmetric points
+  where many bugs would still accidentally give 0.5.
+- Match level: hand-derivable reference cases, not simulation — a team up
+  1 set in a best-of-3 at a neutral game score must have match-win
+  probability exactly 0.5 + 0.5Β·0.5 = 0.75 (win the next set outright, or
+  win a neutral decider), and the engine returns exactly 0.75; down 1 set
+  returns exactly 0.25, confirming symmetry.
+- A separate technical bug, caught by this validation and fixed before
+  proceeding: the naive top-down recursive tiebreak formula exceeded
+  Python's call-stack limit (a symmetric random walk can explore
+  arbitrarily deep before hitting a base case; memoization collapses
+  *repeated* states, not the depth of a single first, unresolved
+  exploration). Fixed by computing the tiebreak table bottom-up
+  (decreasing point-total order) instead of top-down recursion, with a
+  convergence check confirming the answer is unchanged whether the
+  table's outer boundary is capped at 150 or 300 points.
+- The application to real data reuses the same fitted `M`/`S`/`TB`/`G`
+  closures across all points scored for a tour, rather than rebuilding
+  them per point (which would rebuild the tiebreak table's full
+  bottom-up DP on every single point) — checked that this optimisation
+  produces byte-identical results to the unoptimised path before using
+  it at scale.
+
+**Known, disclosed simplification:** every set is modelled with a standard
+7-point tiebreak at 6-6. The Australian Open 2023 final set uses a 10-point
+super-tiebreak instead, not special-cased here. Acceptable for this
+measure's use — a leverage-comparability and leverage-matching check
+(§7a.3), not a published point-importance value in its own right — but
+would need addressing before Morris importance is used as, say, a causal
+forest covariate in a journal version.
+
+Applied to the won-BP/won-SGP populations, this is what surfaced the
+leverage mismatch and enabled the matched-leverage robustness test written
+up in §7a.3.
+
 ## 5. Results
 
 - Headline table: all 10 specs, ATE + match-clustered bootstrap 95% CI
@@ -349,9 +429,11 @@ own evidence, not a footnote:
 > replacement is a matched-comparison design (§7a.3) plus the existing tiebreak null
 > (§7a.4), each assigned to a different rival. Test 1 has been run to full precision
 > (match-clustered bootstrap, B=199); its point estimates and the mechanism check
-> that motivates the design are reported below. Open: the Morris measure remains
-> unbuilt (deferred — see §7a.7 item 1, the crude leverage match was checked and
-> found close); the assumption that either rival mechanism *persists in tiebreaks*
+> that motivates the design are reported below. §4d built the Morris measure and
+> it disagreed with the crude leverage proxy — BP and SGP are not leverage-matched,
+> 2–4Γ— apart, not close (see §7a.7 item 1) — resolved by a leverage-matched
+> robustness test (§7a.3) showing the sign flip survives common-support matching
+> on both tours. The assumption that either rival mechanism *persists in tiebreaks*
 > is inference, not a tested claim in either source paper (§7a.7 items 2–3); the WTA
 > tiebreak cell remains power-limited (§7a.7 item 4). All headline figures below
 > reflect a control-pool and CUSUM-construction fix found in a later audit pass and
@@ -460,27 +542,65 @@ serve-transfer *reversed*." That is a cleaner test than the one originally
 specified: it predicts opposite-signed effects, not merely the absence of an effect
 at the comparison group.
 
-**Leverage comparability (crude match, checked; Morris measure deferred — see
-§7a.7 item 1).** Comparing the won-treatment populations
-(`High_Leverage_{BP,SGP}==1 & Point_Won==1`) on the two match/set-context axes
-identified as carrying real spread (§7a.3's original leverage-spread pre-check,
-game-margin and set number):
+**Leverage comparability — the crude proxy was wrong, not just unconfirmed.**
+The original score-state/game-margin/set-number proxy (§7a.3's leverage-spread
+pre-check) found BP and SGP close on match/set context and concluded a formal
+Morris-importance measure was "not expected to change the qualitative
+comparison." That conclusion did not survive building the measure. The Morris
+(1977) point-importance engine — recursive point→game→set→match win-probability
+model, a single fixed tour-wide serve-win-probability (ATP p=0.6386, WTA
+p=0.5686, both estimated directly from the cleaned points data, not assumed;
+best-of-5/best-of-3 modelled separately per tour), validated at every level
+against independent Monte Carlo simulation before being trusted on real data
+(§4d) — shows BP and SGP are *not* leverage-matched:
 
-| axis | ATP BP (n=1,497) | ATP SGP (n=3,645) | WTA BP (n=1,001) | WTA SGP (n=1,464) |
-|---|---|---|---|---|
-| Game-margin \|Gm1−Gm2\|, median [IQR] | 1 [0, 2] | 1 [0, 2] | 1 [0, 2] | 1 [0, 2] |
-| Set number, distribution | spans all sets, no concentration | spans all sets, no concentration | spans all sets, no concentration | spans all sets, no concentration |
+| | ATP BP | ATP SGP | ratio | WTA BP | WTA SGP | ratio |
+|---|---|---|---|---|---|---|
+| Mean Morris importance | 0.0843 | 0.0202 | 4.2Γ— | 0.0847 | 0.0400 | 2.1Γ— |
 
-Match/set-context leverage is close to identical across the two groups on both
-tours. The one axis that differs is within-game score state itself — BP is skewed
-toward the closer-to-deuce states (30-40/40-AD ≈ 66% of the population, both tours)
-while SGP spreads more evenly across its four states, including 40-0/AD-40 at the
-edges — but that axis was already flagged as genuinely coarse for BP alone (§7a.3's
-original pre-check, 4 discrete values by construction) and the crude match on the
-axes that do carry spread is close enough that a Morris-importance re-weighting is
-not expected to change the qualitative comparison. Deferring the principled measure
-to the shipped version per the explicit reconnaissance/ship split (§7a.7 item 1);
-this result is reconnaissance-grade.
+Mann-Whitney U test: p β‰ˆ 0 (ATP), p = 2.2e-130 (WTA) — these are not
+close distributions.
+
+**Why, structurally.** This is not noise; it has a mechanical explanation.
+A break point is must-win-now for the server: lose it and the game ends
+immediately. A server game point is insured: the server needs 4 points with a
+2-clear margin, so losing *this specific* point usually just returns to an
+earlier, still-favourable position in the same game (lose the point at 40-0,
+you're at 40-15, still heavily favoured to hold). Receiver-near-winning and
+server-near-winning are not mechanically symmetric in tennis scoring, and the
+crude proxy — game margin, set number — cannot see this, because it doesn't
+capture within-game mechanical structure at all. The gap is real and now
+explained, not a red flag in itself.
+
+**Why it doesn't threaten the sign-flip argument — resolved, not disclaimed.**
+The exposure this creates is specific: discouragement predicts the same sign
+regardless of leverage, so the sign-flip argument (§7a.2) only rules
+discouragement out if the flip isn't itself an artifact of BP and SGP sitting
+at systematically different leverage — which they do. A leverage-controlled
+check is therefore load-bearing, not optional insulation. Restricting each
+treated population to a common-support Morris-importance band (per tour: ATP
+[0.0180, 0.0455], WTA [0.0235, 0.0913] — the overlap of each group's [p5, p95]
+range; ATP's band is thinner, 283 BP / 1,385 SGP treated, vs WTA's 645 BP /
+731 SGP) and re-estimating both effects within it, match-clustered bootstrap,
+B=199:
+
+| | ATE | 95% CI | n treated |
+|---|---|---|---|
+| ATP BP, matched | +0.1457 | [0.0737, 0.2140] | 283 |
+| ATP SGP, matched | βˆ’0.1153 | [βˆ’0.1455, βˆ’0.0907] | 1,385 |
+| WTA BP, matched | +0.0787 | [0.0297, 0.1147] | 645 |
+| WTA SGP, matched | βˆ’0.0542 | [βˆ’0.0962, βˆ’0.0182] | 731 |
+
+All four CIs clear zero, on both tours, `n_fail=0` throughout. The sign flip
+survives leverage-matching — it is not an artifact of the importance gap. The
+magnitudes barely moved from the full-population estimates (ATP SGP βˆ’0.1398β†’
+βˆ’0.1153, WTA SGP βˆ’0.0581β†’βˆ’0.0542), which is itself informative: the leverage
+gap wasn't doing meaningful work in the original comparison either. This
+converts "no magnitude claim is made" (a hedge against a difference that
+might have mattered) into "the sign is robust to leverage-matching, checked
+directly" (a closed question) — the discouragement rival is now ruled out
+by a leverage-controlled test, not by asserting that a known confound
+happens not to bite.
 
 **Power.** Both cells are well above the break-point cells they're compared
 against — 3,645 ATP / 1,464 WTA treated versus BP's 1,497 / 1,001 — so this is not
@@ -521,10 +641,15 @@ gaps. The treatments draw on the same control pool, so any baseline artefact com
 to both shifts the estimates together rather than in opposite directions. And the
 two flags are built as a literal mirror of the point-score string — break point is
 `Pts ∈ {0-40, 15-40, 30-40, 40-AD}`, server game point is the same four states with
-the server/receiver halves swapped, `Pts ∈ {40-0, 40-15, 40-30, AD-40}` — so the
-contrast is not built on obviously mismatched stakes; a formal Morris (1977)
-importance match, deferred here, would confirm the leverage alignment directly
-rather than resting on the mirror construction alone.
+the server/receiver halves swapped, `Pts ∈ {40-0, 40-15, 40-30, AD-40}` — a
+mirror in construction, though not in leverage: the formal Morris (1977)
+measure built in §4d shows BP and SGP are not leverage-matched (2–4Γ— apart in
+mean importance, both tours) — the mirror-string symmetry does not imply
+stakes symmetry, and this document does not claim it does. What closes the
+gap is not the construction but the leverage-matched robustness test in
+§7a.3: the sign flip survives when BP and SGP are restricted to a
+common-support importance band, on both tours, so the leverage difference is
+not what's producing the sign.
 
 **No magnitude claim is made.** The BP and SGP CIs overlap substantially in
 magnitude on both tours — ATP BP [0.1071, 0.1602] against SGP's magnitude
@@ -645,13 +770,25 @@ assumed beyond what the point estimates show.
 
 #### 7a.7 Open dependencies and unverified claims
 
-1. **Morris measure deferred to the shipped version, not built.** Test 1 (§7a.3)
-   ran on the crude score-state/game-margin/set-number match, found close enough on
-   the axes that carry real spread (game-margin, set number) that a Morris-importance
-   re-weighting is not expected to change the qualitative result. This is
-   reconnaissance-grade, flagged as such — the win-probability-swing measure is still
-   not built and remains required before journal submission. **Citation, verified
-   against the primary source (not a notebook extract):** Klaassen, C. A. J., &
+1. **Resolved: Morris measure built (§4d), and it corrected a wrong claim.**
+   The original crude score-state/game-margin/set-number proxy concluded BP
+   and SGP were "close enough" that a Morris re-weighting wasn't expected to
+   change the result. That was wrong, not just unconfirmed: the built measure
+   shows BP and SGP differ 2–4Γ— in mean importance (both tours, Mann-Whitney
+   p β‰ˆ 0 / p=2.2e-130). Resolved, not just flagged, by the leverage-matched
+   robustness test in §7a.3: restricting both treated populations to a
+   common-support importance band, the sign flip survives on both tours, all
+   four CIs clear of zero. This is now referee-grade evidence against the
+   discouragement rival specifically (§7a.2's leverage-independence argument
+   no longer rests on an unmeasured assumption that BP and SGP sit at similar
+   stakes — it's been checked and holds anyway). Known simplification carried
+   into the built measure, disclosed not hidden: every set uses a standard
+   7-point tiebreak; the Australian Open 2023 final set's 10-point
+   super-tiebreak is not special-cased (§4d) — acceptable for a
+   leverage-comparability check, would need addressing for Morris importance
+   used as, say, a causal-forest covariate in a journal version.
+   **Citation, verified against the primary source (not a notebook extract):**
+   Klaassen, C. A. J., &
    Magnus, J. R. (2001). Are points in tennis independent and identically
    distributed? Evidence from a dynamic binary panel data model. *Journal of the
    American Statistical Association*, 96(454), 500–509. p.12 reproduces Morris's
@@ -801,10 +938,12 @@ null (§7a.4, reassigned as corroborating evidence specifically for
 belief-updating, via Descamps, Ke, & Page 2022) adds a second, independent,
 serve-neutral check at low power — it does not carry the argument alone the
 way it would have under the retired design. What remains, listed at §7a.7:
-the Morris/Klaassen-Magnus importance measure is deferred to the shipped
-version (the crude match was checked and found close on the axes that carry
-real spread — game-margin, set number — so this is flagged
-reconnaissance-grade, not blocking); Test 1, corroborated by Test 2, rules
+the Morris/Klaassen-Magnus importance measure is now built (§4d) and it
+corrected a wrong claim: the crude proxy said BP/SGP leverage was close
+enough; the built measure shows a 2–4Γ— gap, both tours (§7a.7 item 1) —
+resolved, not just flagged, by a leverage-matched robustness test (§7a.3)
+showing the sign flip survives common-support importance matching on both
+tours, all four CIs clear of zero; Test 1, corroborated by Test 2, rules
 out discouragement and belief-updating as the *primary* driver, not as
 present-in-any-degree — a small effect from either could be swamped by a
 dominant serve-transition effect, so "not primary" is the claim, not
